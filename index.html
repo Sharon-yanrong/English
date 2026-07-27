@@ -1,0 +1,1078 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>快乐英语岛 · Happy English Island</title>
+<style>
+  /* ---------- Base / cartoon theme ---------- */
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  :root{
+    --bg1:#7fd8ff; --bg2:#c9f5ff; --card:#ffffff;
+    --pink:#ff7eb3; --pink-d:#ff4f8b;
+    --yellow:#ffd23f; --yellow-d:#ffb300;
+    --green:#4ade80; --green-d:#22c55e;
+    --purple:#a78bfa; --purple-d:#7c3aed;
+    --blue:#38bdf8; --blue-d:#0ea5e9;
+    --orange:#ffa552; --orange-d:#ff7a00;
+    --ink:#274060; --ink-soft:#5b7a99;
+    --shadow:0 6px 0 rgba(0,0,0,.12), 0 10px 20px rgba(0,0,0,.10);
+  }
+  body{
+    font-family:"PingFang SC","Microsoft YaHei","Comic Sans MS",system-ui,sans-serif;
+    color:var(--ink);
+    background:linear-gradient(180deg,var(--bg1),var(--bg2));
+    background-attachment:fixed;
+    overflow-x:hidden;
+    user-select:none;
+  }
+  .app{ max-width:820px; margin:0 auto; padding:14px 14px 90px; }
+
+  /* ---------- Top bar ---------- */
+  .topbar{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .avatar{
+    width:54px; height:54px; border-radius:50%;
+    background:var(--yellow); display:flex; align-items:center; justify-content:center;
+    font-size:32px; box-shadow:var(--shadow); flex:0 0 auto;
+  }
+  .hello{ flex:1; min-width:0; }
+  .hello .hi{ font-size:15px; color:var(--ink-soft); }
+  .hello .name{ font-size:22px; font-weight:900; line-height:1.1; }
+  .starbox{
+    background:#fff; border-radius:20px; padding:6px 12px; font-weight:900;
+    font-size:18px; box-shadow:var(--shadow); display:flex; align-items:center; gap:4px;
+  }
+  .gear{
+    width:44px; height:44px; border-radius:50%; border:none; background:#fff;
+    font-size:22px; box-shadow:var(--shadow); cursor:pointer; flex:0 0 auto;
+  }
+  .gear:active{ transform:translateY(2px); }
+
+  /* ---------- Generic card / button ---------- */
+  .card{ background:var(--card); border-radius:24px; padding:16px; box-shadow:var(--shadow); margin-bottom:14px; }
+  .btn{
+    border:none; border-radius:20px; padding:14px 18px; font-size:18px; font-weight:900;
+    color:#fff; cursor:pointer; box-shadow:0 5px 0 rgba(0,0,0,.15); transition:transform .05s;
+  }
+  .btn:active{ transform:translateY(4px); box-shadow:0 1px 0 rgba(0,0,0,.15); }
+  .btn.big{ font-size:22px; padding:18px 22px; width:100%; }
+  .btn-pink{ background:var(--pink); }   .btn-yellow{ background:var(--yellow-d); }
+  .btn-green{ background:var(--green-d); } .btn-purple{ background:var(--purple-d); }
+  .btn-blue{ background:var(--blue-d); }  .btn-orange{ background:var(--orange-d); }
+  .btn-ghost{ background:#eef4fb; color:var(--ink); box-shadow:0 5px 0 #cdd9e8; }
+
+  h2.title{ font-size:24px; margin:6px 2px 12px; }
+  .subtle{ color:var(--ink-soft); font-size:14px; }
+
+  /* ---------- Home menu tiles ---------- */
+  .tiles{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .tile{
+    border:none; border-radius:26px; padding:18px 14px; color:#fff; cursor:pointer;
+    box-shadow:var(--shadow); text-align:left; position:relative; overflow:hidden;
+    min-height:120px; display:flex; flex-direction:column; justify-content:space-between;
+  }
+  .tile:active{ transform:translateY(3px); }
+  .tile .emoji{ font-size:46px; line-height:1; }
+  .tile .t{ font-size:20px; font-weight:900; }
+  .tile .d{ font-size:12px; opacity:.95; }
+  .tile.full{ grid-column:1 / -1; min-height:auto; flex-direction:row; align-items:center; gap:12px; }
+  .tile.full .emoji{ font-size:40px; }
+
+  /* ---------- Parent notes on home ---------- */
+  .note{ border-radius:22px; padding:14px 16px; margin-bottom:12px; box-shadow:var(--shadow); }
+  .note .lbl{ font-size:13px; font-weight:900; opacity:.85; margin-bottom:4px; }
+  .note .txt{ font-size:18px; font-weight:800; }
+  .note.task{ background:#fff7d6; color:#8a6d00; }
+  .note.secret{ background:#ffe3ef; color:#a3235a; }
+  .note .play{ margin-top:8px; }
+
+  /* ---------- Screen system ---------- */
+  .screen{ display:none; }
+  .screen.active{ display:block; animation:pop .25s ease; }
+  @keyframes pop{ from{ opacity:0; transform:scale(.96);} to{ opacity:1; transform:scale(1);} }
+  .backrow{ display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+  .backbtn{ border:none; background:#fff; border-radius:18px; padding:10px 16px; font-size:18px; font-weight:900; box-shadow:var(--shadow); cursor:pointer; color:var(--ink); }
+  .backbtn:active{ transform:translateY(2px); }
+
+  /* ---------- Talk (dialogue) cards ---------- */
+  .bigcard{ text-align:center; }
+  .bigcard .em{ font-size:96px; line-height:1; margin:6px 0 4px; }
+  .bigcard .en{ font-size:34px; font-weight:900; letter-spacing:.5px; }
+  .bigcard .ipa{ font-size:18px; color:var(--purple-d); font-weight:800; margin-top:2px; }
+  .bigcard .cn{ font-size:20px; color:var(--ink-soft); margin-top:6px; font-weight:800; }
+  .rowbtns{ display:flex; gap:10px; margin-top:14px; }
+  .rowbtns .btn{ flex:1; }
+  .progressdots{ display:flex; gap:6px; justify-content:center; margin:10px 0; flex-wrap:wrap; }
+  .dot{ width:12px; height:12px; border-radius:50%; background:#d7e6f2; }
+  .dot.on{ background:var(--green-d); }
+  .dot.cur{ background:var(--orange-d); transform:scale(1.3); }
+
+  .feedback{ min-height:30px; font-size:20px; font-weight:900; margin-top:12px; text-align:center; }
+  .stars-earned{ font-size:30px; text-align:center; letter-spacing:4px; }
+
+  /* ---------- List rows (scenarios / levels) ---------- */
+  .listrow{
+    display:flex; align-items:center; gap:14px; background:#fff; border-radius:22px;
+    padding:14px 16px; box-shadow:var(--shadow); margin-bottom:12px; cursor:pointer; border:none; width:100%; text-align:left;
+  }
+  .listrow:active{ transform:translateY(2px); }
+  .listrow .lem{ font-size:40px; }
+  .listrow .lt{ flex:1; }
+  .listrow .lt .a{ font-size:20px; font-weight:900; color:var(--ink); }
+  .listrow .lt .b{ font-size:13px; color:var(--ink-soft); }
+  .listrow .lock{ font-size:26px; }
+  .listrow.locked{ opacity:.55; }
+  .badge-mini{ background:var(--green); color:#fff; border-radius:14px; padding:2px 10px; font-size:12px; font-weight:900; }
+
+  /* ---------- Quiz ---------- */
+  .quiz-emoji{ font-size:110px; text-align:center; margin:6px 0 14px; }
+  .options{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .opt{ border:none; border-radius:22px; padding:20px; font-size:24px; font-weight:900; background:#eef4fb; color:var(--ink); box-shadow:0 5px 0 #cdd9e8; cursor:pointer; }
+  .opt:active{ transform:translateY(3px); }
+  .opt.right{ background:var(--green-d); color:#fff; box-shadow:0 5px 0 var(--green); }
+  .opt.wrong{ background:#ffb4b4; color:#7a1a1a; }
+
+  /* ---------- Badge wall ---------- */
+  .badgegrid{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  .badgeitem{ background:#fff; border-radius:20px; padding:14px 8px; text-align:center; box-shadow:var(--shadow); }
+  .badgeitem .be{ font-size:40px; }
+  .badgeitem .bn{ font-size:12px; font-weight:800; margin-top:4px; }
+  .badgeitem.locked{ filter:grayscale(1); opacity:.4; }
+  .stat{ display:flex; gap:10px; text-align:center; }
+  .stat .s{ flex:1; background:#fff; border-radius:20px; padding:12px 6px; box-shadow:var(--shadow); }
+  .stat .s .n{ font-size:26px; font-weight:900; color:var(--orange-d); }
+  .stat .s .l{ font-size:12px; color:var(--ink-soft); }
+
+  /* ---------- Modal (parent backend) ---------- */
+  .mask{ position:fixed; inset:0; background:rgba(20,40,60,.55); display:none; align-items:center; justify-content:center; padding:16px; z-index:50; }
+  .mask.show{ display:flex; }
+  .modal{ background:#fff; border-radius:24px; padding:18px; width:100%; max-width:460px; max-height:88vh; overflow:auto; box-shadow:var(--shadow); }
+  .modal h3{ margin:2px 0 12px; font-size:22px; }
+  label.fld{ display:block; font-size:14px; font-weight:800; color:var(--ink-soft); margin:12px 0 4px; }
+  input.in, textarea.in{ width:100%; border:2px solid #d7e6f2; border-radius:14px; padding:12px; font-size:17px; font-family:inherit; color:var(--ink); }
+  textarea.in{ min-height:70px; resize:vertical; }
+  .pinpad{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .pinpad button{ border:none; border-radius:16px; padding:16px; font-size:22px; font-weight:900; background:#eef4fb; box-shadow:0 4px 0 #cdd9e8; cursor:pointer; color:var(--ink); }
+  .pindisp{ text-align:center; font-size:30px; letter-spacing:8px; min-height:38px; font-weight:900; }
+
+  /* ---------- Confetti ---------- */
+  #confetti{ position:fixed; inset:0; pointer-events:none; z-index:60; }
+
+  /* ---------- Toast ---------- */
+  .toast{
+    position:fixed; left:50%; bottom:24px; transform:translateX(-50%) translateY(120%);
+    background:var(--ink); color:#fff; padding:12px 20px; border-radius:20px; font-weight:800;
+    z-index:70; transition:transform .3s; max-width:90%; text-align:center;
+  }
+  .toast.show{ transform:translateX(-50%) translateY(0); }
+
+  .listen-tip{ font-size:13px; color:var(--ink-soft); text-align:center; margin-top:8px; }
+  .mic-anim{ animation:pulse 1s infinite; }
+  @keyframes pulse{ 0%,100%{ transform:scale(1);} 50%{ transform:scale(1.06);} }
+</style>
+
+<div class="app">
+  <!-- ===== Top bar (always visible) ===== -->
+  <div class="topbar">
+    <div class="avatar" id="avatar">🦁</div>
+    <div class="hello">
+      <div class="hi">你好呀，小英雄！</div>
+      <div class="name" id="kidName">小朋友</div>
+    </div>
+    <div class="starbox">⭐ <span id="starCount">0</span></div>
+    <button class="gear" id="gearBtn" title="家长入口">⚙️</button>
+  </div>
+
+  <!-- ===== HOME ===== -->
+  <div id="home" class="screen active">
+    <div id="taskNote" class="note task" style="display:none">
+      <div class="lbl">📌 今日任务</div>
+      <div class="txt" id="taskText"></div>
+    </div>
+    <div id="secretNote" class="note secret" style="display:none">
+      <div class="lbl">💌 悄悄话</div>
+      <div class="txt" id="secretText"></div>
+      <button id="playSecretVoice" class="btn btn-pink play" style="display:none">▶️ 听爸爸妈妈的语音</button>
+    </div>
+
+    <div class="tiles">
+      <button class="tile" style="background:linear-gradient(145deg,#ff9a9e,#ff6f91)" onclick="go('talkList')">
+        <div class="emoji">💬</div>
+        <div><div class="t">开口说话</div><div class="d">打招呼 · 日常口语（主打）</div></div>
+      </button>
+      <button class="tile" style="background:linear-gradient(145deg,#43e97b,#38f9d7)" onclick="go('mapWorlds')">
+        <div class="emoji">🗺️</div>
+        <div><div class="t">闯关背单词</div><div class="d">动物 · 太空 · 恐龙</div></div>
+      </button>
+      <button class="tile" style="background:linear-gradient(145deg,#a18cd1,#fbc2eb)" onclick="go('phonics')">
+        <div class="emoji">🔤</div>
+        <div><div class="t">音标小课堂</div><div class="d">认识字母的声音</div></div>
+      </button>
+      <button class="tile" style="background:linear-gradient(145deg,#fbc687,#ff8c42)" onclick="go('badges')">
+        <div class="emoji">🏅</div>
+        <div><div class="t">我的奖杯</div><div class="d">星星 · 徽章 · 天数</div></div>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== TALK: scenario list ===== -->
+  <div id="talkList" class="screen">
+    <div class="backrow"><button class="backbtn" onclick="go('home')">⬅️ 回家</button><h2 class="title" style="margin:0">💬 开口说话</h2></div>
+    <p class="subtle" style="margin:0 4px 10px">点一个场景，先听我读，再按「我来读」自己说一遍。说错也没关系，我们只鼓励，不批评！</p>
+    <div id="talkListBody"></div>
+  </div>
+
+  <!-- ===== TALK: dialogue player ===== -->
+  <div id="talkPlay" class="screen">
+    <div class="backrow"><button class="backbtn" onclick="go('talkList')">⬅️ 返回</button><h2 class="title" id="talkPlayTitle" style="margin:0"></h2></div>
+    <div class="progressdots" id="talkDots"></div>
+    <div class="card bigcard">
+      <div class="em" id="talkEm">🙂</div>
+      <div class="en" id="talkEn"></div>
+      <div class="ipa" id="talkIpa"></div>
+      <div class="cn" id="talkCn"></div>
+      <div class="rowbtns">
+        <button class="btn btn-blue" id="talkListenBtn">🔊 听我读</button>
+        <button class="btn btn-pink" id="talkSpeakBtn">🎤 我来读</button>
+      </div>
+      <div class="feedback" id="talkFeedback"></div>
+      <div class="listen-tip" id="talkTip"></div>
+    </div>
+    <div class="rowbtns">
+      <button class="btn btn-ghost" id="talkPrev">⬅️ 上一句</button>
+      <button class="btn btn-green" id="talkNext">下一句 ➡️</button>
+    </div>
+  </div>
+
+  <!-- ===== MAP: worlds ===== -->
+  <div id="mapWorlds" class="screen">
+    <div class="backrow"><button class="backbtn" onclick="go('home')">⬅️ 回家</button><h2 class="title" style="margin:0">🗺️ 闯关地图</h2></div>
+    <div id="worldsBody"></div>
+  </div>
+
+  <!-- ===== MAP: levels of a world ===== -->
+  <div id="mapLevels" class="screen">
+    <div class="backrow"><button class="backbtn" onclick="go('mapWorlds')">⬅️ 返回</button><h2 class="title" id="worldTitle" style="margin:0"></h2></div>
+    <div id="levelsBody"></div>
+  </div>
+
+  <!-- ===== MAP: word cards ===== -->
+  <div id="wordPlay" class="screen">
+    <div class="backrow"><button class="backbtn" id="wordBack">⬅️ 返回</button><h2 class="title" id="wordPlayTitle" style="margin:0"></h2></div>
+    <div class="progressdots" id="wordDots"></div>
+    <div class="card bigcard">
+      <div class="em" id="wordEm">🐱</div>
+      <div class="en" id="wordEn"></div>
+      <div class="ipa" id="wordIpa"></div>
+      <div class="cn" id="wordCn"></div>
+      <div class="rowbtns">
+        <button class="btn btn-blue" id="wordListenBtn">🔊 听我读</button>
+        <button class="btn btn-pink" id="wordSpeakBtn">🎤 我来读</button>
+      </div>
+      <div class="feedback" id="wordFeedback"></div>
+      <div class="listen-tip" id="wordTip"></div>
+    </div>
+    <div class="rowbtns">
+      <button class="btn btn-ghost" id="wordPrev">⬅️ 上一个</button>
+      <button class="btn btn-green" id="wordNext">下一个 ➡️</button>
+    </div>
+  </div>
+
+  <!-- ===== Science card ===== -->
+  <div id="science" class="screen">
+    <div class="backrow"><h2 class="title" style="margin:0">🌟 科普小知识</h2></div>
+    <div class="card" style="text-align:center">
+      <div style="font-size:80px" id="sciEmoji">🐋</div>
+      <div style="font-size:22px;font-weight:900;margin:8px 0" id="sciTitle"></div>
+      <div style="font-size:18px;color:var(--ink-soft);line-height:1.5" id="sciText"></div>
+    </div>
+    <button class="btn big btn-orange" id="sciNext">太厉害啦，去测验！🎯</button>
+  </div>
+
+  <!-- ===== Quiz ===== -->
+  <div id="quiz" class="screen">
+    <div class="backrow"><h2 class="title" style="margin:0">🎯 闯关小测验</h2></div>
+    <div class="progressdots" id="quizDots"></div>
+    <div class="card">
+      <div class="subtle" style="text-align:center">看图，选出对的英文单词👇</div>
+      <div class="quiz-emoji" id="quizEmoji">🐱</div>
+      <div class="options" id="quizOptions"></div>
+      <div class="feedback" id="quizFeedback"></div>
+    </div>
+  </div>
+
+  <!-- ===== Level complete ===== -->
+  <div id="levelDone" class="screen">
+    <div class="card" style="text-align:center">
+      <div style="font-size:90px">🎉</div>
+      <div style="font-size:28px;font-weight:900">通关啦！</div>
+      <div class="stars-earned" id="doneStars">⭐⭐⭐</div>
+      <div id="doneBadge" style="font-size:18px;margin-top:8px;font-weight:800;color:var(--green-d)"></div>
+      <div class="rowbtns" style="margin-top:16px">
+        <button class="btn btn-ghost" onclick="go('home')">🏠 回家</button>
+        <button class="btn btn-green" id="doneNext">下一关 ➡️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Phonics ===== -->
+  <div id="phonics" class="screen">
+    <div class="backrow"><button class="backbtn" onclick="go('home')">⬅️ 回家</button><h2 class="title" style="margin:0">🔤 音标小课堂</h2></div>
+    <p class="subtle" style="margin:0 4px 10px">每个字母都有自己的声音。点一点，听听它怎么发音，跟着读！</p>
+    <div id="phonicsBody"></div>
+  </div>
+
+  <!-- ===== Badges / progress ===== -->
+  <div id="badges" class="screen">
+    <div class="backrow"><button class="backbtn" onclick="go('home')">⬅️ 回家</button><h2 class="title" style="margin:0">🏅 我的奖杯</h2></div>
+    <div class="stat" style="margin-bottom:14px">
+      <div class="s"><div class="n" id="statStars">0</div><div class="l">星星</div></div>
+      <div class="s"><div class="n" id="statWords">0</div><div class="l">学会单词</div></div>
+      <div class="s"><div class="n" id="statDays">0</div><div class="l">学习天数</div></div>
+    </div>
+    <div class="card">
+      <div style="font-weight:900;font-size:18px;margin-bottom:10px">徽章墙</div>
+      <div class="badgegrid" id="badgeGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Parent PIN gate ===== -->
+<div class="mask" id="pinMask">
+  <div class="modal">
+    <h3>🔒 家长验证</h3>
+    <p class="subtle">请输入 4 位密码（默认 <b>1234</b>，可在里面修改）</p>
+    <div class="pindisp" id="pinDisp"></div>
+    <div class="pinpad">
+      <button onclick="pinPress('1')">1</button><button onclick="pinPress('2')">2</button><button onclick="pinPress('3')">3</button>
+      <button onclick="pinPress('4')">4</button><button onclick="pinPress('5')">5</button><button onclick="pinPress('6')">6</button>
+      <button onclick="pinPress('7')">7</button><button onclick="pinPress('8')">8</button><button onclick="pinPress('9')">9</button>
+      <button onclick="pinClear()">✖️</button><button onclick="pinPress('0')">0</button><button onclick="pinDel()">⌫</button>
+    </div>
+    <button class="btn btn-ghost" style="width:100%;margin-top:12px" onclick="closeMask('pinMask')">取消</button>
+  </div>
+</div>
+
+<!-- ===== Parent backend ===== -->
+<div class="mask" id="parentMask">
+  <div class="modal">
+    <h3>⚙️ 家长 / 老师后台</h3>
+
+    <label class="fld">孩子的名字</label>
+    <input class="in" id="pName" placeholder="比如：豆豆">
+
+    <label class="fld">选一个头像</label>
+    <div id="avatarPick" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+
+    <label class="fld">📌 今日任务（首页给孩子看）</label>
+    <textarea class="in" id="pTask" placeholder="比如：今天学会 5 个动物单词，读给妈妈听～"></textarea>
+
+    <label class="fld">💌 悄悄话（首页给孩子看）</label>
+    <textarea class="in" id="pSecret" placeholder="比如：宝贝你真棒，妈妈爱你！"></textarea>
+
+    <label class="fld">🎙️ 语音悄悄话（本机录，孩子在首页点播放）</label>
+    <div class="rowbtns">
+      <button class="btn btn-pink" id="recBtn">● 开始录音</button>
+      <button class="btn btn-ghost" id="recPlayBtn">▶️ 试听</button>
+      <button class="btn btn-ghost" id="recDelBtn">🗑️ 删除</button>
+    </div>
+    <div class="subtle" id="recStatus" style="margin-top:6px">还没有录音</div>
+
+    <label class="fld">🔑 修改家长密码（4 位数字）</label>
+    <input class="in" id="pPin" maxlength="4" inputmode="numeric" placeholder="留空则不改">
+
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeMask('parentMask')">关闭</button>
+      <button class="btn btn-green" style="flex:1" id="parentSave">💾 保存</button>
+    </div>
+
+    <details style="margin-top:14px">
+      <summary class="subtle" style="cursor:pointer">危险操作 / 重置进度</summary>
+      <button class="btn btn-ghost" style="width:100%;margin-top:8px;color:#c0392b" id="resetBtn">⚠️ 清空所有学习进度</button>
+    </details>
+  </div>
+</div>
+
+<canvas id="confetti"></canvas>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   快乐英语岛 — single-file kids English app (offline, phase 1)
+   Focus: speaking / greetings first, word-map second.
+   Storage: localStorage. Speech: SpeechSynthesis + webkitSpeechRecognition.
+   ============================================================ */
+
+/* ---------------- Content data ---------------- */
+
+// TALK = speaking scenarios (the star feature). Each item = one spoken line.
+const TALK = [
+  { id:'greet', emoji:'👋', title:'见面打招呼', lines:[
+    {em:'👋', en:'Hi!', ipa:'/haɪ/', cn:'嗨！你好！'},
+    {em:'😀', en:'Hello!', ipa:'/həˈloʊ/', cn:'你好！'},
+    {em:'🌅', en:'Good morning!', ipa:'/ɡʊd ˈmɔːrnɪŋ/', cn:'早上好！'},
+    {em:'🌆', en:'Good afternoon!', ipa:'/ɡʊd ˌæftərˈnuːn/', cn:'下午好！'},
+    {em:'👋', en:'Goodbye!', ipa:'/ˌɡʊdˈbaɪ/', cn:'再见！'},
+  ]},
+  { id:'name', emoji:'🙋', title:'认识你', lines:[
+    {em:'🙋', en:"What's your name?", ipa:'/wʌts jɔːr neɪm/', cn:'你叫什么名字？'},
+    {em:'😊', en:'My name is Tom.', ipa:'/maɪ neɪm ɪz tɑːm/', cn:'我叫汤姆。'},
+    {em:'🤝', en:'Nice to meet you!', ipa:'/naɪs tə miːt juː/', cn:'很高兴认识你！'},
+    {em:'😄', en:'How are you?', ipa:'/haʊ ɑːr juː/', cn:'你好吗？'},
+    {em:'👍', en:"I'm fine, thank you!", ipa:'/aɪm faɪn θæŋk juː/', cn:'我很好，谢谢你！'},
+  ]},
+  { id:'me', emoji:'🎂', title:'介绍我自己', lines:[
+    {em:'❓', en:'How old are you?', ipa:'/haʊ oʊld ɑːr juː/', cn:'你几岁了？'},
+    {em:'🎂', en:'I am eight years old.', ipa:'/aɪ æm eɪt jɪrz oʊld/', cn:'我八岁了。'},
+    {em:'🏫', en:'I am a student.', ipa:'/aɪ æm ə ˈstuːdənt/', cn:'我是一名学生。'},
+    {em:'😃', en:'I am happy!', ipa:'/aɪ æm ˈhæpi/', cn:'我很开心！'},
+    {em:'👋', en:'See you tomorrow!', ipa:'/siː juː təˈmɑːroʊ/', cn:'明天见！'},
+  ]},
+  { id:'num', emoji:'🔢', title:'数一数 1-10', lines:[
+    {em:'1️⃣', en:'one', ipa:'/wʌn/', cn:'一'},
+    {em:'2️⃣', en:'two', ipa:'/tuː/', cn:'二'},
+    {em:'3️⃣', en:'three', ipa:'/θriː/', cn:'三'},
+    {em:'4️⃣', en:'four', ipa:'/fɔːr/', cn:'四'},
+    {em:'5️⃣', en:'five', ipa:'/faɪv/', cn:'五'},
+    {em:'6️⃣', en:'six', ipa:'/sɪks/', cn:'六'},
+    {em:'7️⃣', en:'seven', ipa:'/ˈsevən/', cn:'七'},
+    {em:'8️⃣', en:'eight', ipa:'/eɪt/', cn:'八'},
+    {em:'9️⃣', en:'nine', ipa:'/naɪn/', cn:'九'},
+    {em:'🔟', en:'ten', ipa:'/ten/', cn:'十'},
+  ]},
+  { id:'color', emoji:'🌈', title:'彩虹颜色', lines:[
+    {em:'🔴', en:'red', ipa:'/red/', cn:'红色'},
+    {em:'🟡', en:'yellow', ipa:'/ˈjeloʊ/', cn:'黄色'},
+    {em:'🔵', en:'blue', ipa:'/bluː/', cn:'蓝色'},
+    {em:'🟢', en:'green', ipa:'/ɡriːn/', cn:'绿色'},
+    {em:'🟣', en:'purple', ipa:'/ˈpɜːrpəl/', cn:'紫色'},
+  ]},
+  { id:'polite', emoji:'🌸', title:'有礼貌的话', lines:[
+    {em:'🙏', en:'Thank you!', ipa:'/θæŋk juː/', cn:'谢谢你！'},
+    {em:'😊', en:"You're welcome!", ipa:'/jʊr ˈwelkəm/', cn:'不客气！'},
+    {em:'🥺', en:'Please.', ipa:'/pliːz/', cn:'请。'},
+    {em:'😅', en:'Sorry.', ipa:'/ˈsɑːri/', cn:'对不起。'},
+    {em:'👌', en:"That's OK!", ipa:'/ðæts oʊˈkeɪ/', cn:'没关系！'},
+  ]},
+];
+
+// WORLDS = word-map (secondary). Each level: 5 words + a science card.
+const WORLDS = [
+  { id:'animal', emoji:'🦁', name:'动物世界', color:'linear-gradient(145deg,#f6d365,#fda085)', levels:[
+    { name:'第 1 关 · 小动物', words:[
+      {em:'🐱', en:'cat', ipa:'/kæt/', cn:'猫'},
+      {em:'🐶', en:'dog', ipa:'/dɔːɡ/', cn:'狗'},
+      {em:'🐦', en:'bird', ipa:'/bɜːrd/', cn:'鸟'},
+      {em:'🐟', en:'fish', ipa:'/fɪʃ/', cn:'鱼'},
+      {em:'🐰', en:'rabbit', ipa:'/ˈræbɪt/', cn:'兔子'},
+    ], sci:{em:'🐘', title:'大象的鼻子', text:'大象的鼻子有 4 万块肌肉，能捡起一颗花生，也能拔起一棵大树！'}},
+    { name:'第 2 关 · 大动物', words:[
+      {em:'🦁', en:'lion', ipa:'/ˈlaɪən/', cn:'狮子'},
+      {em:'🐯', en:'tiger', ipa:'/ˈtaɪɡər/', cn:'老虎'},
+      {em:'🐘', en:'elephant', ipa:'/ˈeləfənt/', cn:'大象'},
+      {em:'🐵', en:'monkey', ipa:'/ˈmʌŋki/', cn:'猴子'},
+      {em:'🐻', en:'bear', ipa:'/ber/', cn:'熊'},
+    ], sci:{em:'🐋', title:'蓝鲸有多大', text:'蓝鲸是地球上最大的动物，它的舌头就有一头大象那么重！'}},
+  ]},
+  { id:'space', emoji:'🚀', name:'太空宇宙', color:'linear-gradient(145deg,#5ee7df,#66a6ff)', levels:[
+    { name:'第 1 关 · 天空上', words:[
+      {em:'☀️', en:'sun', ipa:'/sʌn/', cn:'太阳'},
+      {em:'🌙', en:'moon', ipa:'/muːn/', cn:'月亮'},
+      {em:'⭐', en:'star', ipa:'/stɑːr/', cn:'星星'},
+      {em:'🪐', en:'planet', ipa:'/ˈplænɪt/', cn:'行星'},
+      {em:'🚀', en:'rocket', ipa:'/ˈrɑːkɪt/', cn:'火箭'},
+    ], sci:{em:'☀️', title:'太阳有多大', text:'太阳非常非常大，可以装下 130 万个地球！它离我们很远，光要跑 8 分钟才到。'}},
+    { name:'第 2 关 · 探索者', words:[
+      {em:'🌍', en:'earth', ipa:'/ɜːrθ/', cn:'地球'},
+      {em:'🔴', en:'Mars', ipa:'/mɑːrz/', cn:'火星'},
+      {em:'👽', en:'alien', ipa:'/ˈeɪliən/', cn:'外星人'},
+      {em:'🧑‍🚀', en:'astronaut', ipa:'/ˈæstrənɔːt/', cn:'宇航员'},
+      {em:'🌌', en:'galaxy', ipa:'/ˈɡæləksi/', cn:'银河系'},
+    ], sci:{em:'🌕', title:'月亮上跳得高', text:'月亮上的力气比地球小，宇航员在月亮上一跳，能跳得像袋鼠一样高！'}},
+  ]},
+  { id:'dino', emoji:'🦖', name:'恐龙王国', color:'linear-gradient(145deg,#a8ff78,#78ffd6)', levels:[
+    { name:'第 1 关 · 恐龙的东西', words:[
+      {em:'🦕', en:'dinosaur', ipa:'/ˈdaɪnəsɔːr/', cn:'恐龙'},
+      {em:'🥚', en:'egg', ipa:'/eɡ/', cn:'蛋'},
+      {em:'🦴', en:'bone', ipa:'/boʊn/', cn:'骨头'},
+      {em:'🦶', en:'claw', ipa:'/klɔː/', cn:'爪子'},
+      {em:'🦷', en:'tooth', ipa:'/tuːθ/', cn:'牙齿'},
+    ], sci:{em:'🦖', title:'霸王龙的牙齿', text:'霸王龙的牙齿有一根香蕉那么长！它咬东西的力气比 3 只狮子加起来还大。'}},
+    { name:'第 2 关 · 恐龙明星', words:[
+      {em:'🦖', en:'T-Rex', ipa:'/tiː reks/', cn:'霸王龙'},
+      {em:'🦕', en:'long neck', ipa:'/lɔːŋ nek/', cn:'长脖子龙'},
+      {em:'🐊', en:'big', ipa:'/bɪɡ/', cn:'大的'},
+      {em:'⚡', en:'fast', ipa:'/fæst/', cn:'快的'},
+      {em:'💪', en:'strong', ipa:'/strɔːŋ/', cn:'强壮的'},
+    ], sci:{em:'🥚', title:'恐龙蛋的秘密', text:'最大的恐龙蛋有橄榄球那么大，但刚孵出来的小恐龙，只有一只小猫那么小哦！'}},
+  ]},
+];
+
+// Phonics — a few letters/sounds to demystify pronunciation.
+const PHONICS = [
+  {ch:'A a', ipa:'/æ/', word:'apple', em:'🍎', cn:'像“ea”，张大嘴巴'},
+  {ch:'B b', ipa:'/b/', word:'ball', em:'⚽', cn:'双唇一碰，“布”'},
+  {ch:'C c', ipa:'/k/', word:'cat', em:'🐱', cn:'喉咙里的“可”'},
+  {ch:'D d', ipa:'/d/', word:'dog', em:'🐶', cn:'舌尖顶上牙，“的”'},
+  {ch:'E e', ipa:'/e/', word:'egg', em:'🥚', cn:'像“唉”'},
+  {ch:'F f', ipa:'/f/', word:'fish', em:'🐟', cn:'上牙咬下唇，吹气'},
+  {ch:'S s', ipa:'/s/', word:'sun', em:'☀️', cn:'像小蛇“丝~”'},
+  {ch:'T t', ipa:'/t/', word:'ten', em:'🔟', cn:'舌尖轻弹，“特”'},
+];
+
+// Badges awarded by conditions.
+const BADGES = [
+  {id:'first',  em:'🌟', name:'第一次开口'},
+  {id:'talk3',  em:'💬', name:'会打招呼'},
+  {id:'animal', em:'🦁', name:'动物专家'},
+  {id:'space',  em:'🚀', name:'太空达人'},
+  {id:'dino',   em:'🦖', name:'恐龙大师'},
+  {id:'stars50',em:'👑', name:'50 颗星'},
+];
+
+/* ---------------- State ---------------- */
+const DEFAULT = {
+  name:'小朋友', avatar:'🦁', pin:'1234',
+  stars:0, wordsLearned:[], talkDone:[], levelsDone:[], badges:[],
+  days:[], // list of yyyy-mm-dd strings
+  task:'', secret:'', voice:'' // voice = base64 data url
+};
+let S = load();
+
+function load(){
+  try{
+    const raw = localStorage.getItem('kidsEnglish');
+    if(raw){ return Object.assign({}, DEFAULT, JSON.parse(raw)); }
+  }catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT));
+}
+function save(){ localStorage.setItem('kidsEnglish', JSON.stringify(S)); }
+
+function markToday(){
+  const d = new Date().toISOString().slice(0,10);
+  if(!S.days.includes(d)){ S.days.push(d); save(); }
+}
+
+/* ---------------- Speech: TTS ---------------- */
+let voicesReady = false;
+function pickVoice(){
+  const vs = speechSynthesis.getVoices();
+  // prefer an English (US) voice
+  return vs.find(v=>/en[-_]US/i.test(v.lang)) || vs.find(v=>/^en/i.test(v.lang)) || null;
+}
+if('speechSynthesis' in window){
+  speechSynthesis.onvoiceschanged = ()=>{ voicesReady = true; };
+}
+function speak(text, opts={}){
+  if(!('speechSynthesis' in window)){ toast('这个浏览器不支持发音，换 Chrome 试试～'); return; }
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US';
+  u.rate = opts.rate!=null ? opts.rate : 0.72; // slow for kids
+  u.pitch = 1.1;
+  const v = pickVoice(); if(v) u.voice = v;
+  speechSynthesis.speak(u);
+}
+
+/* ---------------- Speech: recognition (我来读) ---------------- */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+function listenAndCheck(target, feedbackEl, tipEl, onStars){
+  // Encouraging feedback. Real scoring needs https/localhost; on file:// or when
+  // recognition can't start, degrade to a TIMED read-along (give the child time to
+  // actually read, THEN praise) — never fake-praise before they've spoken.
+  const cheer = ['太棒啦！','说得真好！','你真厉害！','完美！','好听极了！','再来一次也没问题！'];
+  const encourage = ['很勇敢，声音真好听！','开口就是英雄！','越来越像啦！','真棒，再读一遍试试！'];
+  const rand = a => a[Math.floor(Math.random()*a.length)];
+
+  // Timed read-along: waits ~3s so praise is earned, not instant.
+  function readAlong(){
+    tipEl.textContent = '🎤 该你读啦，看着单词，大声读出来！';
+    let dots = 0;
+    const iv = setInterval(()=>{ dots=(dots+1)%4; feedbackEl.textContent = '🎧 认真听你读' + '.'.repeat(dots); }, 380);
+    setTimeout(()=>{ clearInterval(iv); tipEl.textContent=''; feedbackEl.textContent = '⭐ ' + rand(cheer); onStars(1); }, 3000);
+  }
+
+  // Real recognition only works in a served secure context (http/https), NOT file://
+  const canRecognize = !!SR && location.protocol !== 'file:';
+  if(!canRecognize){ readAlong(); return; }
+
+  const rec = new SR();
+  rec.lang = 'en-US';
+  rec.interimResults = false;
+  rec.maxAlternatives = 5;
+  tipEl.textContent = '🎤 在听你说……大声读出来！';
+  feedbackEl.textContent = '👂';
+  let handled = false;
+  const t0 = Date.now();
+  const finish = (txt, stars)=>{ if(handled) return; handled=true; tipEl.textContent=''; feedbackEl.textContent=txt; onStars(stars); };
+
+  rec.onresult = (e)=>{
+    let heard = '';
+    for(let i=0;i<e.results[0].length;i++){ heard += ' ' + e.results[0][i].transcript; }
+    heard = heard.toLowerCase();
+    const t = target.toLowerCase().replace(/[^a-z' ]/g,'');
+    const words = t.split(/\s+/).filter(Boolean);
+    const hit = words.some(w=> heard.includes(w)) || heard.includes(t);
+    finish(hit ? ('⭐ ' + rand(cheer)) : ('💛 ' + rand(encourage)), hit ? 2 : 1);
+  };
+  const failSoft = ()=>{
+    if(handled) return;
+    // Failed almost instantly => recognition not really usable here => timed read-along,
+    // not an instant praise. A later failure means "didn't catch it" => gentle encourage.
+    if(Date.now() - t0 < 1200){ handled = true; readAlong(); }
+    else finish('💛 ' + rand(encourage), 1);
+  };
+  rec.onerror = failSoft;
+  rec.onend = ()=>{ if(!handled) failSoft(); };
+  try{ rec.start(); }catch(e){ handled = true; readAlong(); }
+}
+
+/* ---------------- Stars / badges ---------------- */
+function addStars(n){
+  S.stars += n; save();
+  document.getElementById('starCount').textContent = S.stars;
+  checkBadges();
+}
+function grantBadge(id){
+  if(!S.badges.includes(id)){ S.badges.push(id); save(); const b=BADGES.find(x=>x.id===id); if(b) toast('🏅 获得徽章：'+b.name); }
+}
+function checkBadges(){
+  if(S.talkDone.length>=1) grantBadge('first');
+  if(S.talkDone.length>=3) grantBadge('talk3');
+  if(S.stars>=50) grantBadge('stars50');
+  // world mastery
+  WORLDS.forEach(w=>{
+    const all = w.levels.every((_,i)=> S.levelsDone.includes(w.id+':'+i));
+    if(all) grantBadge(w.id);
+  });
+}
+
+/* ---------------- Toast ---------------- */
+let toastTimer;
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> t.classList.remove('show'), 2200);
+}
+
+/* ---------------- Navigation ---------------- */
+function go(id){
+  document.querySelectorAll('.screen').forEach(s=> s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+  if(id==='home') renderHome();
+  if(id==='talkList') renderTalkList();
+  if(id==='mapWorlds') renderWorlds();
+  if(id==='phonics') renderPhonics();
+  if(id==='badges') renderBadges();
+}
+
+/* ---------------- Home ---------------- */
+function renderHome(){
+  document.getElementById('kidName').textContent = S.name;
+  document.getElementById('avatar').textContent = S.avatar;
+  document.getElementById('starCount').textContent = S.stars;
+
+  const taskNote = document.getElementById('taskNote');
+  if(S.task && S.task.trim()){ taskNote.style.display='block'; document.getElementById('taskText').textContent = S.task; }
+  else taskNote.style.display='none';
+
+  const secretNote = document.getElementById('secretNote');
+  const hasText = S.secret && S.secret.trim();
+  const hasVoice = !!S.voice;
+  if(hasText || hasVoice){
+    secretNote.style.display='block';
+    document.getElementById('secretText').textContent = hasText ? S.secret : '爸爸妈妈给你留了一段语音，快点播放吧！';
+    const pv = document.getElementById('playSecretVoice');
+    pv.style.display = hasVoice ? 'block' : 'none';
+  }else secretNote.style.display='none';
+}
+document.getElementById('playSecretVoice').onclick = ()=>{
+  if(S.voice){ const a=new Audio(S.voice); a.play(); }
+};
+
+/* ---------------- Talk list ---------------- */
+function renderTalkList(){
+  const box = document.getElementById('talkListBody');
+  box.innerHTML='';
+  TALK.forEach(sc=>{
+    const done = S.talkDone.includes(sc.id);
+    const b = document.createElement('button');
+    b.className='listrow';
+    b.innerHTML = `<div class="lem">${sc.emoji}</div>
+      <div class="lt"><div class="a">${sc.title}</div><div class="b">${sc.lines.length} 句 · 点开听我读</div></div>
+      ${done?'<span class="badge-mini">✓ 学过</span>':'<div class="lock">🎤</div>'}`;
+    b.onclick = ()=> startTalk(sc);
+    box.appendChild(b);
+  });
+}
+
+/* ---------------- Talk player ---------------- */
+let talkCtx = null;
+function startTalk(sc){
+  talkCtx = { sc, i:0, earned:0 };
+  document.getElementById('talkPlayTitle').textContent = sc.emoji+' '+sc.title;
+  go('talkPlay');
+  renderTalkCard();
+  markToday();
+}
+function renderTalkCard(){
+  const {sc,i} = talkCtx;
+  const ln = sc.lines[i];
+  document.getElementById('talkEm').textContent = ln.em;
+  document.getElementById('talkEn').textContent = ln.en;
+  document.getElementById('talkIpa').textContent = ln.ipa;
+  document.getElementById('talkCn').textContent = ln.cn;
+  document.getElementById('talkFeedback').textContent='';
+  document.getElementById('talkTip').textContent='';
+  // dots
+  const dots = document.getElementById('talkDots'); dots.innerHTML='';
+  sc.lines.forEach((_,k)=>{ const d=document.createElement('div'); d.className='dot'+(k<i?' on':'')+(k===i?' cur':''); dots.appendChild(d); });
+  document.getElementById('talkNext').textContent = (i===sc.lines.length-1) ? '完成 ✅' : '下一句 ➡️';
+  document.getElementById('talkPrev').style.visibility = i===0 ? 'hidden':'visible';
+  // auto read
+  speak(ln.en);
+}
+document.getElementById('talkListenBtn').onclick = ()=> speak(talkCtx.sc.lines[talkCtx.i].en);
+document.getElementById('talkSpeakBtn').onclick = function(){
+  const el=this; el.classList.add('mic-anim');
+  listenAndCheck(talkCtx.sc.lines[talkCtx.i].en,
+    document.getElementById('talkFeedback'), document.getElementById('talkTip'),
+    (st)=>{ el.classList.remove('mic-anim'); talkCtx.earned+=st; addStars(st); popStars(st); });
+};
+document.getElementById('talkPrev').onclick = ()=>{ if(talkCtx.i>0){ talkCtx.i--; renderTalkCard(); } };
+document.getElementById('talkNext').onclick = ()=>{
+  if(talkCtx.i < talkCtx.sc.lines.length-1){ talkCtx.i++; renderTalkCard(); }
+  else{
+    if(!S.talkDone.includes(talkCtx.sc.id)){ S.talkDone.push(talkCtx.sc.id); save(); checkBadges(); }
+    confettiBurst();
+    toast('🎉 '+talkCtx.sc.title+' 完成！');
+    go('talkList');
+  }
+};
+
+/* ---------------- Worlds ---------------- */
+function worldUnlocked(wIdx){
+  if(wIdx===0) return true;
+  // unlock next world when previous world fully done
+  const prev = WORLDS[wIdx-1];
+  return prev.levels.every((_,i)=> S.levelsDone.includes(prev.id+':'+i));
+}
+function levelUnlocked(w, lvIdx){
+  if(lvIdx===0) return true;
+  return S.levelsDone.includes(w.id+':'+(lvIdx-1));
+}
+function renderWorlds(){
+  const box=document.getElementById('worldsBody'); box.innerHTML='';
+  WORLDS.forEach((w,wi)=>{
+    const un = worldUnlocked(wi);
+    const doneCount = w.levels.filter((_,i)=> S.levelsDone.includes(w.id+':'+i)).length;
+    const b=document.createElement('button');
+    b.className='listrow'+(un?'':' locked');
+    b.innerHTML = `<div class="lem">${w.emoji}</div>
+      <div class="lt"><div class="a">${w.name}</div><div class="b">${un?('已通 '+doneCount+'/'+w.levels.length+' 关'):'先通关前一个世界解锁'}</div></div>
+      <div class="lock">${un?'▶️':'🔒'}</div>`;
+    if(un) b.onclick=()=> openWorld(wi);
+    box.appendChild(b);
+  });
+}
+let curWorld=0;
+function openWorld(wi){
+  curWorld=wi;
+  const w=WORLDS[wi];
+  document.getElementById('worldTitle').textContent = w.emoji+' '+w.name;
+  const box=document.getElementById('levelsBody'); box.innerHTML='';
+  w.levels.forEach((lv,li)=>{
+    const key=w.id+':'+li;
+    const done=S.levelsDone.includes(key);
+    const un=levelUnlocked(w,li);
+    const b=document.createElement('button');
+    b.className='listrow'+(un?'':' locked');
+    b.innerHTML = `<div class="lem">${done?'⭐':'📘'}</div>
+      <div class="lt"><div class="a">${lv.name}</div><div class="b">${lv.words.length} 个单词${done?' · 已通关':''}</div></div>
+      <div class="lock">${un?'▶️':'🔒'}</div>`;
+    if(un) b.onclick=()=> startLevel(wi,li);
+    box.appendChild(b);
+  });
+  go('mapLevels');
+}
+
+/* ---------------- Word player ---------------- */
+let wordCtx=null;
+function startLevel(wi,li){
+  const w=WORLDS[wi], lv=w.levels[li];
+  wordCtx={ wi, li, i:0, w, lv };
+  document.getElementById('wordPlayTitle').textContent = w.emoji+' '+lv.name;
+  document.getElementById('wordBack').onclick = ()=> openWorld(wi);
+  go('wordPlay');
+  renderWordCard();
+  markToday();
+}
+function renderWordCard(){
+  const {lv,i}=wordCtx;
+  const wd=lv.words[i];
+  document.getElementById('wordEm').textContent=wd.em;
+  document.getElementById('wordEn').textContent=wd.en;
+  document.getElementById('wordIpa').textContent=wd.ipa;
+  document.getElementById('wordCn').textContent=wd.cn;
+  document.getElementById('wordFeedback').textContent='';
+  document.getElementById('wordTip').textContent='';
+  const dots=document.getElementById('wordDots'); dots.innerHTML='';
+  lv.words.forEach((_,k)=>{ const d=document.createElement('div'); d.className='dot'+(k<i?' on':'')+(k===i?' cur':''); dots.appendChild(d); });
+  document.getElementById('wordNext').textContent = (i===lv.words.length-1)?'去科普 🌟':'下一个 ➡️';
+  document.getElementById('wordPrev').style.visibility = i===0?'hidden':'visible';
+  speak(wd.en);
+}
+document.getElementById('wordListenBtn').onclick=()=> speak(wordCtx.lv.words[wordCtx.i].en);
+document.getElementById('wordSpeakBtn').onclick=function(){
+  const el=this; el.classList.add('mic-anim');
+  const wd=wordCtx.lv.words[wordCtx.i];
+  listenAndCheck(wd.en, document.getElementById('wordFeedback'), document.getElementById('wordTip'),
+    (st)=>{ el.classList.remove('mic-anim'); addStars(st); popStars(st);
+      if(!S.wordsLearned.includes(wd.en)){ S.wordsLearned.push(wd.en); save(); } });
+};
+document.getElementById('wordPrev').onclick=()=>{ if(wordCtx.i>0){ wordCtx.i--; renderWordCard(); } };
+document.getElementById('wordNext').onclick=()=>{
+  const wd=wordCtx.lv.words[wordCtx.i];
+  if(!S.wordsLearned.includes(wd.en)){ S.wordsLearned.push(wd.en); save(); }
+  if(wordCtx.i < wordCtx.lv.words.length-1){ wordCtx.i++; renderWordCard(); }
+  else showScience();
+};
+
+/* ---------------- Science ---------------- */
+function showScience(){
+  const sci=wordCtx.lv.sci;
+  document.getElementById('sciEmoji').textContent=sci.em;
+  document.getElementById('sciTitle').textContent=sci.title;
+  document.getElementById('sciText').textContent=sci.text;
+  go('science');
+}
+document.getElementById('sciNext').onclick=()=> startQuiz();
+
+/* ---------------- Quiz ---------------- */
+let quizCtx=null;
+function startQuiz(){
+  const words=wordCtx.lv.words.slice();
+  quizCtx={ q:0, questions: shuffle(words.slice()), pool:words, correct:0 };
+  go('quiz');
+  renderQuiz();
+}
+function renderQuiz(){
+  const {questions,q,pool}=quizCtx;
+  const dots=document.getElementById('quizDots'); dots.innerHTML='';
+  questions.forEach((_,k)=>{ const d=document.createElement('div'); d.className='dot'+(k<q?' on':'')+(k===q?' cur':''); dots.appendChild(d); });
+  const cur=questions[q];
+  document.getElementById('quizEmoji').textContent=cur.em;
+  document.getElementById('quizFeedback').textContent='';
+  // options: correct + 3 distractors from pool
+  let opts=[cur];
+  const others=shuffle(pool.filter(w=>w.en!==cur.en)).slice(0,3);
+  opts=shuffle(opts.concat(others));
+  const box=document.getElementById('quizOptions'); box.innerHTML='';
+  opts.forEach(o=>{
+    const b=document.createElement('button'); b.className='opt'; b.textContent=o.en;
+    b.onclick=()=> answer(b, o.en===cur.en, cur.en);
+    box.appendChild(b);
+  });
+  speak(cur.en);
+}
+function answer(btn, right, correctEn){
+  document.querySelectorAll('.opt').forEach(b=> b.disabled=true);
+  if(right){
+    btn.classList.add('right');
+    quizCtx.correct++;
+    addStars(1); popStars(1);
+    document.getElementById('quizFeedback').textContent='✅ 答对啦！';
+  }else{
+    btn.classList.add('wrong');
+    document.querySelectorAll('.opt').forEach(b=>{ if(b.textContent===correctEn) b.classList.add('right'); });
+    document.getElementById('quizFeedback').textContent='💛 没关系，正确答案亮起来啦！';
+  }
+  speak(correctEn);
+  setTimeout(()=>{
+    if(quizCtx.q < quizCtx.questions.length-1){ quizCtx.q++; renderQuiz(); }
+    else finishLevel();
+  }, 1300);
+}
+
+/* ---------------- Level complete ---------------- */
+function finishLevel(){
+  const {wi,li,w,lv}=wordCtx;
+  const key=w.id+':'+li;
+  if(!S.levelsDone.includes(key)){ S.levelsDone.push(key); save(); }
+  checkBadges();
+  const stars = 1 + quizCtx.correct; // completion + per correct
+  addStars(stars);
+  confettiBurst();
+  document.getElementById('doneStars').textContent = '⭐'.repeat(Math.min(3, Math.max(1, Math.round(quizCtx.correct/lv.words.length*3))));
+  // badge hint
+  const wb=BADGES.find(x=>x.id===w.id);
+  const worldDone = w.levels.every((_,i)=> S.levelsDone.includes(w.id+':'+i));
+  document.getElementById('doneBadge').textContent = worldDone && wb ? ('🏅 恭喜通关整个世界，获得「'+wb.name+'」徽章！') : '';
+  // next
+  const nextBtn=document.getElementById('doneNext');
+  if(li < w.levels.length-1){ nextBtn.style.display='block'; nextBtn.onclick=()=> startLevel(wi,li+1); }
+  else if(wi < WORLDS.length-1 && worldUnlocked(wi+1)){ nextBtn.style.display='block'; nextBtn.textContent='下个世界 🌍'; nextBtn.onclick=()=> openWorld(wi+1); }
+  else{ nextBtn.style.display='none'; }
+  go('levelDone');
+}
+
+/* ---------------- Phonics ---------------- */
+function renderPhonics(){
+  const box=document.getElementById('phonicsBody'); box.innerHTML='';
+  PHONICS.forEach(p=>{
+    const b=document.createElement('button'); b.className='listrow';
+    b.innerHTML=`<div class="lem">${p.em}</div>
+      <div class="lt"><div class="a">${p.ch} &nbsp; <span style="color:var(--purple-d)">${p.ipa}</span></div>
+      <div class="b">${p.word} · ${p.cn}</div></div><div class="lock">🔊</div>`;
+    b.onclick=()=>{ speak(p.word); toast('跟我读：'+p.word); };
+    box.appendChild(b);
+  });
+}
+
+/* ---------------- Badges screen ---------------- */
+function renderBadges(){
+  document.getElementById('statStars').textContent=S.stars;
+  document.getElementById('statWords').textContent=S.wordsLearned.length;
+  document.getElementById('statDays').textContent=S.days.length;
+  const grid=document.getElementById('badgeGrid'); grid.innerHTML='';
+  BADGES.forEach(b=>{
+    const has=S.badges.includes(b.id);
+    const d=document.createElement('div'); d.className='badgeitem'+(has?'':' locked');
+    d.innerHTML=`<div class="be">${b.em}</div><div class="bn">${b.name}</div>`;
+    grid.appendChild(d);
+  });
+}
+
+/* ---------------- Star pop mini-animation ---------------- */
+function popStars(n){
+  for(let i=0;i<n;i++){
+    const s=document.createElement('div');
+    s.textContent='⭐'; s.style.cssText='position:fixed;left:50%;top:40%;font-size:40px;z-index:65;pointer-events:none;transition:all .9s ease;';
+    document.body.appendChild(s);
+    requestAnimationFrame(()=>{
+      s.style.left=(30+Math.random()*40)+'%';
+      s.style.top='8%'; s.style.opacity='0'; s.style.transform='scale(1.8)';
+    });
+    setTimeout(()=> s.remove(), 950);
+  }
+}
+
+/* ---------------- Confetti ---------------- */
+const cvs=document.getElementById('confetti'); const ctx=cvs.getContext('2d');
+function fitCanvas(){ cvs.width=innerWidth; cvs.height=innerHeight; }
+fitCanvas(); addEventListener('resize', fitCanvas);
+let parts=[];
+function confettiBurst(){
+  const colors=['#ff7eb3','#ffd23f','#4ade80','#38bdf8','#a78bfa','#ffa552'];
+  for(let i=0;i<120;i++){
+    parts.push({ x:innerWidth/2, y:innerHeight/3, vx:(Math.random()-.5)*12, vy:Math.random()*-12-4,
+      g:.35, s:6+Math.random()*8, c:colors[i%colors.length], r:Math.random()*6, life:120 });
+  }
+  if(!confAnim) confLoop();
+}
+let confAnim=false;
+function confLoop(){
+  confAnim=true;
+  ctx.clearRect(0,0,cvs.width,cvs.height);
+  parts.forEach(p=>{ p.vy+=p.g; p.x+=p.vx; p.y+=p.vy; p.life--; ctx.fillStyle=p.c; ctx.fillRect(p.x,p.y,p.s,p.s); });
+  parts=parts.filter(p=> p.life>0 && p.y<cvs.height+20);
+  if(parts.length){ requestAnimationFrame(confLoop); } else { ctx.clearRect(0,0,cvs.width,cvs.height); confAnim=false; }
+}
+
+/* ---------------- Shuffle ---------------- */
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+/* ============================================================
+   Parent backend
+   ============================================================ */
+let pinBuffer='';
+function openMask(id){ document.getElementById(id).classList.add('show'); }
+function closeMask(id){ document.getElementById(id).classList.remove('show'); }
+document.getElementById('gearBtn').onclick=()=>{ pinBuffer=''; renderPin(); openMask('pinMask'); };
+function renderPin(){ document.getElementById('pinDisp').textContent = '●'.repeat(pinBuffer.length) + '○'.repeat(4-pinBuffer.length); }
+function pinPress(n){
+  if(pinBuffer.length>=4) return;
+  pinBuffer+=n; renderPin();
+  if(pinBuffer.length===4){
+    setTimeout(()=>{
+      if(pinBuffer===S.pin){ closeMask('pinMask'); openParent(); }
+      else { toast('密码不对哦～'); pinBuffer=''; renderPin(); }
+    },150);
+  }
+}
+function pinDel(){ pinBuffer=pinBuffer.slice(0,-1); renderPin(); }
+function pinClear(){ pinBuffer=''; renderPin(); }
+
+const AVATARS=['🦁','🐯','🐼','🦊','🐵','🐧','🦖','🚀','🐱','🐶','🦄','🐸'];
+function openParent(){
+  document.getElementById('pName').value=S.name;
+  document.getElementById('pTask').value=S.task||'';
+  document.getElementById('pSecret').value=S.secret||'';
+  document.getElementById('pPin').value='';
+  document.getElementById('recStatus').textContent = S.voice ? '✅ 已有一段录音' : '还没有录音';
+  const pick=document.getElementById('avatarPick'); pick.innerHTML='';
+  AVATARS.forEach(a=>{
+    const b=document.createElement('button');
+    b.textContent=a; b.style.cssText='font-size:26px;border:3px solid '+(a===S.avatar?'#22c55e':'#e5eef7')+';border-radius:14px;background:#fff;padding:6px 10px;cursor:pointer';
+    b.onclick=()=>{ S.avatar=a; document.querySelectorAll('#avatarPick button').forEach(x=>x.style.borderColor='#e5eef7'); b.style.borderColor='#22c55e'; };
+    pick.appendChild(b);
+  });
+  openMask('parentMask');
+}
+document.getElementById('parentSave').onclick=()=>{
+  const nm=document.getElementById('pName').value.trim();
+  S.name = nm || '小朋友';
+  S.task = document.getElementById('pTask').value.trim();
+  S.secret = document.getElementById('pSecret').value.trim();
+  const np=document.getElementById('pPin').value.trim();
+  if(np){ if(/^\d{4}$/.test(np)){ S.pin=np; } else { toast('密码要 4 位数字'); return; } }
+  save(); closeMask('parentMask'); renderHome();
+  toast('✅ 保存好啦！');
+};
+document.getElementById('resetBtn').onclick=()=>{
+  if(confirm('确定清空所有学习进度吗？（星星、单词、徽章都会没有）')){
+    const keepName=S.name, keepAvatar=S.avatar, keepPin=S.pin;
+    S=JSON.parse(JSON.stringify(DEFAULT));
+    S.name=keepName; S.avatar=keepAvatar; S.pin=keepPin;
+    save(); closeMask('parentMask'); renderHome(); toast('已重置');
+  }
+};
+
+/* ---------------- Parent voice recording (same-device, phase 1) ---------------- */
+let mediaRec=null, recChunks=[], recording=false;
+document.getElementById('recBtn').onclick=async function(){
+  if(!recording){
+    if(!navigator.mediaDevices || !window.MediaRecorder){ toast('这个浏览器不支持录音'); return; }
+    try{
+      const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+      mediaRec=new MediaRecorder(stream); recChunks=[];
+      mediaRec.ondataavailable=e=>{ if(e.data.size>0) recChunks.push(e.data); };
+      mediaRec.onstop=()=>{
+        const blob=new Blob(recChunks,{type:'audio/webm'});
+        const reader=new FileReader();
+        reader.onloadend=()=>{
+          const data=reader.result;
+          if(data.length > 900000){ toast('录音太长啦，建议 15 秒内'); }
+          S.voice=data; save();
+          document.getElementById('recStatus').textContent='✅ 录音已保存';
+        };
+        reader.readAsDataURL(blob);
+        stream.getTracks().forEach(t=>t.stop());
+      };
+      mediaRec.start(); recording=true;
+      this.textContent='⏹️ 停止录音'; document.getElementById('recStatus').textContent='🎙️ 正在录音…（说完点停止）';
+    }catch(e){ toast('没能打开麦克风，请允许权限'); }
+  }else{
+    mediaRec.stop(); recording=false; this.textContent='● 开始录音';
+  }
+};
+document.getElementById('recPlayBtn').onclick=()=>{ if(S.voice){ new Audio(S.voice).play(); } else toast('还没有录音'); };
+document.getElementById('recDelBtn').onclick=()=>{ S.voice=''; save(); document.getElementById('recStatus').textContent='已删除'; };
+
+/* ---------------- Boot ---------------- */
+markToday();
+renderHome();
+checkBadges();
+// warm up voices
+if('speechSynthesis' in window){ speechSynthesis.getVoices(); }
+</script>
