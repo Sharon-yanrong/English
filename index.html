@@ -1185,41 +1185,34 @@ function applyPairCode(code, role){
   fam = { url:o.u, key:o.k, room:o.r, role:role }; saveFam();
 }
 
-async function getSB(){
-  if(sb) return sb;
-  if(!famConfigured()) throw new Error('未配置');
-  const mod = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
-  sb = mod.createClient(fam.url, fam.key);
-  return sb;
-}
-
-async function famUpload(blob, ext){
-  const client = await getSB();
-  const path = fam.room + '/' + Date.now() + '.' + ext;
-  const up = await client.storage.from('family-media').upload(path, blob, { contentType: blob.type, upsert:false });
-  if(up.error) throw up.error;
-  return client.storage.from('family-media').getPublicUrl(path).data.publicUrl;
-}
-async function famSend(kind, content){
-  const client = await getSB();
-  const r = await client.from('messages').insert({ room:fam.room, sender:fam.role, kind:kind, content:content, seen:false });
-  if(r.error) throw r.error;
+// Talk to Supabase with plain fetch() — no external library / CDN, so it works
+// on any network (incl. mainland China, where esm/jsdelivr CDNs are often blocked).
+let famPollTimer=null, famSeenIds=new Set();
+function famHeaders(extra){ return Object.assign({ apikey: fam.key, Authorization: 'Bearer '+fam.key }, extra||{}); }
+async function famApi(path, opts){
+  const res = await fetch(fam.url + path, opts);
+  if(!res.ok){ const t = await res.text().catch(()=>''); throw new Error('HTTP '+res.status+' '+t.slice(0,140)); }
+  return res;
 }
 async function famFetch(){
-  const client = await getSB();
-  const r = await client.from('messages').select('*').eq('room', fam.room).order('created_at',{ascending:true});
-  if(r.error) throw r.error;
-  famMsgs = r.data || []; return famMsgs;
+  const res = await famApi('/rest/v1/messages?select=*&room=eq.'+encodeURIComponent(fam.room)+'&order=created_at.asc', { headers: famHeaders() });
+  famMsgs = await res.json(); return famMsgs;
 }
-async function famMarkSeen(id){ try{ const c=await getSB(); await c.from('messages').update({seen:true}).eq('id',id); }catch(e){} }
-
-let famChannel=null;
-async function famSubscribe(onNew){
-  const client = await getSB();
-  if(famChannel) return;
-  famChannel = client.channel('room-'+fam.room)
-    .on('postgres_changes', { event:'INSERT', schema:'public', table:'messages', filter:'room=eq.'+fam.room }, p=>onNew(p.new))
-    .subscribe();
+async function famSend(kind, content){
+  await famApi('/rest/v1/messages', { method:'POST',
+    headers: famHeaders({ 'Content-Type':'application/json', 'Prefer':'return=minimal' }),
+    body: JSON.stringify({ room:fam.room, sender:fam.role, kind:kind, content:content, seen:false }) });
+}
+async function famMarkSeen(id){
+  try{ await famApi('/rest/v1/messages?id=eq.'+encodeURIComponent(id), { method:'PATCH',
+    headers: famHeaders({ 'Content-Type':'application/json', 'Prefer':'return=minimal' }),
+    body: JSON.stringify({ seen:true }) }); }catch(e){}
+}
+async function famUpload(blob, ext){
+  const path = fam.room + '/' + Date.now() + '.' + ext;
+  await famApi('/storage/v1/object/family-media/' + path, { method:'POST',
+    headers: famHeaders({ 'Content-Type': blob.type || 'application/octet-stream' }), body: blob });
+  return fam.url + '/storage/v1/object/public/family-media/' + path;
 }
 
 /* ---------- Record voice/video, then upload + send ---------- */
@@ -1350,16 +1343,22 @@ document.getElementById('famUnpairBtn').onclick=()=>{
 };
 
 async function initFamily(){
+  if(famPollTimer){ clearInterval(famPollTimer); famPollTimer=null; }
   if(!famConfigured()) return;
-  try{
-    await famSubscribe(m=>{
-      if(m.sender===otherSender()){
-        toast('📬 收到一条新消息！');
-        if(document.querySelector('.screen.active').id==='home') renderMailbox();
-      }
-    });
-  }catch(e){}
+  try{ await famFetch(); }catch(e){}
+  famSeenIds = new Set(famMsgs.map(m=>m.id));
   renderMailbox();
+  // Poll every 5s for new messages (simple & reliable, no websockets needed).
+  famPollTimer = setInterval(async ()=>{
+    if(!famConfigured()) return;
+    try{
+      const msgs = await famFetch();
+      let gotNew=false;
+      msgs.forEach(m=>{ if(!famSeenIds.has(m.id)){ famSeenIds.add(m.id); if(m.sender===otherSender()) gotNew=true; } });
+      if(gotNew){ toast('📬 收到一条新消息！'); if(document.querySelector('.screen.active').id==='home') renderMailbox(); }
+      else if(document.querySelector('.screen.active').id==='home'){ renderMailbox(); }
+    }catch(e){}
+  }, 5000);
 }
 
 /* ---------------- Boot ---------------- */
