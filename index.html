@@ -184,6 +184,23 @@
   .replybtns{ display:flex; gap:8px; margin-top:8px; }
   .replybtns .btn{ flex:1; font-size:15px; padding:12px 8px; }
   #recPreview{ transform:scaleX(-1); }
+
+  /* ---------- Reward banner ---------- */
+  .reward{ background:linear-gradient(145deg,#fff3c4,#ffd76e); border-radius:22px; padding:14px 16px; margin-bottom:12px; box-shadow:var(--shadow); }
+  .reward .rt{ font-weight:900; font-size:16px; color:#8a5a00; display:flex; align-items:center; gap:6px; }
+  .reward .bar{ background:#fff; border-radius:12px; height:18px; margin-top:8px; overflow:hidden; box-shadow:inset 0 2px 3px rgba(0,0,0,.08); }
+  .reward .bar > i{ display:block; height:100%; width:0; background:linear-gradient(90deg,#ffb300,#ff7a00); border-radius:12px; transition:width .5s; }
+  .reward .rsub{ font-size:13px; color:#8a5a00; margin-top:6px; font-weight:800; }
+  .reward.done{ background:linear-gradient(145deg,#b9f6ca,#69f0ae); }
+  .reward.done .rt{ color:#1b5e20; }
+
+  /* ---------- Story ---------- */
+  .storyscene{ text-align:center; }
+  .storyscene .scene{ font-size:120px; line-height:1; margin:4px 0; }
+  .storyscene .en{ font-size:30px; font-weight:900; }
+  .storyscene .cn{ font-size:20px; color:var(--ink-soft); margin-top:6px; font-weight:800; }
+  .storyctrl{ display:flex; gap:10px; margin-top:14px; }
+  .storyctrl .btn{ flex:1; }
 </style>
 
 <div class="app">
@@ -200,6 +217,11 @@
 
   <!-- ===== HOME ===== -->
   <div id="home" class="screen active">
+    <div id="rewardBanner" class="reward" style="display:none">
+      <div class="rt" id="rewardTitle"></div>
+      <div class="bar"><i id="rewardBar"></i></div>
+      <div class="rsub" id="rewardSub"></div>
+    </div>
     <div id="taskNote" class="note task" style="display:none">
       <div class="lbl">📌 今日任务</div>
       <div class="txt" id="taskText"></div>
@@ -225,6 +247,10 @@
     </div>
 
     <div class="tiles">
+      <button class="tile full" style="background:linear-gradient(145deg,#f6a5ff,#a06bff)" onclick="go('storyList')">
+        <div class="emoji">📖</div>
+        <div><div class="t">听故事</div><div class="d">好听的小故事 · 边听边学英语</div></div>
+      </button>
       <button class="tile" style="background:linear-gradient(145deg,#ff9a9e,#ff6f91)" onclick="go('talkList')">
         <div class="emoji">💬</div>
         <div><div class="t">开口说话</div><div class="d">打招呼 · 日常口语（主打）</div></div>
@@ -270,6 +296,46 @@
     <div class="rowbtns">
       <button class="btn btn-ghost" id="talkPrev">⬅️ 上一句</button>
       <button class="btn btn-green" id="talkNext">下一句 ➡️</button>
+    </div>
+  </div>
+
+  <!-- ===== STORY: list ===== -->
+  <div id="storyList" class="screen">
+    <div class="backrow"><button class="backbtn" onclick="go('home')">⬅️ 回家</button><h2 class="title" style="margin:0">📖 听故事</h2></div>
+    <p class="subtle" style="margin:0 4px 10px">先点「▶️ 自动播放」躺着听一遍，有空再自己跟着读。故事很短，听得懂就很棒！</p>
+    <div id="storyListBody"></div>
+  </div>
+
+  <!-- ===== STORY: player ===== -->
+  <div id="storyPlay" class="screen">
+    <div class="backrow"><button class="backbtn" onclick="go('storyList')">⬅️ 返回</button><h2 class="title" id="storyPlayTitle" style="margin:0"></h2></div>
+    <div class="progressdots" id="storyDots"></div>
+    <div class="card storyscene">
+      <div class="scene" id="storyScene">🐷</div>
+      <div class="en" id="storyEn"></div>
+      <div class="cn" id="storyCn"></div>
+      <div class="storyctrl">
+        <button class="btn btn-blue" id="storyReplay">🔁 再听</button>
+        <button class="btn btn-pink" id="storySpeak">🎤 我来读</button>
+      </div>
+      <div class="feedback" id="storyFeedback"></div>
+      <div class="listen-tip" id="storyTip"></div>
+    </div>
+    <div class="storyctrl">
+      <button class="btn btn-ghost" id="storyPrev">⬅️ 上一句</button>
+      <button class="btn btn-green" id="storyAuto">▶️ 自动播放</button>
+      <button class="btn btn-ghost" id="storyNext">下一句 ➡️</button>
+    </div>
+  </div>
+
+  <!-- ===== STORY: comprehension ===== -->
+  <div id="storyQuiz" class="screen">
+    <div class="backrow"><h2 class="title" style="margin:0">👂 听一听</h2></div>
+    <div class="card">
+      <div class="subtle" style="text-align:center" id="storyQuizAsk">听声音，点出对的图👇</div>
+      <div style="text-align:center;margin:10px 0"><button class="btn btn-blue" id="storyQuizPlay">🔊 再听一次</button></div>
+      <div class="options" id="storyQuizOptions"></div>
+      <div class="feedback" id="storyQuizFeedback"></div>
     </div>
   </div>
 
@@ -406,6 +472,15 @@
       <button class="btn btn-ghost" id="recDelBtn">🗑️ 删除</button>
     </div>
     <div class="subtle" id="recStatus" style="margin-top:6px">还没有录音</div>
+
+    <label class="fld">🏆 真实奖励（孩子攒够星星，你在现实里给奖励）</label>
+    <input class="in" id="pRewardText" placeholder="奖励是什么，比如：一个恐龙玩具 / 看一集动画" style="margin-bottom:6px">
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="subtle">需要攒够</span>
+      <input class="in" id="pRewardTarget" inputmode="numeric" placeholder="20" style="width:90px;text-align:center">
+      <span class="subtle">颗⭐</span>
+    </div>
+    <div class="subtle" id="rewardHint" style="margin-top:6px"></div>
 
     <label class="fld">📡 家庭消息（跨设备 · 你和孩子隔空发语音/视频）</label>
     <div id="famStatus" class="subtle" style="margin-bottom:8px"></div>
@@ -603,6 +678,42 @@ const PHONICS = [
   {ch:'T t', ipa:'/t/', word:'ten', em:'🔟', cn:'舌尖轻弹，“特”'},
 ];
 
+// STORIES — short, simple, everyday-life stories (Peppa-style short sentences).
+// Graded easy -> hard. Each line: emoji scene + English + Chinese. quiz = listen & pick.
+const STORIES = [
+  { id:'mud', title:'小猪跳泥坑', char:'🐷', color:'linear-gradient(145deg,#ffd1e8,#ff9ec7)',
+    lines:[
+      {em:'🌧️', en:'It is raining.', cn:'下雨啦。'},
+      {em:'🐷', en:'I love the rain!', cn:'我喜欢下雨！'},
+      {em:'🥾', en:'Put on your boots.', cn:'穿上小雨靴。'},
+      {em:'💦', en:'Jump in the puddle!', cn:'跳进泥坑里！'},
+      {em:'😄', en:'Splash! So much fun!', cn:'噗通！太好玩啦！'},
+    ],
+    quiz:[ {ask:'听一听，点出对的图', say:'boots', answer:'🥾', options:['🥾','🌧️','🐷','💦']} ] },
+
+  { id:'dino', title:'小恐龙饿了', char:'🦖', color:'linear-gradient(145deg,#c8f7c5,#7be495)',
+    lines:[
+      {em:'🦖', en:'I am a little dinosaur.', cn:'我是一只小恐龙。'},
+      {em:'😋', en:'I am so hungry.', cn:'我好饿呀。'},
+      {em:'🍎', en:'I want an apple.', cn:'我想要一个苹果。'},
+      {em:'😃', en:'Yummy, yummy!', cn:'真好吃，真好吃！'},
+      {em:'🦕', en:'Thank you, mom!', cn:'谢谢你，妈妈！'},
+      {em:'😴', en:'Now I am sleepy.', cn:'现在我困了。'},
+    ],
+    quiz:[ {ask:'小恐龙想吃什么？', say:'apple', answer:'🍎', options:['🍎','🦖','😴','😋']} ] },
+
+  { id:'car', title:'红色小汽车', char:'🚗', color:'linear-gradient(145deg,#ffe0b3,#ff9f5a)',
+    lines:[
+      {em:'🚗', en:'This is my red car.', cn:'这是我的红色小汽车。'},
+      {em:'🔑', en:'Let us go!', cn:'我们出发吧！'},
+      {em:'💨', en:'It is very fast!', cn:'它开得好快！'},
+      {em:'📣', en:'Beep, beep!', cn:'嘀，嘀！'},
+      {em:'🛑', en:'Red light. Stop!', cn:'红灯了，停！'},
+      {em:'🟢', en:'Green light. Go, go, go!', cn:'绿灯了，走走走！'},
+    ],
+    quiz:[ {ask:'红灯的时候要怎样？', say:'stop', answer:'🛑', options:['🛑','🟢','🚗','💨']} ] },
+];
+
 // Badges awarded by conditions.
 const BADGES = [
   {id:'first',  em:'🌟', name:'第一次开口'},
@@ -617,6 +728,9 @@ const BADGES = [
 const DEFAULT = {
   name:'小朋友', avatar:'🦁', pin:'1234',
   stars:0, wordsLearned:[], talkDone:[], levelsDone:[], badges:[],
+  storiesDone:[],                      // ids of finished stories
+  reward:{ text:'', target:0 },        // parent-set real-world reward
+  rewardReached:false,                 // celebrated for the current reward?
   days:[], // list of yyyy-mm-dd strings
   task:'', secret:'', voice:'' // voice = base64 data url
 };
@@ -715,6 +829,8 @@ function addStars(n){
   S.stars += n; save();
   document.getElementById('starCount').textContent = S.stars;
   checkBadges();
+  checkReward();
+  renderRewardBanner();
 }
 function grantBadge(id){
   if(!S.badges.includes(id)){ S.badges.push(id); save(); const b=BADGES.find(x=>x.id===id); if(b) toast('🏅 获得徽章：'+b.name); }
@@ -741,11 +857,13 @@ function toast(msg){
 
 /* ---------------- Navigation ---------------- */
 function go(id){
+  if(id!=='storyPlay' && typeof stopStoryAuto==='function') stopStoryAuto();
   document.querySelectorAll('.screen').forEach(s=> s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   window.scrollTo(0,0);
   if(id==='home') renderHome();
   if(id==='talkList') renderTalkList();
+  if(id==='storyList') renderStoryList();
   if(id==='mapWorlds') renderWorlds();
   if(id==='phonics') renderPhonics();
   if(id==='badges') renderBadges();
@@ -756,6 +874,7 @@ function renderHome(){
   document.getElementById('kidName').textContent = S.name;
   document.getElementById('avatar').textContent = S.avatar;
   document.getElementById('starCount').textContent = S.stars;
+  renderRewardBanner();
 
   const taskNote = document.getElementById('taskNote');
   if(S.task && S.task.trim()){ taskNote.style.display='block'; document.getElementById('taskText').textContent = S.task; }
@@ -1096,6 +1215,9 @@ function openParent(){
   document.getElementById('pTask').value=S.task||'';
   document.getElementById('pSecret').value=S.secret||'';
   document.getElementById('pPin').value='';
+  document.getElementById('pRewardText').value = (S.reward&&S.reward.text)||'';
+  document.getElementById('pRewardTarget').value = (S.reward&&S.reward.target)||'';
+  document.getElementById('rewardHint').textContent = (S.reward&&S.reward.target>0) ? ('孩子现在有 '+S.stars+' 颗星，目标 '+S.reward.target+' 颗') : '';
   document.getElementById('recStatus').textContent = S.voice ? '✅ 已有一段录音' : '还没有录音';
   const pick=document.getElementById('avatarPick'); pick.innerHTML='';
   AVATARS.forEach(a=>{
@@ -1114,6 +1236,11 @@ document.getElementById('parentSave').onclick=()=>{
   S.secret = document.getElementById('pSecret').value.trim();
   const np=document.getElementById('pPin').value.trim();
   if(np){ if(/^\d{4}$/.test(np)){ S.pin=np; } else { toast('密码要 4 位数字'); return; } }
+  const rtext=document.getElementById('pRewardText').value.trim();
+  const rtarget=parseInt(document.getElementById('pRewardTarget').value,10)||0;
+  const rewardChanged = !S.reward || S.reward.text!==rtext || S.reward.target!==rtarget;
+  S.reward={ text:rtext, target:rtarget };
+  if(rewardChanged) S.rewardReached=false;
   save(); closeMask('parentMask'); renderHome();
   toast('✅ 保存好啦！');
 };
@@ -1156,6 +1283,129 @@ document.getElementById('recBtn').onclick=async function(){
 };
 document.getElementById('recPlayBtn').onclick=()=>{ if(S.voice){ new Audio(S.voice).play(); } else toast('还没有录音'); };
 document.getElementById('recDelBtn').onclick=()=>{ S.voice=''; save(); document.getElementById('recStatus').textContent='已删除'; };
+
+/* ---------------- Story mode ---------------- */
+function storyUnlocked(i){ return i===0 || S.storiesDone.includes(STORIES[i-1].id); }
+function renderStoryList(){
+  const box=document.getElementById('storyListBody'); box.innerHTML='';
+  STORIES.forEach((st,i)=>{
+    const done=S.storiesDone.includes(st.id);
+    const un=storyUnlocked(i);
+    const b=document.createElement('button');
+    b.className='listrow'+(un?'':' locked');
+    b.innerHTML='<div class="lem">'+st.char+'</div>'+
+      '<div class="lt"><div class="a">'+(i+1)+'. '+st.title+'</div><div class="b">'+st.lines.length+' 句 · '+(done?'✅ 听过':'点开听故事')+'</div></div>'+
+      '<div class="lock">'+(un?'▶️':'🔒')+'</div>';
+    if(un) b.onclick=()=> startStory(i);
+    box.appendChild(b);
+  });
+}
+let storyCtx=null;
+function startStory(i){
+  storyCtx={ i, k:0, auto:false, st:STORIES[i], _t:null, qi:0 };
+  document.getElementById('storyPlayTitle').textContent=STORIES[i].char+' '+STORIES[i].title;
+  go('storyPlay'); renderStoryLine(); markToday();
+}
+function renderStoryLine(){
+  const {st,k}=storyCtx;
+  const ln=st.lines[k];
+  document.getElementById('storyScene').textContent=ln.em;
+  document.getElementById('storyEn').textContent=ln.en;
+  document.getElementById('storyCn').textContent=ln.cn;
+  document.getElementById('storyFeedback').textContent='';
+  document.getElementById('storyTip').textContent='';
+  const dots=document.getElementById('storyDots'); dots.innerHTML='';
+  st.lines.forEach((_,j)=>{ const d=document.createElement('div'); d.className='dot'+(j<k?' on':'')+(j===k?' cur':''); dots.appendChild(d); });
+  document.getElementById('storyNext').textContent=(k===st.lines.length-1)?'听懂啦 👂':'下一句 ➡️';
+  document.getElementById('storyPrev').style.visibility=k===0?'hidden':'visible';
+  speak(ln.en);
+}
+document.getElementById('storyReplay').onclick=()=> speak(storyCtx.st.lines[storyCtx.k].en);
+document.getElementById('storySpeak').onclick=function(){
+  stopStoryAuto();
+  const el=this; el.classList.add('mic-anim');
+  listenAndCheck(storyCtx.st.lines[storyCtx.k].en, document.getElementById('storyFeedback'), document.getElementById('storyTip'),
+    (stx)=>{ el.classList.remove('mic-anim'); addStars(stx); popStars(stx); });
+};
+document.getElementById('storyPrev').onclick=()=>{ stopStoryAuto(); if(storyCtx.k>0){ storyCtx.k--; renderStoryLine(); } };
+document.getElementById('storyNext').onclick=()=>{
+  stopStoryAuto();
+  if(storyCtx.k < storyCtx.st.lines.length-1){ storyCtx.k++; renderStoryLine(); }
+  else startStoryQuiz();
+};
+document.getElementById('storyAuto').onclick=function(){
+  if(storyCtx.auto){ stopStoryAuto(); return; }
+  storyCtx.auto=true; this.textContent='⏸️ 暂停'; autoStep();
+};
+function stopStoryAuto(){
+  if(!storyCtx) return;
+  storyCtx.auto=false;
+  const b=document.getElementById('storyAuto'); if(b) b.textContent='▶️ 自动播放';
+  if('speechSynthesis' in window) speechSynthesis.cancel();
+  if(storyCtx._t){ clearTimeout(storyCtx._t); storyCtx._t=null; }
+}
+function autoStep(){
+  if(!storyCtx || !storyCtx.auto) return;
+  renderStoryLine();
+  const ln=storyCtx.st.lines[storyCtx.k];
+  const delay = 1700 + ln.en.split(/\s+/).length*520;
+  storyCtx._t=setTimeout(()=>{
+    if(!storyCtx.auto) return;
+    if(storyCtx.k < storyCtx.st.lines.length-1){ storyCtx.k++; autoStep(); }
+    else { stopStoryAuto(); startStoryQuiz(); }
+  }, delay);
+}
+function startStoryQuiz(){ storyCtx.qi=0; go('storyQuiz'); renderStoryQuiz(); }
+function renderStoryQuiz(){
+  const q=storyCtx.st.quiz[storyCtx.qi];
+  document.getElementById('storyQuizAsk').textContent=q.ask;
+  document.getElementById('storyQuizFeedback').textContent='';
+  const box=document.getElementById('storyQuizOptions'); box.innerHTML='';
+  shuffle(q.options.slice()).forEach(o=>{
+    const b=document.createElement('button'); b.className='opt'; b.style.fontSize='44px'; b.textContent=o;
+    b.onclick=()=> answerStoryQuiz(b, o===q.answer, q);
+    box.appendChild(b);
+  });
+  setTimeout(()=> speak(q.say), 400);
+}
+document.getElementById('storyQuizPlay').onclick=()=> speak(storyCtx.st.quiz[storyCtx.qi].say);
+function answerStoryQuiz(btn, right, q){
+  document.querySelectorAll('#storyQuizOptions .opt').forEach(b=> b.disabled=true);
+  if(right){ btn.classList.add('right'); document.getElementById('storyQuizFeedback').textContent='✅ 答对啦！'; addStars(2); popStars(2); }
+  else{ btn.classList.add('wrong'); document.querySelectorAll('#storyQuizOptions .opt').forEach(b=>{ if(b.textContent===q.answer) b.classList.add('right'); });
+        document.getElementById('storyQuizFeedback').textContent='💛 没关系，正确的亮起来啦！'; addStars(1); }
+  const st=storyCtx.st;
+  if(!S.storiesDone.includes(st.id)){ S.storiesDone.push(st.id); save(); }
+  addStars(2); confettiBurst();
+  setTimeout(()=>{ toast('🎉 故事听完啦！'); go('storyList'); }, 1500);
+}
+
+/* ---------------- Reward (parent-set, real-world) ---------------- */
+function renderRewardBanner(){
+  const b=document.getElementById('rewardBanner');
+  const r=S.reward||{text:'',target:0};
+  if(!r.text || !r.target || r.target<=0){ b.style.display='none'; return; }
+  b.style.display='block';
+  const reached=S.stars>=r.target;
+  b.classList.toggle('done', reached);
+  document.getElementById('rewardBar').style.width=Math.min(100,Math.round(S.stars/r.target*100))+'%';
+  if(reached){
+    document.getElementById('rewardTitle').textContent='🎉 达成啦！快找爸爸妈妈领：'+r.text;
+    document.getElementById('rewardSub').textContent='你集齐了 '+r.target+' 颗星，太棒啦！';
+  }else{
+    document.getElementById('rewardTitle').textContent='🏆 奖励目标：'+r.text;
+    document.getElementById('rewardSub').textContent='已有 '+S.stars+' / '+r.target+' 颗⭐，再得 '+(r.target-S.stars)+' 颗就能领奖励！';
+  }
+}
+function checkReward(){
+  const r=S.reward||{};
+  if(r.text && r.target>0 && S.stars>=r.target && !S.rewardReached){
+    S.rewardReached=true; save();
+    confettiBurst();
+    setTimeout(()=> alert('🎉 恭喜你集齐了 '+r.target+' 颗星！\n快去找爸爸妈妈领奖励：'+r.text), 350);
+    if(famConfigured()){ try{ famSend('text','🎉 '+(S.name||'孩子')+' 完成了奖励目标「'+r.text+'」，快夸夸他！'); }catch(e){} }
+  }
+}
 
 /* ============================================================
    Phase 2: Family messaging (cross-device) via Supabase.
@@ -1224,8 +1474,8 @@ async function famUpload(blob, ext){
 
 /* ---------- Record voice/video, then upload + send ---------- */
 async function recordAndSend(kind){
-  if(!famConfigured()){ toast('还没连接家庭消息（家长后台里设置）'); return; }
-  if(!navigator.mediaDevices || !window.MediaRecorder){ toast('这个浏览器不支持录制'); return; }
+  if(!famConfigured()){ alert('这台设备还没连接「家庭消息」。\n请点右上角 ⚙️（密码 1234）→ 找到 📡家庭消息 → 连接后，再来录音。'); return; }
+  if(!navigator.mediaDevices || !window.MediaRecorder){ alert('这个浏览器不支持录音/录像，建议用 Chrome。'); return; }
   const wantVideo = kind==='video';
   let stream;
   try{ stream = await navigator.mediaDevices.getUserMedia(wantVideo ? {video:{facingMode:'user'},audio:true} : {audio:true}); }
