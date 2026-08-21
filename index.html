@@ -173,7 +173,9 @@
   .mailbox .mbhead{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
   .mailbox .mbtitle{ font-size:18px; font-weight:900; color:#a3235a; }
   .mailbox .mbbadge{ font-size:13px; font-weight:900; color:#d6336c; }
+  #mailboxList{ max-height:42vh; overflow-y:auto; }
   .msgrow{ display:flex; align-items:center; gap:10px; background:#fff; border-radius:16px; padding:10px 12px; margin-bottom:8px; }
+  .msgrow.mine{ background:#e7f9d8; }
   .msgrow.unseen{ box-shadow:0 0 0 3px var(--yellow); }
   .msgrow .mk{ font-size:24px; }
   .msgrow .mt{ flex:1; font-size:16px; font-weight:700; color:var(--ink); word-break:break-word; }
@@ -409,24 +411,29 @@
     <div id="famStatus" class="subtle" style="margin-bottom:8px"></div>
     <div id="famSetup">
       <div style="background:#f4f8ff;border-radius:14px;padding:10px;margin-bottom:8px">
-        <div style="font-weight:900;font-size:14px;margin-bottom:6px">① 这是家长的手机</div>
+        <div style="font-weight:900;font-size:14px;margin-bottom:6px">第一台设备（先在一台填一次，生成连接码）</div>
         <input class="in" id="famUrl" placeholder="Supabase Project URL（https://xxx.supabase.co）" style="margin-bottom:6px">
-        <input class="in" id="famKey" placeholder="Supabase anon public key（那串很长的密钥）" style="margin-bottom:6px">
-        <button class="btn btn-green" style="width:100%" id="famMakeBtn">生成配对码</button>
+        <input class="in" id="famKey" placeholder="Supabase anon public key（很长一串）" style="margin-bottom:6px">
+        <button class="btn btn-green" style="width:100%" id="famMakeBtn">生成连接码</button>
       </div>
       <div style="background:#f4fff6;border-radius:14px;padding:10px">
-        <div style="font-weight:900;font-size:14px;margin-bottom:6px">② 这是孩子的平板</div>
-        <textarea class="in" id="famPaste" placeholder="把家长手机生成的配对码粘贴到这里" style="margin-bottom:6px;min-height:60px"></textarea>
-        <button class="btn btn-blue" style="width:100%" id="famJoinBtn">连接</button>
+        <div style="font-weight:900;font-size:14px;margin-bottom:6px">其它设备（把连接码粘进来加入）</div>
+        <textarea class="in" id="famPaste" placeholder="把第一台生成的连接码粘到这里" style="margin-bottom:6px;min-height:60px"></textarea>
+        <button class="btn btn-blue" style="width:100%" id="famJoinBtn">加入</button>
       </div>
     </div>
     <div id="famPaired" style="display:none">
       <div style="background:#eefbf0;border-radius:14px;padding:10px">
-        <div id="famPairInfo" style="font-weight:900;margin-bottom:8px"></div>
-        <label class="fld" style="margin-top:0">配对码（在孩子平板上粘贴这个）</label>
+        <div style="font-weight:900;margin-bottom:8px">✅ 已连接</div>
+        <label class="fld" style="margin-top:0">这台设备是谁在用？（发消息时显示的名字）</label>
+        <div style="display:flex;gap:8px">
+          <input class="in" id="famName" placeholder="比如：妈妈 / 外甥 / 爸爸" style="flex:1">
+          <button class="btn btn-green" id="famNameSave">保存</button>
+        </div>
+        <label class="fld">连接码（其它设备粘这个就能加入）</label>
         <textarea class="in" id="famCodeOut" readonly style="font-size:12px;min-height:60px"></textarea>
         <div class="rowbtns" style="margin-top:8px">
-          <button class="btn btn-ghost" id="famCopyBtn">📋 复制配对码</button>
+          <button class="btn btn-ghost" id="famCopyBtn">📋 复制连接码</button>
           <button class="btn btn-ghost" id="famUnpairBtn" style="color:#c0392b">断开</button>
         </div>
       </div>
@@ -1170,19 +1177,19 @@ let famMsgs = [];        // cached messages
 let famSendFlag = true;  // send vs cancel for the record overlay
 let famRec=null, famRecChunks=[], famRecTimer=null;
 
-function loadFam(){ try{ const r=localStorage.getItem(FAM_KEY); return r?JSON.parse(r):null; }catch(e){ return null; } }
+function loadFam(){ try{ const r=localStorage.getItem(FAM_KEY); if(!r) return null; const o=JSON.parse(r); if(o && o.role && !o.name){ o.name=(o.role==='parent'?'家长':'孩子'); } return o; }catch(e){ return null; } }
 function saveFam(){ localStorage.setItem(FAM_KEY, JSON.stringify(fam)); }
-function famConfigured(){ return !!(fam && fam.url && fam.key && fam.room && fam.role); }
-function otherSender(){ return fam && fam.role==='parent' ? 'child' : 'parent'; }
+function famConfigured(){ return !!(fam && fam.url && fam.key && fam.room); }
+function myName(){ return (fam && fam.name) ? fam.name : '家人'; }
 function randRoom(){ return 'fam-'+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2)+Date.now().toString(36); }
 function escapeHtml(s){ return (s||'').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
 // Pairing code carries the whole config as base64 (unicode-safe).
 function makePairCode(){ return btoa(unescape(encodeURIComponent(JSON.stringify({u:fam.url,k:fam.key,r:fam.room})))); }
-function applyPairCode(code, role){
+function applyPairCode(code){
   const o = JSON.parse(decodeURIComponent(escape(atob(code.trim()))));
   if(!o.u || !o.k || !o.r) throw new Error('bad code');
-  fam = { url:o.u, key:o.k, room:o.r, role:role }; saveFam();
+  fam = { url:o.u, key:o.k, room:o.r, name:(fam&&fam.name)||'' }; saveFam();
 }
 
 // Talk to Supabase with plain fetch() — no external library / CDN, so it works
@@ -1201,7 +1208,7 @@ async function famFetch(){
 async function famSend(kind, content){
   await famApi('/rest/v1/messages', { method:'POST',
     headers: famHeaders({ 'Content-Type':'application/json', 'Prefer':'return=minimal' }),
-    body: JSON.stringify({ room:fam.room, sender:fam.role, kind:kind, content:content, seen:false }) });
+    body: JSON.stringify({ room:fam.room, sender:myName(), kind:kind, content:content, seen:false }) });
 }
 async function famMarkSeen(id){
   try{ await famApi('/rest/v1/messages?id=eq.'+encodeURIComponent(id), { method:'PATCH',
@@ -1230,7 +1237,9 @@ async function recordAndSend(kind){
   if(wantVideo){ prev.style.display='block'; prev.srcObject=stream; prev.play().catch(()=>{}); }
   else { prev.style.display='none'; prev.srcObject=null; }
 
-  famRec = new MediaRecorder(stream);
+  const mime = pickRecMime(wantVideo);
+  try{ famRec = mime ? new MediaRecorder(stream,{mimeType:mime}) : new MediaRecorder(stream); }
+  catch(err){ famRec = new MediaRecorder(stream); }
   famRec.ondataavailable = e=>{ if(e.data.size>0) famRecChunks.push(e.data); };
   let t=0; document.getElementById('recTimer').textContent='0s';
   famRecTimer = setInterval(()=>{ t++; document.getElementById('recTimer').textContent=t+'s'; if(t>=15) stopRec(true); }, 1000);
@@ -1243,14 +1252,25 @@ async function recordAndSend(kind){
   closeMask('recMask');
   if(!famSendFlag) return;
 
-  const blob = new Blob(famRecChunks, { type: wantVideo?'video/webm':'audio/webm' });
+  if(!famRecChunks.length){ toast('没录到声音，再试一次～'); return; }
+  const type = famRec.mimeType || famRecChunks[0].type || (wantVideo?'video/webm':'audio/webm');
+  const blob = new Blob(famRecChunks, { type });
+  const ext = type.indexOf('mp4')>=0 ? 'mp4' : type.indexOf('webm')>=0 ? 'webm' : (wantVideo?'mp4':'m4a');
   toast('上传中…');
   try{
-    const url = await famUpload(blob, 'webm');
+    const url = await famUpload(blob, ext);
     await famSend(kind, url);
-    toast('✅ 已发送给'+(otherSender()==='child'?'孩子':'爸爸妈妈')+'！');
+    toast('✅ 已发送！');
     renderMailbox();
   }catch(e){ toast('发送失败：'+((e&&e.message)||e)); }
+}
+function pickRecMime(video){
+  const list = video ? ['video/webm;codecs=vp8,opus','video/webm','video/mp4']
+                     : ['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/aac'];
+  if(window.MediaRecorder && MediaRecorder.isTypeSupported){
+    for(let i=0;i<list.length;i++){ if(MediaRecorder.isTypeSupported(list[i])) return list[i]; }
+  }
+  return '';
 }
 function stopRec(send){ famSendFlag = send!==false; if(famRec && famRec.state!=='inactive') famRec.stop(); }
 document.getElementById('recStopSend').onclick=()=> stopRec(true);
@@ -1275,24 +1295,26 @@ async function renderMailbox(){
   let msgs;
   try{ msgs = await famFetch(); }
   catch(e){ badge.textContent=''; list.innerHTML='<div class="subtle">暂时连不上，检查网络或重新连接～</div>'; return; }
-  const from=otherSender();
-  const inbox = msgs.filter(m=>m.sender===from).slice().reverse();
-  const unseen = inbox.filter(m=>!m.seen).length;
-  badge.textContent = unseen>0 ? ('📬 '+unseen+' 条新消息') : '📭 暂无新消息';
-  if(inbox.length===0){ list.innerHTML='<div class="subtle">还没有消息，等一等哦～</div>'; return; }
+  const others = msgs.filter(m=> m.sender!==myName());
+  const unseen = others.filter(m=> !m.seen).length;
+  badge.textContent = unseen>0 ? ('📬 '+unseen+' 条新消息') : '💬 家庭聊天';
+  if(msgs.length===0){ list.innerHTML='<div class="subtle">还没有消息，发一条打个招呼吧～</div>'; return; }
   list.innerHTML='';
-  inbox.slice(0,20).forEach(m=>{
-    const row=document.createElement('div'); row.className='msgrow'+(m.seen?'':' unseen');
+  msgs.slice(-30).forEach(m=>{
+    const mine = m.sender===myName();
+    const row=document.createElement('div'); row.className='msgrow'+(mine?' mine':'')+((!mine && !m.seen)?' unseen':'');
     const d=new Date(m.created_at); const hm=d.getHours()+':'+('0'+d.getMinutes()).slice(-2);
+    const who = mine ? '我' : escapeHtml(m.sender||'家人');
     if(m.kind==='text'){
-      row.innerHTML='<span class="mk">💬</span><div class="mt">'+escapeHtml(m.content)+'</div><span class="mtime">'+hm+'</span>';
-      if(!m.seen) famMarkSeen(m.id);
+      row.innerHTML='<div class="mt"><b>'+who+'：</b>'+escapeHtml(m.content)+'</div><span class="mtime">'+hm+'</span>';
+      if(!mine && !m.seen) famMarkSeen(m.id);
     }else{
-      row.innerHTML='<span class="mk">'+kindIcon(m.kind)+'</span><div class="mt">'+(m.kind==='video'?'一段视频':'一条语音')+'</div><button class="btn btn-blue msplay">▶️ 播放</button><span class="mtime">'+hm+'</span>';
+      row.innerHTML='<div class="mt"><b>'+who+'</b> '+(m.kind==='video'?'📹 视频':'🎧 语音')+'</div><button class="btn btn-blue msplay">▶️ 播放</button><span class="mtime">'+hm+'</span>';
       row.querySelector('.msplay').onclick=()=> playMedia(m);
     }
     list.appendChild(row);
   });
+  list.scrollTop = list.scrollHeight;
 }
 function playMedia(m){
   famMarkSeen(m.id);
@@ -1308,36 +1330,41 @@ function renderFamSection(){
   document.getElementById('famPaired').style.display = configured?'block':'none';
   const st=document.getElementById('famStatus');
   if(configured){
-    st.textContent='✅ 已连接。本机身份：'+(fam.role==='parent'?'家长':'孩子');
-    document.getElementById('famPairInfo').textContent='本机身份：'+(fam.role==='parent'?'👨‍👩‍👧 家长手机':'🧒 孩子平板');
+    st.textContent='✅ 已连接。给这台起个名字，就能开始收发消息了。';
+    document.getElementById('famName').value = (fam.name && fam.name!=='家人') ? fam.name : '';
     document.getElementById('famCodeOut').value = makePairCode();
   }else{
-    st.textContent='还没连接。家长先在自己手机上填 ①、生成配对码，再到孩子平板用 ② 粘贴连接。';
+    st.textContent='还没连接。找一台先填后台信息生成连接码，其它设备粘连接码加入即可。';
   }
 }
 document.getElementById('famMakeBtn').onclick=()=>{
   const url=document.getElementById('famUrl').value.trim();
   const key=document.getElementById('famKey').value.trim();
   if(!/^https:\/\/.+\.supabase\.co\/?$/.test(url)){ toast('URL 不对，应该像 https://xxxx.supabase.co'); return; }
-  if(key.length<20){ toast('anon key 看起来不对（应该很长一串）'); return; }
-  fam={ url:url.replace(/\/$/,''), key:key, room:randRoom(), role:'parent' }; sb=null; famChannel=null; saveFam();
+  if(key.length<20){ toast('key 看起来不对（应该很长一串）'); return; }
+  fam={ url:url.replace(/\/$/,''), key:key, room:randRoom(), name:(fam&&fam.name)||'' }; saveFam();
   renderFamSection(); renderHome(); initFamily();
-  toast('✅ 生成好啦，复制配对码到孩子平板');
+  toast('✅ 连接码已生成，记得给这台起个名字');
 };
 document.getElementById('famJoinBtn').onclick=()=>{
-  try{ applyPairCode(document.getElementById('famPaste').value,'child'); sb=null; famChannel=null;
-    renderFamSection(); renderHome(); initFamily(); toast('✅ 连接成功！'); }
-  catch(e){ toast('配对码无效，请重新复制'); }
+  try{ applyPairCode(document.getElementById('famPaste').value);
+    renderFamSection(); renderHome(); initFamily(); toast('✅ 加入成功！给这台起个名字吧'); }
+  catch(e){ toast('连接码无效，请重新复制'); }
+};
+document.getElementById('famNameSave').onclick=()=>{
+  const n=document.getElementById('famName').value.trim();
+  if(!n){ toast('起个名字吧，比如“妈妈”'); return; }
+  fam.name=n; saveFam(); renderHome(); toast('✅ 已保存：'+n);
 };
 document.getElementById('famCopyBtn').onclick=()=>{
   const el=document.getElementById('famCodeOut'); el.select();
   try{ document.execCommand('copy'); }catch(e){}
   if(navigator.clipboard) navigator.clipboard.writeText(el.value).catch(()=>{});
-  toast('已复制配对码');
+  toast('已复制连接码');
 };
 document.getElementById('famUnpairBtn').onclick=()=>{
   if(confirm('断开家庭消息连接？（这台设备就收不到消息了）')){
-    fam=null; sb=null; famChannel=null; localStorage.removeItem(FAM_KEY);
+    fam=null; localStorage.removeItem(FAM_KEY);
     renderFamSection(); renderHome();
   }
 };
@@ -1354,7 +1381,7 @@ async function initFamily(){
     try{
       const msgs = await famFetch();
       let gotNew=false;
-      msgs.forEach(m=>{ if(!famSeenIds.has(m.id)){ famSeenIds.add(m.id); if(m.sender===otherSender()) gotNew=true; } });
+      msgs.forEach(m=>{ if(!famSeenIds.has(m.id)){ famSeenIds.add(m.id); if(m.sender!==myName()) gotNew=true; } });
       if(gotNew){ toast('📬 收到一条新消息！'); if(document.querySelector('.screen.active').id==='home') renderMailbox(); }
       else if(document.querySelector('.screen.active').id==='home'){ renderMailbox(); }
     }catch(e){}
