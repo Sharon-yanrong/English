@@ -302,7 +302,7 @@
   <!-- ===== STORY: list ===== -->
   <div id="storyList" class="screen">
     <div class="backrow"><button class="backbtn" onclick="go('home')">⬅️ 回家</button><h2 class="title" style="margin:0">📖 听故事</h2></div>
-    <p class="subtle" style="margin:0 4px 10px">先点「▶️ 自动播放」躺着听一遍，有空再自己跟着读。故事很短，听得懂就很棒！</p>
+    <p class="subtle" style="margin:0 4px 10px">🦖 小恐龙 <b>Rex</b> 一家的搞笑冒险，一集接一集！先点「▶️ 自动播放」躺着听，有空再自己跟着读～</p>
     <div id="storyListBody"></div>
   </div>
 
@@ -481,6 +481,11 @@
       <span class="subtle">颗⭐</span>
     </div>
     <div class="subtle" id="rewardHint" style="margin-top:6px"></div>
+
+    <label class="fld">🎯 发音评测（Azure · 让"我来读"给真分数，选填）</label>
+    <input class="in" id="pAzureKey" placeholder="Azure 语音 KEY（一长串）" style="margin-bottom:6px">
+    <input class="in" id="pAzureRegion" placeholder="区域，如 germanywestcentral">
+    <div class="subtle" id="azureHint" style="margin-top:6px">填了之后，跟读会用微软发音评测给真实分数；不填就用普通鼓励模式。</div>
 
     <label class="fld">📡 家庭消息（跨设备 · 你和孩子隔空发语音/视频）</label>
     <div id="famStatus" class="subtle" style="margin-bottom:8px"></div>
@@ -680,79 +685,87 @@ const PHONICS = [
 
 // STORIES — short, simple, everyday-life stories (Peppa-style short sentences).
 // Graded easy -> hard. Each line: emoji scene + English + Chinese. quiz = listen & pick.
-// A continuous series: "Dino 一家" — a little dinosaur family's everyday adventures.
-// Recurring cast (Dino, Baby, Mummy, Daddy), simple dialogue, gentle humor, one arc per episode.
+// "小恐龙雷克斯 Rex" — an original funny family series. Recurring cast with personality
+// (Rex the eager hero, Pip who copies everyone, show-off Daddy who face-plants, warm Mummy),
+// running gags, a little laugh + problem each episode, and a hook to the next one.
 const STORIES = [
-  { id:'rain', title:'第1集 · 下雨天', char:'🦖', color:'linear-gradient(145deg,#a5c8ff,#6b9bff)',
+  { id:'mud', title:'第1集 · 泥坑大冒险', char:'🦖', color:'linear-gradient(145deg,#a5c8ff,#6b9bff)',
     lines:[
-      {em:'🌧️', en:'It is a rainy day.', cn:'下雨天啦。'},
-      {em:'🦖', en:'Dino looks out the window.', cn:'小恐龙看向窗外。'},
-      {em:'😃', en:'"I want to play!" says Dino.', cn:'小恐龙说：“我要出去玩！”'},
-      {em:'🥾', en:'"Put on your boots," says Mummy.', cn:'妈妈说：“穿上雨靴。”'},
-      {em:'💦', en:'Dino jumps in the puddle.', cn:'小恐龙跳进水坑。'},
-      {em:'😆', en:'Splash! Splash! Splash!', cn:'噗通！噗通！噗通！'},
-      {em:'🦕', en:'Baby jumps in too.', cn:'小宝也跳进来。'},
-      {em:'🌈', en:'The rain stops. Look, a rainbow!', cn:'雨停了，看，彩虹！'},
-      {em:'❤️', en:'"I love rainy days!" says Dino.', cn:'小恐龙：“我爱下雨天！”'},
+      {em:'🌧️', en:'It is raining! Rex is so happy.', cn:'下雨啦！雷克斯好开心。'},
+      {em:'🦖', en:'"I LOVE muddy puddles!" says Rex.', cn:'雷克斯：“我最爱泥坑啦！”'},
+      {em:'💦', en:'Rex jumps in. Splash!', cn:'雷克斯跳进去。噗通！'},
+      {em:'🦕', en:'"Me too! Me too!" says baby Pip.', cn:'小皮皮：“我也要！我也要！”'},
+      {em:'😎', en:'"Watch this! I am the best jumper!" says Daddy.', cn:'爸爸：“看我的！我跳得最棒！”'},
+      {em:'💥', en:'Daddy jumps... SPLOOSH!', cn:'爸爸一跳……哗啦！'},
+      {em:'🟤', en:'Mud goes everywhere! Everyone is brown!', cn:'泥巴溅得到处都是！大家都变棕色啦！'},
+      {em:'🤣', en:'"Oops!" says Daddy. Everyone laughs.', cn:'爸爸：“哎呀！”大家哈哈大笑。'},
+      {em:'🛁', en:'Time for a big bubbly bath!', cn:'该洗个泡泡大澡啦！'},
+      {em:'🎂', en:'"Guess what? Tomorrow is my birthday!" says Rex.', cn:'雷克斯：“你猜怎么着？明天是我生日！”'},
     ],
-    quiz:[ {ask:'下雨天要穿什么？', say:'boots', answer:'🥾', options:['🥾','🌈','🦖','💦']} ] },
+    quiz:[ {ask:'泥巴让大家变成了什么颜色？', say:'brown', answer:'🟤', options:['🟤','🌈','💦','🦖']} ] },
 
-  { id:'bday', title:'第2集 · Dino 的生日', char:'🎂', color:'linear-gradient(145deg,#ffd1e8,#ff9ec7)',
+  { id:'bday', title:'第2集 · Rex 的生日', char:'🎂', color:'linear-gradient(145deg,#ffd1e8,#ff9ec7)',
     lines:[
-      {em:'🎂', en:'Today is Dino’s birthday.', cn:'今天是小恐龙的生日。'},
-      {em:'🎈', en:'There are balloons everywhere.', cn:'到处都是气球。'},
-      {em:'🐰', en:'His friends come to play.', cn:'朋友们来一起玩。'},
-      {em:'🎁', en:'"Here is a present for you!"', cn:'朋友：“这个礼物送给你！”'},
-      {em:'😲', en:'Dino opens the box.', cn:'小恐龙打开盒子。'},
-      {em:'🚗', en:'Wow, a little red car!', cn:'哇，一辆红色小汽车！'},
-      {em:'🕯️', en:'Now it is time for the cake.', cn:'该吃蛋糕啦。'},
-      {em:'🎶', en:'"Happy birthday to you!"', cn:'大家唱：“祝你生日快乐！”'},
-      {em:'😋', en:'The cake is so yummy.', cn:'蛋糕真好吃。'},
-      {em:'🥳', en:'"Best birthday ever!" says Dino.', cn:'小恐龙：“最棒的生日！”'},
+      {em:'🎂', en:'Today is Rex’s birthday!', cn:'今天是雷克斯的生日！'},
+      {em:'🎈', en:'Balloons everywhere. Rex is so excited.', cn:'到处都是气球，雷克斯超兴奋。'},
+      {em:'🧑‍🍳', en:'"I will make the cake!" says Daddy.', cn:'爸爸：“蛋糕我来做！”'},
+      {em:'🎂', en:'The cake is very, very tall.', cn:'蛋糕做得非常非常高。'},
+      {em:'😬', en:'It wobbles... wobble, wobble...', cn:'它开始摇……晃啊，晃啊……'},
+      {em:'💥', en:'SPLAT! The cake falls over!', cn:'啪！蛋糕倒啦！'},
+      {em:'😅', en:'"Don’t worry!" says Mummy. She fixes it fast.', cn:'妈妈：“别担心！”她很快修好了。'},
+      {em:'🎁', en:'Rex opens his present. A toy dinosaur!', cn:'雷克斯打开礼物，是一只玩具恐龙！'},
+      {em:'🦖', en:'"I will call him Buddy!" says Rex.', cn:'雷克斯：“我叫他巴迪！”'},
+      {em:'🥳', en:'"Best birthday ever! ROAR!"', cn:'雷克斯：“最棒的生日！吼——！”'},
+      {em:'🌳', en:'"Tomorrow, Buddy and I will explore the forest!"', cn:'雷克斯：“明天我要和巴迪去森林探险！”'},
     ],
-    quiz:[ {ask:'Dino 收到什么礼物？', say:'a little red car', answer:'🚗', options:['🚗','🎂','🎈','🎁']} ] },
+    quiz:[ {ask:'雷克斯的生日礼物是什么？', say:'a toy dinosaur', answer:'🦖', options:['🦖','🎂','🎈','🎁']} ] },
 
-  { id:'hide', title:'第3集 · 捉迷藏', char:'🙈', color:'linear-gradient(145deg,#c8f7c5,#7be495)',
+  { id:'forest', title:'第3集 · 森林里的怪声音', char:'🌳', color:'linear-gradient(145deg,#c8f7c5,#7be495)',
     lines:[
-      {em:'🦖', en:'Dino wants to play a game.', cn:'小恐龙想玩游戏。'},
-      {em:'🙈', en:'"Let’s play hide and seek!"', cn:'小恐龙：“我们玩捉迷藏！”'},
-      {em:'🔢', en:'Daddy counts: one, two, three...', cn:'爸爸数：一、二、三……'},
-      {em:'🌳', en:'Dino hides behind a tree.', cn:'小恐龙躲在树后面。'},
-      {em:'🛋️', en:'Baby hides behind the sofa.', cn:'小宝躲在沙发后面。'},
-      {em:'👀', en:'"Where are you?" says Daddy.', cn:'爸爸：“你们在哪儿呀？”'},
-      {em:'🤭', en:'Dino giggles quietly.', cn:'小恐龙偷偷地笑。'},
-      {em:'🎉', en:'"Found you!" says Daddy.', cn:'爸爸：“找到你啦！”'},
-      {em:'😄', en:'Everyone laughs together.', cn:'大家一起哈哈笑。'},
+      {em:'🌳', en:'Rex and Buddy go to the big forest.', cn:'雷克斯和巴迪去大森林。'},
+      {em:'🦕', en:'Baby Pip comes too. "Me too!"', cn:'小皮皮也跟来。“我也要！”'},
+      {em:'🔍', en:'"Let’s explore!" says Rex.', cn:'雷克斯：“我们去探险！”'},
+      {em:'👂', en:'Suddenly... they hear a big sound.', cn:'突然……他们听到一个大声音。'},
+      {em:'😱', en:'"GRRRR!" What is that?', cn:'“呼噜——！”那是什么？'},
+      {em:'🌿', en:'They look behind the bush.', cn:'他们往灌木后面看。'},
+      {em:'😴', en:'It is Pip, fast asleep and snoring!', cn:'是皮皮，睡着了在打呼噜！'},
+      {em:'🤣', en:'"Silly Pip!" Everyone laughs.', cn:'大家：“傻皮皮！”哈哈大笑。'},
+      {em:'🦋', en:'Then they find a beautiful butterfly.', cn:'然后他们发现一只漂亮的蝴蝶。'},
+      {em:'🌧️', en:'Uh oh... dark clouds. Is it going to rain?', cn:'糟糕……乌云来了，要下雨了吗？'},
     ],
-    quiz:[ {ask:'Dino 躲在哪里？', say:'behind a tree', answer:'🌳', options:['🌳','🛋️','🦖','👀']} ] },
+    quiz:[ {ask:'那个吓人的声音是谁发出的？', say:'Pip sleeping', answer:'😴', options:['😴','🦋','🌳','🦖']} ] },
 
-  { id:'park', title:'第4集 · 去公园', char:'🛝', color:'linear-gradient(145deg,#ffe0b3,#ff9f5a)',
+  { id:'storm', title:'第4集 · 暴风雨来啦', char:'⚡', color:'linear-gradient(145deg,#9fb4d8,#5a6f99)',
     lines:[
-      {em:'☀️', en:'It is a sunny day.', cn:'大晴天。'},
-      {em:'🦖', en:'Dino goes to the park.', cn:'小恐龙去公园。'},
-      {em:'🛝', en:'"I want to go on the slide!"', cn:'小恐龙：“我要玩滑梯！”'},
-      {em:'😆', en:'Wheee! So much fun!', cn:'哇！太好玩啦！'},
-      {em:'🎠', en:'Then they play on the swing.', cn:'然后他们玩秋千。'},
-      {em:'🦕', en:'Baby is a little scared.', cn:'小宝有点害怕。'},
-      {em:'🤗', en:'"Don’t worry, I am here."', cn:'小恐龙：“别怕，有我在。”'},
-      {em:'🍦', en:'Now it is time for ice cream!', cn:'该吃冰淇淋啦！'},
-      {em:'😋', en:'"Yummy! Thank you, Daddy!"', cn:'小恐龙：“真好吃，谢谢爸爸！”'},
+      {em:'🌧️', en:'The rain comes down fast!', cn:'雨一下子下大了！'},
+      {em:'🏃', en:'"Run home!" says Rex. Everyone runs.', cn:'雷克斯：“快跑回家！”大家跑起来。'},
+      {em:'😎', en:'"Watch this!" says Daddy. He forgets his umbrella.', cn:'爸爸：“看我的！”结果忘了带伞。'},
+      {em:'💧', en:'Daddy gets all wet! Drip, drip, drip.', cn:'爸爸全湿透啦！滴答，滴答。'},
+      {em:'🏠', en:'Finally, they are home and safe.', cn:'终于，他们到家了，安全啦。'},
+      {em:'☕', en:'Mummy makes warm cocoa for everyone.', cn:'妈妈给大家做了热可可。'},
+      {em:'⚡', en:'BOOM! Thunder! Little Pip is scared.', cn:'轰！打雷了！小皮皮好害怕。'},
+      {em:'🤗', en:'"Don’t be scared. I am here," says Rex.', cn:'雷克斯：“别怕，有我在。”'},
+      {em:'😊', en:'Pip feels better. He hugs Rex.', cn:'皮皮好多了，他抱住雷克斯。'},
+      {em:'🌟', en:'The storm is gone. The stars come out.', cn:'暴风雨过去了，星星出来了。'},
+      {em:'🏆', en:'"Tomorrow is the big jumping contest!" says Rex.', cn:'雷克斯：“明天是跳水坑大比赛！”'},
     ],
-    quiz:[ {ask:'公园里 Dino 先玩什么？', say:'the slide', answer:'🛝', options:['🛝','🍦','🎠','☀️']} ] },
+    quiz:[ {ask:'妈妈给大家做了什么暖暖的东西？', say:'warm cocoa', answer:'☕', options:['☕','🌧️','⚡','🏠']} ] },
 
-  { id:'night', title:'第5集 · 晚安 Dino', char:'🌙', color:'linear-gradient(145deg,#b3a5ff,#8b6bff)',
+  { id:'contest', title:'第5集 · 跳水坑大比赛', char:'🏆', color:'linear-gradient(145deg,#ffe0b3,#ff9f5a)',
     lines:[
-      {em:'🌙', en:'It is night time now.', cn:'到了晚上。'},
-      {em:'🦖', en:'Dino is very sleepy.', cn:'小恐龙很困了。'},
-      {em:'🪥', en:'First, brush your teeth.', cn:'先刷牙。'},
-      {em:'🛁', en:'Then, take a warm bath.', cn:'然后洗个热水澡。'},
-      {em:'📖', en:'Mummy reads a bedtime story.', cn:'妈妈讲睡前故事。'},
-      {em:'🦕', en:'Baby is already asleep.', cn:'小宝已经睡着了。'},
-      {em:'😴', en:'"Good night, Dino," says Mummy.', cn:'妈妈：“晚安，小恐龙。”'},
-      {em:'🥰', en:'"Good night, Mummy. I love you."', cn:'小恐龙：“晚安妈妈，我爱你。”'},
-      {em:'💤', en:'Zzz... Sweet dreams!', cn:'呼呼……做个好梦！'},
+      {em:'☀️', en:'It is contest day! The sun is out.', cn:'比赛日到啦！太阳出来了。'},
+      {em:'💦', en:'Who can make the biggest splash?', cn:'谁能溅起最大的水花？'},
+      {em:'🐰', en:'Coco the bunny jumps. Splash!', cn:'小兔可可跳，噗通！'},
+      {em:'🦖', en:'Rex jumps super high. SPLOOSH!', cn:'雷克斯跳得超高，哗啦！'},
+      {em:'😎', en:'"Watch this!" says Daddy again.', cn:'爸爸又说：“看我的！”'},
+      {em:'💥', en:'Daddy slips and lands on his bottom!', cn:'爸爸一滑，屁股坐地上啦！'},
+      {em:'🤣', en:'Everyone laughs so hard.', cn:'大家笑得好开心。'},
+      {em:'🏅', en:'Little Pip gets a "cutest jumper" medal.', cn:'小皮皮拿到“最可爱跳水员”奖牌。'},
+      {em:'🎉', en:'"The winner is... everyone!" says Mummy.', cn:'妈妈：“冠军是……大家！”'},
+      {em:'🥳', en:'"Best day ever! ROAR!" says Rex.', cn:'雷克斯：“最棒的一天！吼——！”'},
+      {em:'❓', en:'"What will we do tomorrow?"', cn:'雷克斯：“明天我们玩什么呢？”'},
     ],
-    quiz:[ {ask:'睡觉前先做什么？', say:'brush your teeth', answer:'🪥', options:['🪥','🛁','🌙','📖']} ] },
+    quiz:[ {ask:'小皮皮拿到了什么？', say:'a medal', answer:'🏅', options:['🏅','🐰','💦','😎']} ] },
 ];
 
 // Badges awarded by conditions.
@@ -772,6 +785,7 @@ const DEFAULT = {
   storiesDone:[],                      // ids of finished stories
   reward:{ text:'', target:0 },        // parent-set real-world reward
   rewardReached:false,                 // celebrated for the current reward?
+  azure:{ key:'', region:'' },         // Azure Speech pronunciation assessment
   days:[], // list of yyyy-mm-dd strings
   task:'', secret:'', voice:'' // voice = base64 data url
 };
@@ -814,7 +828,80 @@ function speak(text, opts={}){
 
 /* ---------------- Speech: recognition (我来读) ---------------- */
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+/* ---------- Azure pronunciation assessment (real scoring) ---------- */
+function azureOn(){ return !!(S.azure && S.azure.key && S.azure.region); }
+
+// Record mic to a 16 kHz mono 16-bit WAV (the format Azure wants).
+async function recordWav(maxSec){
+  const stream = await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:true,noiseSuppression:true}});
+  const AC = window.AudioContext || window.webkitAudioContext;
+  const ac = new AC();
+  if(ac.state==='suspended'){ try{ await ac.resume(); }catch(e){} }
+  const source = ac.createMediaStreamSource(stream);
+  const proc = ac.createScriptProcessor(4096,1,1);
+  const chunks=[]; let total=0;
+  proc.onaudioprocess = e=>{ const d=e.inputBuffer.getChannelData(0); chunks.push(new Float32Array(d)); total+=d.length; };
+  source.connect(proc); proc.connect(ac.destination);
+  await new Promise(r=> setTimeout(r, maxSec*1000));
+  proc.disconnect(); source.disconnect(); stream.getTracks().forEach(t=>t.stop());
+  const inRate = ac.sampleRate; try{ await ac.close(); }catch(e){}
+  const buf=new Float32Array(total); let o=0; chunks.forEach(c=>{ buf.set(c,o); o+=c.length; });
+  return encodeWav16k(buf, inRate);
+}
+function encodeWav16k(samples, inRate){
+  const outRate=16000, ratio=inRate/outRate;
+  const outLen=Math.max(1, Math.floor(samples.length/ratio));
+  const pcm=new Int16Array(outLen);
+  for(let i=0;i<outLen;i++){ let s=samples[Math.floor(i*ratio)]||0; s=Math.max(-1,Math.min(1,s)); pcm[i]= s<0 ? s*0x8000 : s*0x7FFF; }
+  const ab=new ArrayBuffer(44+pcm.length*2); const v=new DataView(ab);
+  const w=(off,str)=>{ for(let i=0;i<str.length;i++) v.setUint8(off+i,str.charCodeAt(i)); };
+  w(0,'RIFF'); v.setUint32(4,36+pcm.length*2,true); w(8,'WAVE'); w(12,'fmt ');
+  v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,1,true);
+  v.setUint32(24,outRate,true); v.setUint32(28,outRate*2,true); v.setUint16(32,2,true); v.setUint16(34,16,true);
+  w(36,'data'); v.setUint32(40,pcm.length*2,true);
+  let off=44; for(let i=0;i<pcm.length;i++,off+=2) v.setInt16(off,pcm[i],true);
+  return ab;
+}
+// Record + send to Azure. Returns {accuracy,pron,words} | null (nothing heard) | throws (error).
+async function assessPronunciation(refText, secs){
+  const wav = await recordWav(secs);
+  const cfg = { ReferenceText:refText, GradingSystem:'HundredMark', Granularity:'Word', Dimension:'Comprehensive', EnableMiscue:false };
+  const pa = btoa(unescape(encodeURIComponent(JSON.stringify(cfg))));
+  const url = 'https://'+S.azure.region+'.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1?language=en-US';
+  const r = await fetch(url, { method:'POST',
+    headers:{ 'Ocp-Apim-Subscription-Key':S.azure.key, 'Content-Type':'audio/wav; codecs=audio/pcm; samplerate=16000', 'Pronunciation-Assessment':pa, 'Accept':'application/json' },
+    body: wav });
+  const j = await r.json();
+  if(j.RecognitionStatus!=='Success' || !j.NBest || !j.NBest[0]) return null;
+  const nb=j.NBest[0];
+  const words=(nb.Words||[]).map(w=>({ word:w.Word, acc:w.AccuracyScore, err:w.ErrorType }));
+  return { accuracy: nb.AccuracyScore, pron: nb.PronScore, words };
+}
+async function azureAssess(target, feedbackEl, tipEl, onStars){
+  const words = target.replace(/[^a-zA-Z' ]/g,' ').trim().split(/\s+/).filter(Boolean);
+  const secs = Math.min(7, 2.6 + words.length*0.5);
+  tipEl.textContent = '🎤 该你读啦，看着句子，大声读出来！';
+  let n=Math.ceil(secs);
+  feedbackEl.textContent = '🎧 在听你读… '+n;
+  const iv=setInterval(()=>{ n--; feedbackEl.textContent='🎧 在听你读… '+Math.max(0,n); if(n<=0) clearInterval(iv); }, 1000);
+  let res;
+  try{ res = await assessPronunciation(target, secs); }
+  catch(e){ res = undefined; }
+  clearInterval(iv); tipEl.textContent='';
+  if(res===undefined){ feedbackEl.textContent='💛 很勇敢，再读一遍试试！'; onStars(1); return; }
+  if(res===null){ feedbackEl.textContent='💛 没太听清，凑近一点、大声点再读一遍～'; onStars(1); return; }
+  const a=Math.round(res.accuracy);
+  let weak=null; res.words.forEach(w=>{ if(w.err!=='None' || w.acc<70){ if(!weak || w.acc<weak.acc) weak=w; } });
+  let msg, stars;
+  if(a>=85){ msg='⭐ 发音很棒！'+a+' 分'; stars=3; }
+  else if(a>=70){ msg='👍 不错哦！'+a+' 分'+(weak?'，「'+weak.word+'」再清楚一点点':''); stars=2; }
+  else if(a>=55){ msg='🙂 加油！'+a+' 分'+(weak?'，我们再读读「'+weak.word+'」':''); stars=1; }
+  else { msg='💛 再读一遍就更好啦，你可以的！'; stars=1; }
+  feedbackEl.textContent=msg; onStars(stars);
+}
+
 function listenAndCheck(target, feedbackEl, tipEl, onStars){
+  if(azureOn()){ azureAssess(target, feedbackEl, tipEl, onStars); return; }
   // Encouraging feedback. Real scoring needs https/localhost; on file:// or when
   // recognition can't start, degrade to a TIMED read-along (give the child time to
   // actually read, THEN praise) — never fake-praise before they've spoken.
@@ -1259,6 +1346,8 @@ function openParent(){
   document.getElementById('pRewardText').value = (S.reward&&S.reward.text)||'';
   document.getElementById('pRewardTarget').value = (S.reward&&S.reward.target)||'';
   document.getElementById('rewardHint').textContent = (S.reward&&S.reward.target>0) ? ('孩子现在有 '+S.stars+' 颗星，目标 '+S.reward.target+' 颗') : '';
+  document.getElementById('pAzureKey').value = (S.azure&&S.azure.key)||'';
+  document.getElementById('pAzureRegion').value = (S.azure&&S.azure.region)||'';
   document.getElementById('recStatus').textContent = S.voice ? '✅ 已有一段录音' : '还没有录音';
   const pick=document.getElementById('avatarPick'); pick.innerHTML='';
   AVATARS.forEach(a=>{
@@ -1282,6 +1371,7 @@ document.getElementById('parentSave').onclick=()=>{
   const rewardChanged = !S.reward || S.reward.text!==rtext || S.reward.target!==rtarget;
   S.reward={ text:rtext, target:rtarget };
   if(rewardChanged) S.rewardReached=false;
+  S.azure={ key:document.getElementById('pAzureKey').value.trim(), region:document.getElementById('pAzureRegion').value.trim().toLowerCase() };
   save(); closeMask('parentMask'); renderHome();
   toast('✅ 保存好啦！');
 };
