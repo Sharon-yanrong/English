@@ -909,6 +909,8 @@ const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 function azureOn(){ return !!(S.azure && S.azure.key && S.azure.region); }
 let azureRecStop=false;
 function stopAzureRec(){ azureRecStop=true; }
+let lastRecBlob=null;   // the child's own last recording, for playback
+function playMyVoice(){ if(lastRecBlob){ const u=URL.createObjectURL(lastRecBlob); const a=new Audio(u); a.onended=()=>URL.revokeObjectURL(u); a.play().catch(()=>{}); } }
 
 // Record mic to a 16 kHz mono 16-bit WAV (the format Azure wants).
 async function recordWav(maxSec){
@@ -926,7 +928,9 @@ async function recordWav(maxSec){
   proc.disconnect(); source.disconnect(); stream.getTracks().forEach(t=>t.stop());
   const inRate = ac.sampleRate; try{ await ac.close(); }catch(e){}
   const buf=new Float32Array(total); let o=0; chunks.forEach(c=>{ buf.set(c,o); o+=c.length; });
-  return encodeWav16k(buf, inRate);
+  const ab = encodeWav16k(buf, inRate);
+  lastRecBlob = new Blob([ab], {type:'audio/wav'});   // keep for playback
+  return ab;
 }
 function encodeWav16k(samples, inRate){
   const outRate=16000, ratio=inRate/outRate;
@@ -960,25 +964,36 @@ async function assessPronunciation(refText, secs){
 async function azureAssess(target, feedbackEl, tipEl, onStars){
   const words = target.replace(/[^a-zA-Z' ]/g,' ').trim().split(/\s+/).filter(Boolean);
   const secs = Math.min(7, 2.6 + words.length*0.5);
-  tipEl.innerHTML = '🎤 大声读！读完就点 <button type="button" id="azStopBtn" class="btn btn-orange" style="padding:6px 14px;font-size:15px">⏹️ 读好了</button>';
-  const sb=document.getElementById('azStopBtn'); if(sb) sb.onclick=()=> stopAzureRec();
+  // Big, tap-friendly STOP button (bind click AND touchend so it works on phones)
+  feedbackEl.innerHTML = '<button type="button" id="azStopBtn" class="btn btn-orange" style="padding:12px 18px;font-size:18px;width:100%">⏹️ 我读好了</button>';
+  const sb=document.getElementById('azStopBtn');
+  const doStop=(e)=>{ if(e && e.cancelable) e.preventDefault(); if(sb){ sb.textContent='🎧 评分中…'; sb.disabled=true; } stopAzureRec(); };
+  if(sb){ sb.addEventListener('click', doStop); sb.addEventListener('touchend', doStop, {passive:false}); }
   let n=Math.ceil(secs);
-  feedbackEl.textContent = '🎧 在听你读… '+n;
-  const iv=setInterval(()=>{ n--; feedbackEl.textContent='🎧 在听你读… '+Math.max(0,n); if(n<=0) clearInterval(iv); }, 1000);
+  tipEl.textContent = '🎤 大声读出来！读完点上面的按钮（还有 '+n+' 秒）';
+  const iv=setInterval(()=>{ n--; tipEl.textContent='🎤 大声读出来！读完点上面的按钮（还有 '+Math.max(0,n)+' 秒）'; if(n<=0) clearInterval(iv); }, 1000);
   let res;
   try{ res = await assessPronunciation(target, secs); }
   catch(e){ res = undefined; }
   clearInterval(iv); tipEl.textContent='';
-  if(res===undefined){ feedbackEl.textContent='💛 很勇敢，再读一遍试试！'; onStars(1); return; }
-  if(res===null){ feedbackEl.textContent='💛 没太听清，凑近一点、大声点再读一遍～'; onStars(1); return; }
-  const a=Math.round(res.accuracy);
-  let weak=null; res.words.forEach(w=>{ if(w.err!=='None' || w.acc<70){ if(!weak || w.acc<weak.acc) weak=w; } });
   let msg, stars;
-  if(a>=85){ msg='⭐ 发音很棒！'+a+' 分'; stars=3; }
-  else if(a>=70){ msg='👍 不错哦！'+a+' 分'+(weak?'，「'+weak.word+'」再清楚一点点':''); stars=2; }
-  else if(a>=55){ msg='🙂 加油！'+a+' 分'+(weak?'，我们再读读「'+weak.word+'」':''); stars=1; }
-  else { msg='💛 再读一遍就更好啦，你可以的！'; stars=1; }
-  feedbackEl.textContent=msg; onStars(stars);
+  if(res===undefined){ msg='💛 很勇敢，再读一遍试试！'; stars=1; }
+  else if(res===null){ msg='💛 没太听清，凑近一点、大声点再读一遍～'; stars=1; }
+  else {
+    const a=Math.round(res.accuracy);
+    let weak=null; res.words.forEach(w=>{ if(w.err!=='None' || w.acc<70){ if(!weak || w.acc<weak.acc) weak=w; } });
+    if(a>=85){ msg='⭐ 发音很棒！'+a+' 分'; stars=3; }
+    else if(a>=70){ msg='👍 不错哦！'+a+' 分'+(weak?'，「'+weak.word+'」再清楚一点点':''); stars=2; }
+    else if(a>=55){ msg='🙂 加油！'+a+' 分'+(weak?'，我们再读读「'+weak.word+'」':''); stars=1; }
+    else { msg='💛 再读一遍就更好啦，你可以的！'; stars=1; }
+  }
+  feedbackEl.textContent=msg;
+  // "listen to my own voice" button
+  if(lastRecBlob){
+    tipEl.innerHTML='<button type="button" id="azPlayMine" class="btn btn-blue" style="padding:8px 16px;font-size:15px">🔁 听听我自己读的</button>';
+    const pb=document.getElementById('azPlayMine'); if(pb) pb.onclick=()=> playMyVoice();
+  }
+  onStars(stars);
 }
 
 function listenAndCheck(target, feedbackEl, tipEl, onStars){
