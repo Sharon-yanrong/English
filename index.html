@@ -1,5 +1,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>快乐英语岛 · Happy English Island</title>
 <style>
   /* ---------- Base / cartoon theme ---------- */
@@ -201,6 +204,19 @@
   .storyscene .cn{ font-size:20px; color:var(--ink-soft); margin-top:6px; font-weight:800; }
   .storyctrl{ display:flex; gap:10px; margin-top:14px; }
   .storyctrl .btn{ flex:1; }
+
+  /* ---------- Tap-a-word ---------- */
+  .wtap{ text-decoration:underline; text-decoration-style:dotted; text-underline-offset:5px; cursor:pointer; }
+  .wtap:active, .wtaphit{ color:var(--pink-d); background:#fff3c4; border-radius:6px; }
+
+  /* ---------- Conversation topics ---------- */
+  .convline{ display:flex; gap:10px; align-items:flex-start; margin-bottom:12px; }
+  .convwho{ flex:0 0 auto; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:900; color:#fff; font-size:15px; }
+  .convwho.a{ background:var(--blue-d); } .convwho.b{ background:var(--pink-d); }
+  .convbubble{ background:#fff; border-radius:16px; padding:10px 12px; box-shadow:var(--shadow); flex:1; }
+  .convbubble .en{ font-size:20px; font-weight:900; }
+  .convbubble .cn{ font-size:14px; color:var(--ink-soft); margin-top:2px; }
+  .convbubble .sp{ border:none; background:#eef4fb; border-radius:12px; padding:4px 10px; font-size:13px; font-weight:800; margin-top:6px; cursor:pointer; color:var(--ink); }
 </style>
 
 <div class="app">
@@ -254,6 +270,10 @@
       <button class="tile" style="background:linear-gradient(145deg,#ff9a9e,#ff6f91)" onclick="go('talkList')">
         <div class="emoji">💬</div>
         <div><div class="t">开口说话</div><div class="d">打招呼 · 日常口语（主打）</div></div>
+      </button>
+      <button class="tile" style="background:linear-gradient(145deg,#84fab0,#8fd3f4)" onclick="go('convList')">
+        <div class="emoji">🗣️</div>
+        <div><div class="t">聊天话题</div><div class="d">和爸妈一起练对话</div></div>
       </button>
       <button class="tile" style="background:linear-gradient(145deg,#43e97b,#38f9d7)" onclick="go('mapWorlds')">
         <div class="emoji">🗺️</div>
@@ -336,6 +356,23 @@
       <div style="text-align:center;margin:10px 0"><button class="btn btn-blue" id="storyQuizPlay">🔊 再听一次</button></div>
       <div class="options" id="storyQuizOptions"></div>
       <div class="feedback" id="storyQuizFeedback"></div>
+    </div>
+  </div>
+
+  <!-- ===== CONVERSATION: topic list ===== -->
+  <div id="convList" class="screen">
+    <div class="backrow"><button class="backbtn" onclick="go('home')">⬅️ 回家</button><h2 class="title" style="margin:0">🗣️ 聊天话题</h2></div>
+    <p class="subtle" style="margin:0 4px 10px">和爸爸妈妈一人一句照着说！<b>A</b> 一个人、<b>B</b> 另一个人。点单词能听发音。</p>
+    <div id="convListBody"></div>
+  </div>
+
+  <!-- ===== CONVERSATION: a dialogue ===== -->
+  <div id="convPlay" class="screen">
+    <div class="backrow"><button class="backbtn" onclick="go('convList')">⬅️ 返回</button><h2 class="title" id="convTitle" style="margin:0"></h2></div>
+    <div class="card">
+      <div id="convBody"></div>
+      <button class="btn big btn-blue" id="convPlayAll" style="margin-top:6px">▶️ 从头听一遍</button>
+      <p class="subtle" style="text-align:center;margin-top:10px">💡 你读 A、孩子读 B，再换过来！用「家庭消息」的 🎤 录下来发给对方～</p>
     </div>
   </div>
 
@@ -671,6 +708,46 @@ const WORLDS = [
   ]},
 ];
 
+// CONV — reference conversation topics: short A/B dialogues to imitate together.
+const CONV = [
+  { id:'hello', emoji:'👋', title:'打招呼', lines:[
+    {who:'A', en:'Hi!', cn:'嗨！'},
+    {who:'B', en:'Hello!', cn:'你好！'},
+    {who:'A', en:'How are you?', cn:'你好吗？'},
+    {who:'B', en:'I am good, thank you!', cn:'我很好，谢谢你！'},
+  ]},
+  { id:'name', emoji:'🙋', title:'你叫什么名字', lines:[
+    {who:'A', en:'What is your name?', cn:'你叫什么名字？'},
+    {who:'B', en:'My name is Rex.', cn:'我叫 Rex。'},
+    {who:'A', en:'Nice to meet you!', cn:'很高兴认识你！'},
+    {who:'B', en:'Nice to meet you too!', cn:'我也很高兴认识你！'},
+  ]},
+  { id:'age', emoji:'🎂', title:'你几岁啦', lines:[
+    {who:'A', en:'How old are you?', cn:'你几岁了？'},
+    {who:'B', en:'I am eight years old.', cn:'我八岁了。'},
+    {who:'A', en:'When is your birthday?', cn:'你的生日是什么时候？'},
+    {who:'B', en:'It is in May.', cn:'在五月。'},
+  ]},
+  { id:'like', emoji:'❤️', title:'我喜欢', lines:[
+    {who:'A', en:'What do you like?', cn:'你喜欢什么？'},
+    {who:'B', en:'I like dinosaurs!', cn:'我喜欢恐龙！'},
+    {who:'A', en:'Me too!', cn:'我也是！'},
+    {who:'B', en:'Cool!', cn:'太酷啦！'},
+  ]},
+  { id:'day', emoji:'🌞', title:'今天怎么样', lines:[
+    {who:'A', en:'How was your day?', cn:'你今天过得怎么样？'},
+    {who:'B', en:'It was great!', cn:'很棒！'},
+    {who:'A', en:'What did you do?', cn:'你做了什么？'},
+    {who:'B', en:'I played football.', cn:'我踢足球了。'},
+  ]},
+  { id:'food', emoji:'🍎', title:'吃点什么', lines:[
+    {who:'A', en:'Are you hungry?', cn:'你饿了吗？'},
+    {who:'B', en:'Yes, I am.', cn:'是的，我饿了。'},
+    {who:'A', en:'What do you want?', cn:'你想要什么？'},
+    {who:'B', en:'An apple, please.', cn:'一个苹果，谢谢。'},
+  ]},
+];
+
 // Phonics — a few letters/sounds to demystify pronunciation.
 const PHONICS = [
   {ch:'A a', ipa:'/æ/', word:'apple', em:'🍎', cn:'像“ea”，张大嘴巴'},
@@ -830,6 +907,8 @@ function speak(text, opts={}){
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 /* ---------- Azure pronunciation assessment (real scoring) ---------- */
 function azureOn(){ return !!(S.azure && S.azure.key && S.azure.region); }
+let azureRecStop=false;
+function stopAzureRec(){ azureRecStop=true; }
 
 // Record mic to a 16 kHz mono 16-bit WAV (the format Azure wants).
 async function recordWav(maxSec){
@@ -842,7 +921,8 @@ async function recordWav(maxSec){
   const chunks=[]; let total=0;
   proc.onaudioprocess = e=>{ const d=e.inputBuffer.getChannelData(0); chunks.push(new Float32Array(d)); total+=d.length; };
   source.connect(proc); proc.connect(ac.destination);
-  await new Promise(r=> setTimeout(r, maxSec*1000));
+  azureRecStop=false;
+  await new Promise(res=>{ const t0=Date.now(); const iv=setInterval(()=>{ if(azureRecStop || Date.now()-t0>=maxSec*1000){ clearInterval(iv); res(); } }, 100); });
   proc.disconnect(); source.disconnect(); stream.getTracks().forEach(t=>t.stop());
   const inRate = ac.sampleRate; try{ await ac.close(); }catch(e){}
   const buf=new Float32Array(total); let o=0; chunks.forEach(c=>{ buf.set(c,o); o+=c.length; });
@@ -880,7 +960,8 @@ async function assessPronunciation(refText, secs){
 async function azureAssess(target, feedbackEl, tipEl, onStars){
   const words = target.replace(/[^a-zA-Z' ]/g,' ').trim().split(/\s+/).filter(Boolean);
   const secs = Math.min(7, 2.6 + words.length*0.5);
-  tipEl.textContent = '🎤 该你读啦，看着句子，大声读出来！';
+  tipEl.innerHTML = '🎤 大声读！读完就点 <button type="button" id="azStopBtn" class="btn btn-orange" style="padding:6px 14px;font-size:15px">⏹️ 读好了</button>';
+  const sb=document.getElementById('azStopBtn'); if(sb) sb.onclick=()=> stopAzureRec();
   let n=Math.ceil(secs);
   feedbackEl.textContent = '🎧 在听你读… '+n;
   const iv=setInterval(()=>{ n--; feedbackEl.textContent='🎧 在听你读… '+Math.max(0,n); if(n<=0) clearInterval(iv); }, 1000);
@@ -992,6 +1073,7 @@ function go(id){
   if(id==='home') renderHome();
   if(id==='talkList') renderTalkList();
   if(id==='storyList') renderStoryList();
+  if(id==='convList') renderConvList();
   if(id==='mapWorlds') renderWorlds();
   if(id==='phonics') renderPhonics();
   if(id==='badges') renderBadges();
@@ -1053,7 +1135,7 @@ function renderTalkCard(){
   const {sc,i} = talkCtx;
   const ln = sc.lines[i];
   document.getElementById('talkEm').textContent = ln.em;
-  document.getElementById('talkEn').textContent = ln.en;
+  renderTappable(document.getElementById('talkEn'), ln.en);
   document.getElementById('talkIpa').textContent = ln.ipa;
   document.getElementById('talkCn').textContent = ln.cn;
   document.getElementById('talkFeedback').textContent='';
@@ -1415,6 +1497,19 @@ document.getElementById('recBtn').onclick=async function(){
 document.getElementById('recPlayBtn').onclick=()=>{ if(S.voice){ new Audio(S.voice).play(); } else toast('还没有录音'); };
 document.getElementById('recDelBtn').onclick=()=>{ S.voice=''; save(); document.getElementById('recStatus').textContent='已删除'; };
 
+/* ---------- Tappable sentence: each word underlined, tap to hear it ---------- */
+function renderTappable(el, text){
+  el.innerHTML='';
+  text.split(/(\s+)/).forEach(p=>{
+    if(!p) return;
+    const clean = p.replace(/[^A-Za-z']/g,'');
+    if(/^\s+$/.test(p) || !clean){ el.appendChild(document.createTextNode(p)); return; }
+    const s=document.createElement('span'); s.className='wtap'; s.textContent=p;
+    s.onclick=(e)=>{ e.stopPropagation(); speak(clean); s.classList.add('wtaphit'); setTimeout(()=>s.classList.remove('wtaphit'),450); };
+    el.appendChild(s);
+  });
+}
+
 /* ---------------- Story mode ---------------- */
 function storyUnlocked(i){ return i===0 || S.storiesDone.includes(STORIES[i-1].id); }
 function renderStoryList(){
@@ -1441,7 +1536,7 @@ function renderStoryLine(){
   const {st,k}=storyCtx;
   const ln=st.lines[k];
   document.getElementById('storyScene').textContent=ln.em;
-  document.getElementById('storyEn').textContent=ln.en;
+  renderTappable(document.getElementById('storyEn'), ln.en);
   document.getElementById('storyCn').textContent=ln.cn;
   document.getElementById('storyFeedback').textContent='';
   document.getElementById('storyTip').textContent='';
@@ -1510,6 +1605,39 @@ function answerStoryQuiz(btn, right, q){
   addStars(2); confettiBurst();
   setTimeout(()=>{ toast('🎉 故事听完啦！'); go('storyList'); }, 1500);
 }
+
+/* ---------------- Conversation topics ---------------- */
+function renderConvList(){
+  const box=document.getElementById('convListBody'); box.innerHTML='';
+  CONV.forEach((c,i)=>{
+    const b=document.createElement('button'); b.className='listrow';
+    b.innerHTML='<div class="lem">'+c.emoji+'</div><div class="lt"><div class="a">'+c.title+'</div><div class="b">'+c.lines.length+' 句对话</div></div><div class="lock">▶️</div>';
+    b.onclick=()=> openConv(i);
+    box.appendChild(b);
+  });
+}
+let convCtx=null;
+function openConv(i){
+  convCtx={ i, c:CONV[i] };
+  document.getElementById('convTitle').textContent=CONV[i].emoji+' '+CONV[i].title;
+  const body=document.getElementById('convBody'); body.innerHTML='';
+  CONV[i].lines.forEach(ln=>{
+    const row=document.createElement('div'); row.className='convline';
+    const who=document.createElement('div'); who.className='convwho '+(ln.who==='A'?'a':'b'); who.textContent=ln.who;
+    const bub=document.createElement('div'); bub.className='convbubble';
+    const en=document.createElement('div'); en.className='en'; renderTappable(en, ln.en);
+    const cn=document.createElement('div'); cn.className='cn'; cn.textContent=ln.cn;
+    const sp=document.createElement('button'); sp.className='sp'; sp.textContent='🔊 听'; sp.onclick=()=> speak(ln.en);
+    bub.appendChild(en); bub.appendChild(cn); bub.appendChild(sp);
+    row.appendChild(who); row.appendChild(bub); body.appendChild(row);
+  });
+  go('convPlay'); markToday();
+}
+document.getElementById('convPlayAll').onclick=function(){
+  const lines=convCtx.c.lines; let k=0;
+  const step=()=>{ if(!convCtx || k>=lines.length) return; speak(lines[k].en); const d=1200+lines[k].en.split(/\s+/).length*450; k++; setTimeout(step,d); };
+  step();
+};
 
 /* ---------------- Reward (parent-set, real-world) ---------------- */
 function renderRewardBanner(){
