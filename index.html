@@ -714,6 +714,14 @@
     <input class="in" id="pAzureKey" placeholder="Azure 语音 KEY（一长串）" style="margin-bottom:6px">
     <input class="in" id="pAzureRegion" placeholder="区域，如 germanywestcentral">
     <div class="subtle" id="azureHint" style="margin-top:6px">填了之后，跟读会用微软发音评测给真实分数；不填就用普通鼓励模式。</div>
+    <label class="fld">🔈 朗读声音（更自然、更像小朋友）</label>
+    <select class="in" id="pAzureVoice">
+      <option value="en-US-AnaNeural">小女孩 Ana（推荐 · 活泼可爱）</option>
+      <option value="en-GB-MaisieNeural">英式小女孩 Maisie</option>
+      <option value="en-US-JennyNeural">温柔姐姐 Jenny</option>
+      <option value="en-US-GuyNeural">大哥哥 Guy</option>
+      <option value="browser">浏览器默认（不用 Azure）</option>
+    </select>
 
     <label class="fld">📡 家庭消息（跨设备 · 你和孩子隔空发语音/视频）</label>
     <div id="famStatus" class="subtle" style="margin-bottom:8px"></div>
@@ -1576,21 +1584,40 @@ function markToday(){
 let voicesReady = false;
 function pickVoice(){
   const vs = speechSynthesis.getVoices();
-  // prefer an English (US) voice
+  // prefer the more natural voices available in the browser
+  const pref=['Google US English','Google UK English Female','Microsoft Aria','Aria','Natural','Samantha','Microsoft Jenny','Microsoft Zira'];
+  for(let i=0;i<pref.length;i++){ const v=vs.find(x=> x.name.indexOf(pref[i])>=0 && /^en/i.test(x.lang)); if(v) return v; }
   return vs.find(v=>/en[-_]US/i.test(v.lang)) || vs.find(v=>/^en/i.test(v.lang)) || null;
 }
 if('speechSynthesis' in window){
   speechSynthesis.onvoiceschanged = ()=>{ voicesReady = true; };
 }
-function speak(text, opts={}){
-  if(!('speechSynthesis' in window)){ toast('这个浏览器不支持发音，换 Chrome 试试～'); return; }
+function browserSpeak(text, opts){
+  opts=opts||{};
+  if(!('speechSynthesis' in window)) return;
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'en-US';
-  u.rate = opts.rate!=null ? opts.rate : 0.72; // slow for kids
-  u.pitch = 1.1;
-  const v = pickVoice(); if(v) u.voice = v;
+  u.lang='en-US'; u.rate = opts.rate!=null ? opts.rate : 0.8; u.pitch = 1.15;
+  const v=pickVoice(); if(v) u.voice=v;
   speechSynthesis.speak(u);
+}
+// Azure Neural TTS = warm, natural, kid-friendly voice (uses the same Azure key). Cached per phrase.
+let ttsCache={}, curAudio=null;
+function azureVoiceName(){ return (S.azure && S.azure.voice) || 'en-US-AnaNeural'; }
+function playAudioUrl(url){ try{ if(curAudio) curAudio.pause(); curAudio=new Audio(url); curAudio.play().catch(()=>{}); }catch(e){} }
+async function azureSpeak(text){
+  const ck=azureVoiceName()+'|'+text;
+  if(ttsCache[ck]){ playAudioUrl(ttsCache[ck]); return; }
+  const ssml="<speak version='1.0' xml:lang='en-US'><voice name='"+azureVoiceName()+"'><prosody rate='-6%'>"+escapeHtml(text)+"</prosody></voice></speak>";
+  const r=await fetch('https://'+S.azure.region+'.tts.speech.microsoft.com/cognitiveservices/v1',{ method:'POST',
+    headers:{ 'Ocp-Apim-Subscription-Key':S.azure.key, 'Content-Type':'application/ssml+xml', 'X-Microsoft-OutputFormat':'audio-24khz-48kbitrate-mono-mp3' }, body:ssml });
+  if(!r.ok) throw new Error('tts '+r.status);
+  const url=URL.createObjectURL(await r.blob()); ttsCache[ck]=url; playAudioUrl(url);
+}
+function speak(text, opts){
+  if(!text) return;
+  if(typeof azureOn==='function' && azureOn() && azureVoiceName()!=='browser'){ azureSpeak(text).catch(()=>browserSpeak(text,opts)); return; }
+  browserSpeak(text,opts);
 }
 
 /* ---------------- Speech: recognition (我来读) ---------------- */
@@ -2212,6 +2239,7 @@ function openParent(){
   document.getElementById('rewardHint').textContent = (S.reward&&S.reward.target>0) ? ('孩子现在有 '+S.stars+' 颗星，目标 '+S.reward.target+' 颗') : '';
   document.getElementById('pAzureKey').value = (S.azure&&S.azure.key)||'';
   document.getElementById('pAzureRegion').value = (S.azure&&S.azure.region)||'';
+  document.getElementById('pAzureVoice').value = (S.azure&&S.azure.voice)||'en-US-AnaNeural';
   document.getElementById('recStatus').textContent = S.voice ? '✅ 已有一段录音' : '还没有录音';
   const pick=document.getElementById('avatarPick'); pick.innerHTML='';
   AVATARS.forEach(a=>{
@@ -2235,7 +2263,7 @@ document.getElementById('parentSave').onclick=()=>{
   const rewardChanged = !S.reward || S.reward.text!==rtext || S.reward.target!==rtarget;
   S.reward={ text:rtext, target:rtarget };
   if(rewardChanged) S.rewardReached=false;
-  S.azure={ key:document.getElementById('pAzureKey').value.trim(), region:document.getElementById('pAzureRegion').value.trim().toLowerCase() };
+  S.azure={ key:document.getElementById('pAzureKey').value.trim(), region:document.getElementById('pAzureRegion').value.trim().toLowerCase(), voice:document.getElementById('pAzureVoice').value };
   save(); closeMask('parentMask'); renderHome();
   toast('✅ 保存好啦！');
 };
