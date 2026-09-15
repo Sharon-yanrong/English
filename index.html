@@ -227,7 +227,7 @@
       <div class="hi">你好呀，小英雄！</div>
       <div class="name" id="kidName">小朋友</div>
     </div>
-    <div class="starbox">⭐ <span id="starCount">0</span></div>
+    <div class="starbox" id="starBox">⭐ <span id="starCount">0</span></div>
     <button class="gear" id="gearBtn" title="家长入口">⚙️</button>
   </div>
 
@@ -469,6 +469,19 @@
   </div>
 </div>
 
+<!-- ===== Who is using this device? ===== -->
+<div class="mask" id="roleMask">
+  <div class="modal" style="text-align:center">
+    <div style="font-size:56px">🦁</div>
+    <h3 style="font-size:24px;margin:6px 0 4px">你好呀！请问谁在用这台？</h3>
+    <p class="subtle" style="margin:0 0 6px">选一次就记住啦，之后也能改。</p>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-top:12px">
+      <button class="btn big btn-green" id="roleKid">👶 我是小朋友</button>
+      <button class="btn big btn-blue" id="roleParent">👨‍👩‍👧 我是家长 / 老师</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===== Parent PIN gate ===== -->
 <div class="mask" id="pinMask">
   <div class="modal">
@@ -563,6 +576,8 @@
       <button class="btn btn-ghost" style="flex:1" onclick="closeMask('parentMask')">关闭</button>
       <button class="btn btn-green" style="flex:1" id="parentSave">💾 保存</button>
     </div>
+
+    <button class="btn btn-ghost" style="width:100%;margin-top:12px" id="switchRoleBtn">🔄 切换这台设备的身份（家长 / 小朋友）</button>
 
     <details style="margin-top:14px">
       <summary class="subtle" style="cursor:pointer">危险操作 / 重置进度</summary>
@@ -857,6 +872,7 @@ const BADGES = [
 
 /* ---------------- State ---------------- */
 const DEFAULT = {
+  role:'',                             // '' not chosen yet | 'kid' | 'parent' (per device)
   name:'小朋友', avatar:'🦁', pin:'1234',
   stars:0, wordsLearned:[], talkDone:[], levelsDone:[], badges:[],
   storiesDone:[],                      // ids of finished stories
@@ -1420,6 +1436,21 @@ let pinBuffer='';
 function openMask(id){ document.getElementById(id).classList.add('show'); }
 function closeMask(id){ document.getElementById(id).classList.remove('show'); }
 document.getElementById('gearBtn').onclick=()=>{ pinBuffer=''; renderPin(); openMask('pinMask'); };
+
+/* ---------- Device role (parent vs kid) ---------- */
+function applyRole(){
+  const gear=document.getElementById('gearBtn');
+  gear.style.display = (S.role==='kid') ? 'none' : '';   // hide settings on the kid's device
+}
+document.getElementById('roleKid').onclick=()=>{ S.role='kid'; save(); closeMask('roleMask'); applyRole(); renderHome(); };
+document.getElementById('roleParent').onclick=()=>{ S.role='parent'; save(); closeMask('roleMask'); applyRole(); renderHome(); toast('点右上角 ⚙️ 进入后台，密码 1234'); };
+document.getElementById('switchRoleBtn').onclick=()=>{ closeMask('parentMask'); S.role=''; save(); openMask('roleMask'); };
+// Parent gate on the kid's device: tap the star box 5x quickly to reach settings.
+let starTaps=0, starTapTimer=null;
+document.getElementById('starBox').addEventListener('click', ()=>{
+  starTaps++; clearTimeout(starTapTimer); starTapTimer=setTimeout(()=>{ starTaps=0; }, 1200);
+  if(starTaps>=5){ starTaps=0; pinBuffer=''; renderPin(); openMask('pinMask'); }
+});
 function renderPin(){ document.getElementById('pinDisp').textContent = '●'.repeat(pinBuffer.length) + '○'.repeat(4-pinBuffer.length); }
 function pinPress(n){
   if(pinBuffer.length>=4) return;
@@ -1917,6 +1948,7 @@ markToday();
 renderHome();
 checkBadges();
 initFamily();
+if(!S.role){ openMask('roleMask'); } else { applyRole(); }
 // warm up voices
 if('speechSynthesis' in window){ speechSynthesis.getVoices(); }
 </script>
