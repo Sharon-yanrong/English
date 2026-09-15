@@ -397,9 +397,15 @@
     <div id="convListBody"></div>
   </div>
 
+  <!-- ===== CONVERSATION: topics within a category ===== -->
+  <div id="convTopics" class="screen">
+    <div class="backrow"><button class="backbtn" onclick="go('convList')">⬅️ 返回</button><h2 class="title" id="convCatTitle" style="margin:0"></h2></div>
+    <div id="convTopicsBody"></div>
+  </div>
+
   <!-- ===== CONVERSATION: a dialogue ===== -->
   <div id="convPlay" class="screen">
-    <div class="backrow"><button class="backbtn" onclick="go('convList')">⬅️ 返回</button><h2 class="title" id="convTitle" style="margin:0"></h2></div>
+    <div class="backrow"><button class="backbtn" onclick="go('convTopics')">⬅️ 返回</button><h2 class="title" id="convTitle" style="margin:0"></h2></div>
     <div class="card">
       <div id="convBody"></div>
       <div class="feedback" id="convFeedback"></div>
@@ -896,6 +902,42 @@ const WORLDS = [
       {em:'💪', en:'strong', ipa:'/strɔːŋ/', cn:'强壮的'},
     ], sci:{em:'🥚', title:'恐龙蛋的秘密', text:'最大的恐龙蛋有橄榄球那么大，但刚孵出来的小恐龙，只有一只小猫那么小哦！'}},
   ]},
+  { id:'market', emoji:'🛒', name:'逛超市', color:'linear-gradient(145deg,#84fab0,#8fd3f4)', levels:[
+    { name:'第 1 关 · 买吃的', words:[
+      {em:'🍎', en:'apple', ipa:'/ˈæpl/', cn:'苹果', s:{en:'I want an apple.', cn:'我想要一个苹果。'}},
+      {em:'🍌', en:'banana', ipa:'/bəˈnɑːnə/', cn:'香蕉', s:{en:'The banana is yellow.', cn:'香蕉是黄色的。'}},
+      {em:'🥛', en:'milk', ipa:'/mɪlk/', cn:'牛奶', s:{en:'I drink milk every day.', cn:'我每天喝牛奶。'}},
+      {em:'🍞', en:'bread', ipa:'/bred/', cn:'面包', s:{en:'I like bread and jam.', cn:'我喜欢面包加果酱。'}},
+      {em:'🥚', en:'egg', ipa:'/eɡ/', cn:'鸡蛋', s:{en:'I eat an egg for breakfast.', cn:'我早餐吃一个鸡蛋。'}},
+      {em:'💧', en:'water', ipa:'/ˈwɔːtər/', cn:'水', s:{en:'Please give me some water.', cn:'请给我一些水。'}},
+      {em:'🍚', en:'rice', ipa:'/raɪs/', cn:'米饭', s:{en:'We eat rice for dinner.', cn:'我们晚饭吃米饭。'}},
+      {em:'🐟', en:'fish', ipa:'/fɪʃ/', cn:'鱼', s:{en:'Fish is good for you.', cn:'吃鱼对身体好。'}},
+    ], sci:{em:'🛒', title:'超市的小心机', text:'超市常把牛奶、面包放在最里面，是想让你多逛一逛、顺便多看看别的东西哦！'}},
+  ]},
+  { id:'playground', emoji:'🎡', name:'游乐场', color:'linear-gradient(145deg,#f6d365,#fda085)', levels:[
+    { name:'第 1 关 · 一起玩', words:[
+      {em:'🛝', en:'slide', ipa:'/slaɪd/', cn:'滑梯', s:{en:'I go down the slide.', cn:'我从滑梯滑下来。'}},
+      {em:'🎠', en:'swing', ipa:'/swɪŋ/', cn:'秋千', s:{en:'I play on the swing.', cn:'我荡秋千。'}},
+      {em:'⚽', en:'ball', ipa:'/bɔːl/', cn:'球', s:{en:"Let's play with the ball.", cn:'我们来玩球吧。'}},
+      {em:'🪁', en:'kite', ipa:'/kaɪt/', cn:'风筝', s:{en:'The kite is high in the sky.', cn:'风筝在天上飞得很高。'}},
+      {em:'🏃', en:'run', ipa:'/rʌn/', cn:'跑', s:{en:'I can run very fast.', cn:'我能跑得很快。'}},
+      {em:'🤸', en:'jump', ipa:'/dʒʌmp/', cn:'跳', s:{en:'Jump up and down!', cn:'上下跳一跳！'}},
+      {em:'🎮', en:'play', ipa:'/pleɪ/', cn:'玩', s:{en:'I play with my friends.', cn:'我和朋友们一起玩。'}},
+      {em:'😄', en:'happy', ipa:'/ˈhæpi/', cn:'开心的', s:{en:'I am so happy today!', cn:'我今天好开心！'}},
+    ], sci:{em:'🎠', title:'荡秋千的科学', text:'荡秋千用的是“钟摆”原理——蹬腿的节奏对上了，就能越荡越高又稳当！'}},
+  ]},
+  { id:'hospital', emoji:'🏥', name:'去医院', color:'linear-gradient(145deg,#a1c4fd,#c2e9fb)', levels:[
+    { name:'第 1 关 · 看医生', words:[
+      {em:'👨‍⚕️', en:'doctor', ipa:'/ˈdɒktər/', cn:'医生', s:{en:'The doctor helps me.', cn:'医生帮助我。'}},
+      {em:'👩‍⚕️', en:'nurse', ipa:'/nɜːrs/', cn:'护士', s:{en:'The nurse is kind.', cn:'护士很温柔。'}},
+      {em:'🤒', en:'sick', ipa:'/sɪk/', cn:'生病的', s:{en:'I feel sick today.', cn:'我今天不舒服。'}},
+      {em:'🤧', en:'cold', ipa:'/koʊld/', cn:'感冒', s:{en:'I have a cold.', cn:'我感冒了。'}},
+      {em:'💊', en:'medicine', ipa:'/ˈmedsn/', cn:'药', s:{en:'Take your medicine.', cn:'把药吃了吧。'}},
+      {em:'🌡️', en:'hot', ipa:'/hɒt/', cn:'发烧/热', s:{en:'My head feels hot.', cn:'我的头很烫。'}},
+      {em:'🛌', en:'rest', ipa:'/rest/', cn:'休息', s:{en:'You need to rest.', cn:'你需要休息。'}},
+      {em:'😊', en:'better', ipa:'/ˈbetər/', cn:'好些了', s:{en:'I feel better now.', cn:'我现在好些了。'}},
+    ], sci:{em:'🩺', title:'听诊器的秘密', text:'医生脖子上那个圆圆的叫“听诊器”，能听到你心脏“咚、咚、咚”跳动的声音！'}},
+  ]},
 ];
 
 // CONV — conversation topics by scene/level; original dialogues to imitate together.
@@ -996,25 +1038,42 @@ const CONV = [
     {who:'A', en:'Well done! I am proud of you.', cn:'真棒！我为你骄傲。'},
   ]},
   // ---- ④ jokes / fun ----
-  { id:'joke1', cat:4, emoji:'🚪', title:'敲门笑话', lines:[
+  { id:'joke1', cat:4, emoji:'🐔', title:'小鸡过马路', lines:[
+    {who:'A', en:'Why did the chicken cross the road?', cn:'小鸡为什么要过马路？'},
+    {who:'B', en:"I don't know. Why?", cn:'不知道呀，为什么？'},
+    {who:'A', en:'To get to the other side!', cn:'为了到马路的另一边呀！'},
+    {who:'B', en:'Haha!', cn:'哈哈！'},
+  ]},
+  { id:'joke2', cat:4, emoji:'🐻', title:'没牙的熊', lines:[
+    {who:'A', en:'What do you call a bear with no teeth?', cn:'没有牙齿的熊叫什么？'},
+    {who:'B', en:'Hmm... what?', cn:'嗯……叫什么？'},
+    {who:'A', en:'A gummy bear!', cn:'一只“软糖熊”！（gummy 也有“没牙”的意思）'},
+    {who:'B', en:'Haha, so funny!', cn:'哈哈，太好笑啦！'},
+  ]},
+  { id:'joke3', cat:4, emoji:'🍌', title:'香蕉看医生', lines:[
+    {who:'A', en:'Why did the banana go to the doctor?', cn:'香蕉为什么去看医生？'},
+    {who:'B', en:'Why?', cn:'为什么？'},
+    {who:'A', en:'It was not peeling well!', cn:'它“剥”得不舒服！（peeling 听起来像 feeling 感觉）'},
+    {who:'B', en:'Hahaha!', cn:'哈哈哈！'},
+  ]},
+  { id:'joke4', cat:4, emoji:'👻', title:'敲门笑话', lines:[
     {who:'A', en:'Knock, knock!', cn:'咚咚咚！'},
     {who:'B', en:"Who's there?", cn:'谁呀？'},
-    {who:'A', en:'Cow.', cn:'一头牛。'},
-    {who:'B', en:'Cow who?', cn:'什么牛？'},
-    {who:'A', en:'No! A cow says "Moo"!', cn:'不对！牛会说“哞——”！'},
+    {who:'A', en:'Boo.', cn:'布。'},
+    {who:'B', en:'Boo who?', cn:'哪个布？（Boo who 听起来像哭声“呜呜”）'},
+    {who:'A', en:"Don't cry, it's only a joke!", cn:'别哭啦，只是个玩笑！'},
   ]},
-  { id:'joke2', cat:4, emoji:'🐼', title:'猜一猜', lines:[
-    {who:'A', en:'What is black and white and loves bamboo?', cn:'什么是黑白色、还爱吃竹子？'},
-    {who:'B', en:'A panda!', cn:'熊猫！'},
-    {who:'A', en:'Yes! You are so clever!', cn:'对！你真聪明！'},
-    {who:'B', en:'Haha, that was easy!', cn:'哈哈，太简单啦！'},
+  { id:'joke5', cat:4, emoji:'🐱', title:'猫的颜色', lines:[
+    {who:'A', en:"What is a cat's favorite color?", cn:'猫最喜欢什么颜色？'},
+    {who:'B', en:"I don't know.", cn:'不知道。'},
+    {who:'A', en:'Purr-ple!', cn:'紫色 purple！（猫咕噜声 purr + purple）'},
+    {who:'B', en:'Haha!', cn:'哈哈！'},
   ]},
-  { id:'joke3', cat:4, emoji:'🐱', title:'和猫说话', lines:[
-    {who:'A', en:'I can talk to animals!', cn:'我会和动物说话！'},
-    {who:'B', en:'Really? Say something to my cat.', cn:'真的？跟我的猫说句话。'},
-    {who:'A', en:'"Meow, meow!"', cn:'“喵，喵！”'},
-    {who:'B', en:'Haha! What did she say?', cn:'哈哈！她说什么？'},
-    {who:'A', en:'She said, "Feed me!"', cn:'她说：“喂我吃饭！”'},
+  { id:'joke6', cat:4, emoji:'👃', title:'12 英寸的鼻子', lines:[
+    {who:'A', en:'Why can\'t your nose be 12 inches long?', cn:'鼻子为什么不能有 12 英寸长？'},
+    {who:'B', en:'Why not?', cn:'为什么不能？'},
+    {who:'A', en:'Because then it would be a foot!', cn:'因为那样它就变成“一英尺 / 一只脚”啦！（12 inches = 1 foot）'},
+    {who:'B', en:'Hahaha!', cn:'哈哈哈！'},
   ]},
 ];
 
@@ -1193,13 +1252,13 @@ const PHONICS = [
       {key:'U u', say:'U', rep:3, ipa:'/juː/', hint:'国王⑤ 名字读“优”', words:[]},
     ]},
   { id:'p2', title:'第2课 · 5个元音·短音', emoji:'🔤',
-    intro:'国王在短单词里常常读“短音”，又快又短。先跟着读三遍字母，再读单词、找找那个音。',
+    intro:'国王在短单词里读“短音”，又快又短（不是念字母的名字哦）。先听三遍短音，再读单词、找找那个音。',
     items:[
-      {key:'a', say:'a', rep:3, ipa:'/æ/', hint:'嘴张大，“ae”', words:[{w:'cat',em:'🐱',cn:'猫'},{w:'apple',em:'🍎',cn:'苹果'}]},
-      {key:'e', say:'e', rep:3, ipa:'/e/', hint:'像“唉”', words:[{w:'hen',em:'🐔',cn:'母鸡'},{w:'bed',em:'🛏️',cn:'床'}]},
-      {key:'i', say:'i', rep:3, ipa:'/ɪ/', hint:'短短的“衣”', words:[{w:'pig',em:'🐷',cn:'猪'},{w:'six',em:'6️⃣',cn:'六'}]},
-      {key:'o', say:'o', rep:3, ipa:'/ɒ/', hint:'圆嘴“喔”', words:[{w:'dog',em:'🐶',cn:'狗'},{w:'box',em:'📦',cn:'盒子'}]},
-      {key:'u', say:'u', rep:3, ipa:'/ʌ/', hint:'短“啊”', words:[{w:'cup',em:'🥤',cn:'杯子'},{w:'bus',em:'🚌',cn:'公交车'}]},
+      {key:'a', say:'ah', rep:3, ipa:'/æ/', hint:'嘴张大，短“ae”', words:[{w:'cat',em:'🐱',cn:'猫'},{w:'apple',em:'🍎',cn:'苹果'}]},
+      {key:'e', say:'eh', rep:3, ipa:'/e/', hint:'短短的“唉”', words:[{w:'hen',em:'🐔',cn:'母鸡'},{w:'bed',em:'🛏️',cn:'床'}]},
+      {key:'i', say:'ih', rep:3, ipa:'/ɪ/', hint:'短短的“衣”', words:[{w:'pig',em:'🐷',cn:'猪'},{w:'six',em:'6️⃣',cn:'六'}]},
+      {key:'o', say:'aw', rep:3, ipa:'/ɒ/', hint:'圆嘴短“喔”', words:[{w:'dog',em:'🐶',cn:'狗'},{w:'box',em:'📦',cn:'盒子'}]},
+      {key:'u', say:'uh', rep:3, ipa:'/ʌ/', hint:'短“啊”', words:[{w:'cup',em:'🥤',cn:'杯子'},{w:'bus',em:'🚌',cn:'公交车'}]},
     ]},
   { id:'p3', title:'第3课 · 神奇的 e', emoji:'✨',
     intro:'单词结尾加一个不发音的 e，前面的元音就会“读自己的名字”（长音）。比如 cap→cape、hop→hope。',
@@ -1880,6 +1939,16 @@ function playPhonics(item){
   let k=0; const step=()=>{ if(k>=seq.length) return; speak(seq[k]); k++; setTimeout(step, 1000); };
   step();
 }
+// A 🎤跟读 button whose result (score + ⏹️停止 + 🔁听自己读的) shows right beside/under it.
+function phPrac(refText){
+  const wrap=document.createElement('div');
+  const prac=document.createElement('button'); prac.className='sp'; prac.textContent='🎤 跟读'; prac.style.marginLeft='6px';
+  const fb=document.createElement('div'); fb.className='feedback'; fb.style.cssText='font-size:15px;min-height:0;text-align:left;margin-top:4px';
+  const tp=document.createElement('div'); tp.className='listen-tip'; tp.style.textAlign='left';
+  prac.onclick=()=> listenAndCheck(refText, fb, tp, (st)=>{ addStars(st); popStars(st); });
+  wrap.appendChild(fb); wrap.appendChild(tp);
+  return { prac, results:wrap };
+}
 function openPhonicsLesson(idx){
   const L=PHONICS[idx];
   document.getElementById('phLessonTitle').textContent=L.title;
@@ -1894,19 +1963,27 @@ function openPhonicsLesson(idx){
       '<div style="flex:1"><div style="font-weight:800">'+item.ipa+'</div><div class="subtle">'+item.hint+'</div></div>';
     const listen=document.createElement('button'); listen.className='btn btn-blue'; listen.style.cssText='padding:8px 14px;font-size:15px'; listen.textContent='🔊 听'; listen.onclick=()=> playPhonics(item);
     head.appendChild(listen); c.appendChild(head);
-    (item.words||[]).forEach(w=>{
-      const row=document.createElement('div'); row.className='listrow'; row.style.marginTop='8px';
-      const em=document.createElement('div'); em.className='lem'; em.textContent=w.em;
-      const lt=document.createElement('div'); lt.className='lt';
-      const a=document.createElement('div'); a.className='a'; renderTappable(a, w.w);
-      const bcn=document.createElement('div'); bcn.className='b'; bcn.textContent=w.cn;
-      lt.appendChild(a); lt.appendChild(bcn);
-      const sp=document.createElement('button'); sp.className='sp'; sp.textContent='🔊'; sp.onclick=()=> speak(w.w);
-      const prac=document.createElement('button'); prac.className='sp'; prac.textContent='🎤 跟读'; prac.style.marginLeft='6px';
-      prac.onclick=()=> listenAndCheck(w.w, document.getElementById('phFeedback'), document.getElementById('phTip'), (st)=>{ addStars(st); popStars(st); });
-      row.appendChild(em); row.appendChild(lt); row.appendChild(sp); row.appendChild(prac);
-      c.appendChild(row);
-    });
+    if(item.words && item.words.length){
+      item.words.forEach(w=>{
+        const row=document.createElement('div'); row.className='listrow'; row.style.marginTop='8px';
+        const em=document.createElement('div'); em.className='lem'; em.textContent=w.em;
+        const lt=document.createElement('div'); lt.className='lt';
+        const a=document.createElement('div'); a.className='a'; renderTappable(a, w.w);
+        const bcn=document.createElement('div'); bcn.className='b'; bcn.textContent=w.cn;
+        lt.appendChild(a); lt.appendChild(bcn);
+        const sp=document.createElement('button'); sp.className='sp'; sp.textContent='🔊'; sp.onclick=()=> speak(w.w);
+        const p=phPrac(w.w);
+        row.appendChild(em); row.appendChild(lt); row.appendChild(sp); row.appendChild(p.prac);
+        c.appendChild(row); c.appendChild(p.results);
+      });
+    } else {
+      // letter-only items (e.g. Lesson 1): practice the letter itself
+      const p=phPrac(item.say || item.key);
+      const prow=document.createElement('div'); prow.style.cssText='display:flex;align-items:center;gap:8px;margin-top:8px';
+      const label=document.createElement('div'); label.className='subtle'; label.style.flex='1'; label.textContent='跟老师读读这个字母 👉';
+      prow.appendChild(label); prow.appendChild(p.prac);
+      c.appendChild(prow); c.appendChild(p.results);
+    }
     body.appendChild(c);
   });
   go('phonicsLesson'); markToday();
@@ -2248,19 +2325,27 @@ function openCountry(i){
 /* ---------------- Conversation topics ---------------- */
 function renderConvList(){
   const box=document.getElementById('convListBody'); box.innerHTML='';
-  CONV_CATS.forEach(cat=>{
-    const items=CONV.filter(c=>c.cat===cat.n);
-    if(!items.length) return;
-    const h=document.createElement('div'); h.style.cssText='font-weight:900;font-size:16px;margin:14px 4px 6px'; h.textContent=cat.name;
-    box.appendChild(h);
-    items.forEach(c=>{
-      const idx=CONV.indexOf(c);
-      const b=document.createElement('button'); b.className='listrow';
-      b.innerHTML='<div class="lem">'+c.emoji+'</div><div class="lt"><div class="a">'+c.title+'</div><div class="b">'+c.lines.length+' 句对话</div></div><div class="lock">▶️</div>';
-      b.onclick=()=> openConv(idx);
-      box.appendChild(b);
-    });
+  const emo=['👋','🏠','🏫','😄'];
+  CONV_CATS.forEach((cat,i)=>{
+    const cnt=CONV.filter(c=>c.cat===cat.n).length;
+    const b=document.createElement('button'); b.className='listrow'; b.style.padding='20px 16px';
+    b.innerHTML='<div class="lem" style="font-size:40px">'+emo[i%4]+'</div><div class="lt"><div class="a" style="font-size:20px">'+cat.name+'</div><div class="b">'+cnt+' 个话题</div></div><div class="lock">▶️</div>';
+    b.onclick=()=> openConvCat(cat.n);
+    box.appendChild(b);
   });
+}
+function openConvCat(n){
+  const cat=CONV_CATS.find(c=>c.n===n);
+  document.getElementById('convCatTitle').textContent='🗣️ '+cat.name;
+  const box=document.getElementById('convTopicsBody'); box.innerHTML='';
+  CONV.filter(c=>c.cat===n).forEach(c=>{
+    const idx=CONV.indexOf(c);
+    const b=document.createElement('button'); b.className='listrow';
+    b.innerHTML='<div class="lem">'+c.emoji+'</div><div class="lt"><div class="a">'+c.title+'</div><div class="b">'+c.lines.length+' 句对话</div></div><div class="lock">▶️</div>';
+    b.onclick=()=> openConv(idx);
+    box.appendChild(b);
+  });
+  go('convTopics');
 }
 let convCtx=null;
 function openConv(i){
@@ -2382,6 +2467,20 @@ document.getElementById('unitDone').onclick=function(){
   addStars(3); popStars(3); confettiBurst(); toast('🎉 '+u.title+' 学完啦！'); go('courseList');
 };
 
+/* ---------------- Sound effects (synthesized, no files) ---------------- */
+let _sfxCtx=null;
+function sfx(type){
+  try{
+    _sfxCtx = _sfxCtx || new (window.AudioContext||window.webkitAudioContext)();
+    if(_sfxCtx.state==='suspended') _sfxCtx.resume();
+    const ac=_sfxCtx, t=ac.currentTime, o=ac.createOscillator(), g=ac.createGain();
+    o.connect(g); g.connect(ac.destination);
+    if(type==='match'){ o.type='sine'; o.frequency.setValueAtTime(660,t); o.frequency.setValueAtTime(990,t+0.12); g.gain.setValueAtTime(0.22,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.35); o.start(t); o.stop(t+0.35); }
+    else if(type==='pop'){ o.type='triangle'; o.frequency.setValueAtTime(520,t); o.frequency.exponentialRampToValueAtTime(950,t+0.09); g.gain.setValueAtTime(0.25,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.16); o.start(t); o.stop(t+0.16); }
+    else if(type==='wrong'){ o.type='sawtooth'; o.frequency.setValueAtTime(220,t); o.frequency.exponentialRampToValueAtTime(140,t+0.18); g.gain.setValueAtTime(0.15,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.22); o.start(t); o.stop(t+0.22); }
+  }catch(e){}
+}
+
 /* ---------------- Games ---------------- */
 function wordPool(){
   const pool=[];
@@ -2438,6 +2537,7 @@ function flipCard(idx){
   if(opened.length===2){
     matchCtx.lock=true;
     if(opened[0].pair===opened[1].pair){
+      sfx('match'); speak(opened[0].w.en);
       setTimeout(()=>{ opened.forEach(x=>{x.done=true;x.opened=false;}); matchCtx.matched++; matchCtx.lock=false; renderMatch();
         addStars(1); popStars(1);
         if(matchCtx.matched>=6){ confettiBurst(); addStars(2); document.getElementById('matchMsg').textContent='🎉 全部配对成功！'; document.getElementById('matchAgain').style.display='block'; }
@@ -2483,8 +2583,8 @@ function renderBubble(){
 }
 function popBubble(right, cur, btn){
   document.querySelectorAll('#bubbleField .bubble').forEach(b=> b.disabled=true);
-  if(right){ btn.classList.add('right'); bubbleCtx.score++; document.getElementById('bubbleMsg').textContent='✅ 太棒！'; }
-  else { btn.classList.add('wrong'); document.querySelectorAll('#bubbleField .bubble').forEach(b=>{ if(b.textContent===cur.en) b.classList.add('right'); }); document.getElementById('bubbleMsg').textContent='💛 正确是 '+cur.en; }
+  if(right){ sfx('pop'); btn.classList.add('right'); bubbleCtx.score++; document.getElementById('bubbleMsg').textContent='✅ 太棒！'; }
+  else { sfx('wrong'); btn.classList.add('wrong'); document.querySelectorAll('#bubbleField .bubble').forEach(b=>{ if(b.textContent===cur.en) b.classList.add('right'); }); document.getElementById('bubbleMsg').textContent='💛 正确是 '+cur.en; }
   speak(cur.en); bubbleCtx.q++;
   setTimeout(renderBubble, 850);
 }
