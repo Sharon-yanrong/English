@@ -227,6 +227,16 @@
   .bubble{ border:none; border-radius:40px; padding:16px 10px; font-size:20px; font-weight:900; background:linear-gradient(145deg,#5ee7df,#66a6ff); color:#fff; box-shadow:var(--shadow); cursor:pointer; }
   .bubble:active{ transform:translateY(2px); }
   .bubble.right{ background:var(--green-d); } .bubble.wrong{ background:#ffb4b4; color:#7a1a1a; }
+  .mcn{ font-size:10px; color:#8a8a8a; margin-top:2px; line-height:1.1; }
+  @keyframes fadecn{ 0%,35%{opacity:.9} 100%{opacity:0} }
+  .mcn.fade{ animation:fadecn 4s forwards; }
+
+  /* ---------- Country reveal ---------- */
+  .cflag{ font-size:80px; line-height:1; }
+  .cfact{ font-size:70px; line-height:1; margin:6px 0; }
+  .tfbtns{ display:flex; gap:12px; margin-top:14px; }
+  .tfbtns .btn{ flex:1; font-size:20px; }
+  .stamp{ display:inline-block; border:4px dashed var(--green-d); color:var(--green-d); border-radius:16px; padding:10px 16px; font-weight:900; transform:rotate(-8deg); font-size:20px; }
 </style>
 
 <div class="app">
@@ -384,10 +394,15 @@
     <div id="countryListBody"></div>
   </div>
 
-  <!-- ===== COUNTRIES: one country ===== -->
+  <!-- ===== COUNTRIES: one country (step player) ===== -->
   <div id="countryPlay" class="screen">
     <div class="backrow"><button class="backbtn" onclick="go('countryList')">⬅️ 返回</button><h2 class="title" id="countryTitle" style="margin:0"></h2></div>
-    <div id="countryBody"></div>
+    <div class="progressdots" id="countryDots"></div>
+    <div class="card" id="countryCard" style="text-align:center;min-height:210px"></div>
+    <div class="storyctrl">
+      <button class="btn btn-ghost" id="countryPrev">⬅️ 上一个</button>
+      <button class="btn btn-green" id="countryNext">下一个 ➡️</button>
+    </div>
   </div>
 
   <!-- ===== CONVERSATION: topic list ===== -->
@@ -1080,118 +1095,32 @@ const CONV = [
 // COUNTRIES — fun facts about real countries (facts, original wording). Read-for-fun,
 // slightly harder English. Each country: sections (landmarks/fun facts/culture) + a guess.
 const COUNTRIES = [
-  { id:'cn', flag:'🇨🇳', name:'China', cn:'中国',
-    sections:[
-      { icon:'🏛️', title:'著名景点 Landmarks', facts:[
-        {em:'🧱', en:'The Great Wall is over 20,000 km long!', cn:'长城超过 2 万公里长！'},
-        {em:'🏯', en:'The Forbidden City has almost 1,000 buildings.', cn:'故宫有将近 1000 座房子。'},
-        {em:'🐼', en:'Pandas live in the mountains of China.', cn:'熊猫住在中国的大山里。'},
-      ]},
-      { icon:'🤯', title:'冷知识 Fun facts', facts:[
-        {em:'🧨', en:'Chinese people invented paper and fireworks.', cn:'中国人发明了纸和烟花。'},
-        {em:'🚄', en:'China has some of the fastest trains in the world.', cn:'中国有世界上最快的火车之一。'},
-        {em:'🍜', en:'Noodles in China can be super long!', cn:'中国的面条可以拉得超级长！'},
-      ]},
-      { icon:'🎎', title:'文化 Culture', facts:[
-        {em:'🧧', en:'Kids get red envelopes at Spring Festival.', cn:'过年时小朋友会收到红包。'},
-        {em:'🥢', en:'People eat with chopsticks.', cn:'人们用筷子吃饭。'},
-        {em:'🐉', en:'The Chinese dragon brings good luck.', cn:'中国龙象征好运。'},
-      ]},
+  { id:'cn', flag:'🇨🇳', name:'China', cn:'中国', ready:true,
+    facts:[
+      {em:'🧱', en:'The Great Wall is over 20,000 km long!', cn:'长城超过 2 万公里长！'},
+      {em:'🐼', en:'Pandas live in China and eat bamboo all day.', cn:'熊猫住在中国，整天吃竹子。'},
+      {em:'🧨', en:'Chinese people invented paper and fireworks.', cn:'中国人发明了纸和烟花。'},
+      {em:'🚄', en:'China has some of the fastest trains in the world.', cn:'中国有世界上最快的火车之一。'},
+      {em:'🥢', en:'People in China eat with chopsticks.', cn:'中国人用筷子吃饭。'},
+      {em:'🏯', en:'The Forbidden City has almost 1,000 buildings.', cn:'故宫有将近 1000 座房子。'},
     ],
-    quiz:[ {q:'Which animal is the treasure of China?', qcn:'哪种动物是中国的国宝？',
+    tf:[
+      {en:'You can see the Great Wall from the moon.', cn:'从月球上能看到长城。', ans:false, why:'No, that is just a myth!', whycn:'不能哦，这只是个传说，从月球看不到长城。'},
+      {en:'Pandas love to eat bamboo.', cn:'熊猫爱吃竹子。', ans:true, why:'Yes! Pandas eat for many hours a day.', whycn:'对！熊猫每天要吃好几个小时竹子。'},
+      {en:'Chinese people invented fireworks.', cn:'中国人发明了烟花。', ans:true, why:'True! Fireworks come from ancient China.', whycn:'真的！烟花是古代中国发明的。'},
+    ],
+    guess:{ q:'Which animal is the treasure of China?', qcn:'哪种动物是中国的国宝？',
       options:[{en:'Panda',cn:'熊猫'},{en:'Lion',cn:'狮子'},{en:'Tiger',cn:'老虎'}],
-      answer:'Panda', reveal:'Yes! Pandas eat bamboo for up to 12 hours a day!', revealcn:'对！熊猫一天能吃 12 个小时的竹子！'} ] },
-
-  { id:'uk', flag:'🇬🇧', name:'the UK', cn:'英国',
-    sections:[
-      { icon:'🏛️', title:'著名景点 Landmarks', facts:[
-        {em:'🕰️', en:'Big Ben is a giant clock in London.', cn:'大本钟是伦敦的一座大钟。'},
-        {em:'🎡', en:'The London Eye is a huge wheel by the river.', cn:'伦敦眼是河边的巨大摩天轮。'},
-        {em:'🚌', en:'London has red double-decker buses.', cn:'伦敦有红色的双层巴士。'},
-      ]},
-      { icon:'🤯', title:'冷知识 Fun facts', facts:[
-        {em:'🌧️', en:'It rains a lot in the UK!', cn:'英国经常下雨！'},
-        {em:'⬅️', en:'People drive on the left side of the road.', cn:'人们靠左边开车。'},
-        {em:'🫖', en:'British people love drinking tea.', cn:'英国人很爱喝茶。'},
-      ]},
-      { icon:'🎎', title:'文化 Culture', facts:[
-        {em:'🍟', en:'Fish and chips is a famous British food.', cn:'炸鱼薯条是有名的英国菜。'},
-        {em:'🙏', en:'People say "please" and "thank you" a lot.', cn:'人们经常说“请”和“谢谢”。'},
-      ]},
-    ],
-    quiz:[ {q:'Which side of the road do people drive on in the UK?', qcn:'在英国，人们靠哪边开车？',
-      options:[{en:'The left',cn:'左边'},{en:'The right',cn:'右边'},{en:'The middle',cn:'中间'}],
-      answer:'The left', reveal:'Right! In the UK cars drive on the LEFT.', revealcn:'没错！英国的车靠左行驶。'} ] },
-
-  { id:'us', flag:'🇺🇸', name:'the USA', cn:'美国',
-    sections:[
-      { icon:'🏛️', title:'著名景点 Landmarks', facts:[
-        {em:'🗽', en:'The Statue of Liberty stands in New York.', cn:'自由女神像矗立在纽约。'},
-        {em:'🏜️', en:'The Grand Canyon is a huge, deep valley.', cn:'大峡谷是又大又深的峡谷。'},
-      ]},
-      { icon:'🤯', title:'冷知识 Fun facts', facts:[
-        {em:'5️⃣', en:'The USA has 50 states.', cn:'美国有 50 个州。'},
-        {em:'🍔', en:'The hamburger is very popular there.', cn:'汉堡在那里非常受欢迎。'},
-        {em:'🎃', en:'On Halloween, kids dress up and get candy.', cn:'万圣节小朋友会装扮、要糖果。'},
-      ]},
-      { icon:'🎎', title:'文化 Culture', facts:[
-        {em:'🏀', en:'People love basketball and baseball.', cn:'人们喜欢篮球和棒球。'},
-      ]},
-    ],
-    quiz:[ {q:'How many states does the USA have?', qcn:'美国有多少个州？',
-      options:[{en:'Fifty',cn:'50 个'},{en:'Ten',cn:'10 个'},{en:'One hundred',cn:'100 个'}],
-      answer:'Fifty', reveal:'Correct! The USA has 50 states.', revealcn:'答对了！美国有 50 个州。'} ] },
-
-  { id:'fr', flag:'🇫🇷', name:'France', cn:'法国',
-    sections:[
-      { icon:'🏛️', title:'著名景点 Landmarks', facts:[
-        {em:'🗼', en:'The Eiffel Tower is in Paris.', cn:'埃菲尔铁塔在巴黎。'},
-        {em:'🖼️', en:'Paris has a big, famous art museum.', cn:'巴黎有一座著名的大美术馆。'},
-      ]},
-      { icon:'🤯', title:'冷知识 Fun facts', facts:[
-        {em:'🧀', en:'France makes over 1,000 kinds of cheese!', cn:'法国有 1000 多种奶酪！'},
-        {em:'🥖', en:'French bread is long and crispy.', cn:'法国面包又长又脆。'},
-      ]},
-      { icon:'🎎', title:'文化 Culture', facts:[
-        {em:'👋', en:'People say "Bonjour" for hello.', cn:'人们用“Bonjour”打招呼。'},
-        {em:'🥐', en:'Many people eat croissants for breakfast.', cn:'很多人早餐吃可颂。'},
-      ]},
-    ],
-    quiz:[ {q:'What do French people say for "hello"?', qcn:'法国人说“你好”是哪个词？',
-      options:[{en:'Bonjour',cn:'Bonjour（法语你好）'},{en:'Hello',cn:'Hello'},{en:'Ni hao',cn:'你好'}],
-      answer:'Bonjour', reveal:'Oui! "Bonjour" means hello in French.', revealcn:'对！“Bonjour”是法语的“你好”。'} ] },
-
-  { id:'au', flag:'🇦🇺', name:'Australia', cn:'澳大利亚',
-    sections:[
-      { icon:'🏛️', title:'著名景点 Landmarks', facts:[
-        {em:'🐚', en:'The Sydney Opera House looks like big shells.', cn:'悉尼歌剧院像一片片大贝壳。'},
-        {em:'🐠', en:'The Great Barrier Reef is full of colorful fish.', cn:'大堡礁里满是彩色的鱼。'},
-      ]},
-      { icon:'🤯', title:'冷知识 Fun facts', facts:[
-        {em:'🦘', en:'Kangaroos hop on their two big legs.', cn:'袋鼠用两条大长腿蹦蹦跳。'},
-        {em:'🐨', en:'Koalas sleep up to 20 hours a day!', cn:'考拉一天能睡 20 个小时！'},
-        {em:'🔄', en:'When China is in winter, Australia is in summer.', cn:'中国是冬天时，澳大利亚正是夏天。'},
-      ]},
-    ],
-    quiz:[ {q:'Which animal carries its baby in a pocket?', qcn:'哪种动物用“口袋”装宝宝？',
-      options:[{en:'Kangaroo',cn:'袋鼠'},{en:'Koala',cn:'考拉'},{en:'Dog',cn:'狗'}],
-      answer:'Kangaroo', reveal:'Yes! A baby kangaroo is called a joey.', revealcn:'对！小袋鼠叫 joey。'} ] },
-
-  { id:'eg', flag:'🇪🇬', name:'Egypt', cn:'埃及',
-    sections:[
-      { icon:'🏛️', title:'著名景点 Landmarks', facts:[
-        {em:'🔺', en:'The Pyramids are huge and very old.', cn:'金字塔又大又古老。'},
-        {em:'🦁', en:'The Sphinx has a lion body and a human face.', cn:'狮身人面像有狮子的身体、人的脸。'},
-        {em:'🏞️', en:'The Nile is a very long river.', cn:'尼罗河是一条很长很长的河。'},
-      ]},
-      { icon:'🤯', title:'冷知识 Fun facts', facts:[
-        {em:'⏳', en:'The Pyramids are over 4,000 years old!', cn:'金字塔有 4000 多年历史！'},
-        {em:'🐈', en:'Ancient Egyptians really loved cats.', cn:'古埃及人非常喜爱猫。'},
-      ]},
-    ],
-    quiz:[ {q:'What is the giant triangle building in Egypt?', qcn:'埃及那个巨大的三角形建筑是什么？',
-      options:[{en:'A pyramid',cn:'金字塔'},{en:'A castle',cn:'城堡'},{en:'A tower',cn:'塔'}],
-      answer:'A pyramid', reveal:'Right! Kings were buried inside the pyramids.', revealcn:'对！古代的国王就葬在金字塔里。'} ] },
+      answer:'Panda', reveal:"Yes! The panda is China's treasure.", revealcn:'对！熊猫是中国的国宝。'} },
+  { id:'uk', flag:'🇬🇧', name:'the UK', cn:'英国', ready:false },
+  { id:'us', flag:'🇺🇸', name:'the USA', cn:'美国', ready:false },
+  { id:'fr', flag:'🇫🇷', name:'France', cn:'法国', ready:false },
+  { id:'jp', flag:'🇯🇵', name:'Japan', cn:'日本', ready:false },
+  { id:'au', flag:'🇦🇺', name:'Australia', cn:'澳大利亚', ready:false },
+  { id:'eg', flag:'🇪🇬', name:'Egypt', cn:'埃及', ready:false },
+  { id:'br', flag:'🇧🇷', name:'Brazil', cn:'巴西', ready:false },
+  { id:'ke', flag:'🇰🇪', name:'Kenya', cn:'肯尼亚', ready:false },
+  { id:'it', flag:'🇮🇹', name:'Italy', cn:'意大利', ready:false },
 ];
 
 // COURSE — original lessons aligned to the grade-3 curriculum scope (same words &
@@ -1427,6 +1356,7 @@ const DEFAULT = {
   stars:0, wordsLearned:[], talkDone:[], levelsDone:[], badges:[],
   storiesDone:[],                      // ids of finished stories
   unitsDone:[],                        // ids of finished course units
+  countriesVisited:[],                 // passport stamps collected
   reward:{ text:'', target:0 },        // parent-set real-world reward
   rewardReached:false,                 // celebrated for the current reward?
   azure:{ key:'', region:'' },         // Azure Speech pronunciation assessment
@@ -2268,59 +2198,98 @@ function answerStoryQuiz(btn, right, q){
 /* ---------------- Countries (fun facts + guess) ---------------- */
 function renderCountryList(){
   const box=document.getElementById('countryListBody'); box.innerHTML='';
+  const visited=(S.countriesVisited||[]).length;
+  const hdr=document.createElement('div'); hdr.className='card'; hdr.style.background='#fff7d6';
+  hdr.innerHTML='🛂 <b>我的护照</b>：已集 <b>'+visited+'</b> 个国家印章！走遍世界当小小旅行家 🌍';
+  box.appendChild(hdr);
   COUNTRIES.forEach((c,i)=>{
-    const b=document.createElement('button'); b.className='listrow';
-    b.innerHTML='<div class="lem">'+c.flag+'</div><div class="lt"><div class="a">'+c.name+' · '+c.cn+'</div><div class="b">景点 · 冷知识 · 文化 · 猜猜看</div></div><div class="lock">▶️</div>';
-    b.onclick=()=> openCountry(i);
+    const done=(S.countriesVisited||[]).includes(c.id);
+    const b=document.createElement('button'); b.className='listrow'+(c.ready?'':' locked');
+    b.innerHTML='<div class="lem">'+c.flag+'</div><div class="lt"><div class="a">'+c.name+' · '+c.cn+'</div><div class="b">'+(c.ready?(done?'✅ 已盖章':'点开去探险'):'🔒 即将推出')+'</div></div><div class="lock">'+(c.ready?'▶️':'🔒')+'</div>';
+    if(c.ready) b.onclick=()=> openCountry(i);
     box.appendChild(b);
   });
 }
+let countryCtx=null;
 function openCountry(i){
   const c=COUNTRIES[i];
-  document.getElementById('countryTitle').textContent=c.flag+' '+c.name+' '+c.cn;
-  const body=document.getElementById('countryBody'); body.innerHTML='';
-  c.sections.forEach(sec=>{
-    const card=document.createElement('div'); card.className='card';
-    card.innerHTML='<div style="font-weight:900;font-size:17px;margin-bottom:6px">'+sec.icon+' '+sec.title+'</div>';
-    sec.facts.forEach(f=>{
-      const row=document.createElement('div'); row.className='listrow'; row.style.marginBottom='8px';
-      const em=document.createElement('div'); em.className='lem'; em.textContent=f.em;
-      const lt=document.createElement('div'); lt.className='lt';
-      const a=document.createElement('div'); a.className='a'; a.style.fontSize='16px'; renderTappable(a, f.en);
-      const bcn=document.createElement('div'); bcn.className='b'; bcn.textContent=f.cn;
-      lt.appendChild(a); lt.appendChild(bcn);
-      const sp=document.createElement('button'); sp.className='sp'; sp.textContent='🔊'; sp.onclick=()=> speak(f.en);
-      row.appendChild(em); row.appendChild(lt); row.appendChild(sp);
-      card.appendChild(row);
-    });
-    body.appendChild(card);
-  });
-  (c.quiz||[]).forEach(q=>{
-    const card=document.createElement('div'); card.className='card'; card.style.background='#fff7d6';
-    const head=document.createElement('div'); head.style.cssText='font-weight:900;font-size:17px'; head.textContent='❓ 猜猜看';
-    const qen=document.createElement('div'); qen.style.cssText='font-weight:800;margin-top:6px'; renderTappable(qen, q.q);
-    const qcn=document.createElement('div'); qcn.className='subtle'; qcn.textContent=q.qcn;
-    card.appendChild(head); card.appendChild(qen); card.appendChild(qcn);
-    const opts=document.createElement('div'); opts.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:10px';
-    const msg=document.createElement('div'); msg.className='feedback'; msg.style.textAlign='left'; msg.style.marginTop='8px';
-    let solved=false;
-    q.options.forEach(o=>{
+  if(!c.ready){ toast(c.cn+' 即将推出~'); return; }
+  const steps=[{type:'intro'}];
+  (c.facts||[]).forEach(f=> steps.push({type:'fact', f:f}));
+  (c.tf||[]).forEach(t=> steps.push({type:'tf', t:t, done:false}));
+  if(c.guess) steps.push({type:'guess', g:c.guess, done:false});
+  steps.push({type:'done'});
+  countryCtx={ i, c, steps, k:0 };
+  document.getElementById('countryTitle').textContent=c.flag+' '+c.cn;
+  go('countryPlay'); renderCountryStep(); markToday();
+}
+function renderCountryStep(){
+  const {c,steps,k}=countryCtx;
+  const step=steps[k];
+  const dots=document.getElementById('countryDots'); dots.innerHTML='';
+  steps.forEach((_,j)=>{ const d=document.createElement('div'); d.className='dot'+(j<k?' on':'')+(j===k?' cur':''); dots.appendChild(d); });
+  document.getElementById('countryPrev').style.visibility = k===0?'hidden':'visible';
+  const nextBtn=document.getElementById('countryNext');
+  nextBtn.textContent = (k===steps.length-1)?'🏠 回列表':'下一个 ➡️';
+  const card=document.getElementById('countryCard'); card.innerHTML='';
+  if(step.type==='intro'){
+    card.innerHTML='<div class="cflag">'+c.flag+'</div><div style="font-size:22px;font-weight:900;margin-top:6px">'+c.name+' · '+c.cn+'</div>'+
+      '<div style="font-size:34px;margin-top:12px">🦖✈️</div><div class="subtle" style="margin-top:8px">小恐龙 Rex 带你去'+c.cn+'探险！点“下一个”出发～</div>';
+  } else if(step.type==='fact'){
+    const f=step.f;
+    card.innerHTML='<div class="cfact">'+f.em+'</div><div id="cFactEn" style="font-size:20px;font-weight:900"></div>'+
+      '<div style="font-size:16px;color:var(--ink-soft);margin-top:6px">'+f.cn+'</div>'+
+      '<button class="btn btn-blue" id="cFactPlay" style="margin-top:12px">🔊 再听一次</button>';
+    renderTappable(document.getElementById('cFactEn'), f.en);
+    document.getElementById('cFactPlay').onclick=()=> speak(f.en);
+    speak(f.en);
+  } else if(step.type==='tf'){
+    const t=step.t;
+    card.innerHTML='<div style="font-size:34px">🤔 真 or 假？</div><div id="cTfEn" style="font-size:19px;font-weight:900;margin-top:10px"></div>'+
+      '<div class="subtle" style="margin-top:4px">'+t.cn+'</div>'+
+      '<div class="tfbtns"><button class="btn btn-green" id="tfT">✅ 真 True</button><button class="btn btn-pink" id="tfF">❌ 假 False</button></div>'+
+      '<div class="feedback" id="cTfMsg"></div>';
+    renderTappable(document.getElementById('cTfEn'), t.en);
+    speak(t.en);
+    const ans=(val)=>{
+      const right=(val===t.ans); right?sfx('pop'):sfx('wrong');
+      document.getElementById('cTfMsg').innerHTML=(right?'⭐ 答对啦！':'💡 其实是「'+(t.ans?'真':'假')+'」')+'<br><span class="subtle">'+t.whycn+'</span>';
+      if(right && !step.done){ step.done=true; addStars(1); popStars(1); }
+    };
+    document.getElementById('tfT').onclick=()=> ans(true);
+    document.getElementById('tfF').onclick=()=> ans(false);
+  } else if(step.type==='guess'){
+    const g=step.g;
+    card.innerHTML='<div style="font-size:34px">❓ 猜猜看</div><div id="cGuessEn" style="font-size:18px;font-weight:900;margin-top:8px"></div>'+
+      '<div class="subtle">'+g.qcn+'</div><div id="cGuessOpts" style="display:flex;flex-direction:column;gap:8px;margin-top:12px"></div><div class="feedback" id="cGuessMsg"></div>';
+    renderTappable(document.getElementById('cGuessEn'), g.q);
+    const box=document.getElementById('cGuessOpts');
+    g.options.forEach(o=>{
       const b=document.createElement('button'); b.className='btn btn-ghost'; b.style.cssText='text-align:left;font-size:16px';
       b.innerHTML=o.en+' &nbsp;<span style="color:var(--ink-soft);font-weight:700">'+o.cn+'</span>';
-      b.onclick=()=>{
-        speak(o.en);
-        if(o.en===q.answer){ b.style.background='var(--green-d)'; b.style.color='#fff';
-          msg.innerHTML='⭐ '+(q.reveal||'答对啦！')+'<br><span class="subtle">'+(q.revealcn||'')+'</span>';
-          if(!solved){ solved=true; addStars(1); popStars(1); } }
-        else { b.style.background='#ffb4b4'; msg.textContent='💛 再想想，点一个试试～'; }
-      };
-      opts.appendChild(b);
+      b.onclick=()=>{ speak(o.en);
+        if(o.en===g.answer){ sfx('pop'); b.style.background='var(--green-d)'; b.style.color='#fff';
+          document.getElementById('cGuessMsg').innerHTML='⭐ '+g.reveal+'<br><span class="subtle">'+g.revealcn+'</span>';
+          if(!step.done){ step.done=true; addStars(1); popStars(1); } }
+        else { sfx('wrong'); b.style.background='#ffb4b4'; document.getElementById('cGuessMsg').textContent='💛 再想想～'; } };
+      box.appendChild(b);
     });
-    card.appendChild(opts); card.appendChild(msg);
-    body.appendChild(card);
-  });
-  go('countryPlay'); markToday();
+  } else if(step.type==='done'){
+    if(!S.countriesVisited) S.countriesVisited=[];
+    let firstTime=false;
+    if(!S.countriesVisited.includes(c.id)){ S.countriesVisited.push(c.id); save(); firstTime=true; }
+    card.innerHTML='<div style="font-size:40px">🎉</div><div style="font-weight:900;font-size:20px;margin-top:6px">'+c.cn+' 探索完成！</div>'+
+      '<div style="margin-top:16px"><span class="stamp">🛂 '+c.flag+' '+c.name+' ✓</span></div>'+
+      '<div class="subtle" style="margin-top:16px">护照又多了一个印章！快回列表看看攒了几个国家～</div>';
+    if(firstTime){ addStars(2); confettiBurst(); sfx('match'); }
+  }
 }
+document.getElementById('countryPrev').onclick=()=>{ if(countryCtx && countryCtx.k>0){ countryCtx.k--; renderCountryStep(); } };
+document.getElementById('countryNext').onclick=()=>{
+  if(!countryCtx) return;
+  if(countryCtx.k < countryCtx.steps.length-1){ countryCtx.k++; renderCountryStep(); }
+  else go('countryList');
+};
 
 /* ---------------- Conversation topics ---------------- */
 function renderConvList(){
@@ -2517,12 +2486,17 @@ function startMatch(){
   document.getElementById('matchAgain').style.display='none';
   go('gameMatch'); renderMatch(); markToday();
 }
+function matchFace(c){
+  // English cards show the word + a Chinese hint that gently fades away (weaning off)
+  if(c.kind==='en') return '<div>'+c.face+'</div><div class="mcn fade">'+c.w.cn+'</div>';
+  return '<div style="font-size:26px">'+c.face+'</div>';
+}
 function renderMatch(){
   const grid=document.getElementById('matchGrid'); grid.innerHTML='';
   matchCtx.cards.forEach((c,idx)=>{
     const b=document.createElement('button'); b.className='mcard';
-    if(c.done){ b.className='mcard done'; b.textContent=c.face; }
-    else if(c.opened){ b.className='mcard open'; b.textContent=c.face; }
+    if(c.done){ b.className='mcard done'; b.innerHTML=matchFace(c); }
+    else if(c.opened){ b.className='mcard open'; b.innerHTML=matchFace(c); }
     else b.textContent='?';
     b.onclick=()=> flipCard(idx);
     grid.appendChild(b);
@@ -2583,7 +2557,7 @@ function renderBubble(){
 }
 function popBubble(right, cur, btn){
   document.querySelectorAll('#bubbleField .bubble').forEach(b=> b.disabled=true);
-  if(right){ sfx('pop'); btn.classList.add('right'); bubbleCtx.score++; document.getElementById('bubbleMsg').textContent='✅ 太棒！'; }
+  if(right){ sfx('pop'); btn.classList.add('right'); bubbleCtx.score++; document.getElementById('bubbleMsg').innerHTML='✅ '+cur.en+' = <b>'+cur.cn+'</b>'; }
   else { sfx('wrong'); btn.classList.add('wrong'); document.querySelectorAll('#bubbleField .bubble').forEach(b=>{ if(b.textContent===cur.en) b.classList.add('right'); }); document.getElementById('bubbleMsg').textContent='💛 正确是 '+cur.en; }
   speak(cur.en); bubbleCtx.q++;
   setTimeout(renderBubble, 850);
