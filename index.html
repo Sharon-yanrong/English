@@ -281,9 +281,9 @@
         <div class="emoji">📚</div>
         <div><div class="t">课本同步课</div><div class="d">跟着单元学：单词 · 语法 · 对话</div></div>
       </button>
-      <button class="tile" style="background:linear-gradient(145deg,#ff9a9e,#ff6f91)" onclick="go('talkList')">
-        <div class="emoji">💬</div>
-        <div><div class="t">开口说话</div><div class="d">打招呼 · 日常口语（主打）</div></div>
+      <button class="tile" style="background:linear-gradient(145deg,#43cea2,#185a9d)" onclick="go('countryList')">
+        <div class="emoji">🌍</div>
+        <div><div class="t">国家小揭秘</div><div class="d">用英语看世界 · 冷知识 · 猜猜看</div></div>
       </button>
       <button class="tile" style="background:linear-gradient(145deg,#84fab0,#8fd3f4)" onclick="go('convList')">
         <div class="emoji">🗣️</div>
@@ -295,7 +295,7 @@
       </button>
       <button class="tile" style="background:linear-gradient(145deg,#a18cd1,#fbc2eb)" onclick="go('phonics')">
         <div class="emoji">🔤</div>
-        <div><div class="t">音标小课堂</div><div class="d">认识字母的声音</div></div>
+        <div><div class="t">自然拼读</div><div class="d">一节一节学发音</div></div>
       </button>
       <button class="tile" style="background:linear-gradient(145deg,#f093fb,#f5576c)" onclick="go('gamesList')">
         <div class="emoji">🎮</div>
@@ -375,6 +375,19 @@
       <div class="options" id="storyQuizOptions"></div>
       <div class="feedback" id="storyQuizFeedback"></div>
     </div>
+  </div>
+
+  <!-- ===== COUNTRIES: list ===== -->
+  <div id="countryList" class="screen">
+    <div class="backrow"><button class="backbtn" onclick="go('home')">⬅️ 回家</button><h2 class="title" style="margin:0">🌍 国家小揭秘</h2></div>
+    <p class="subtle" style="margin:0 4px 10px">用英语看看世界各地有趣的事！点一个国家 → 看景点、冷知识、文化，最后玩「猜猜看」。点单词能听发音。</p>
+    <div id="countryListBody"></div>
+  </div>
+
+  <!-- ===== COUNTRIES: one country ===== -->
+  <div id="countryPlay" class="screen">
+    <div class="backrow"><button class="backbtn" onclick="go('countryList')">⬅️ 返回</button><h2 class="title" id="countryTitle" style="margin:0"></h2></div>
+    <div id="countryBody"></div>
   </div>
 
   <!-- ===== CONVERSATION: topic list ===== -->
@@ -465,6 +478,7 @@
       <div class="en" id="wordEn"></div>
       <div class="ipa" id="wordIpa"></div>
       <div class="cn" id="wordCn"></div>
+      <div id="wordSentence"></div>
       <div class="rowbtns">
         <button class="btn btn-blue" id="wordListenBtn">🔊 听我读</button>
         <button class="btn btn-pink" id="wordSpeakBtn">🎤 我来读</button>
@@ -517,9 +531,17 @@
 
   <!-- ===== Phonics ===== -->
   <div id="phonics" class="screen">
-    <div class="backrow"><button class="backbtn" onclick="go('home')">⬅️ 回家</button><h2 class="title" style="margin:0">🔤 音标小课堂</h2></div>
-    <p class="subtle" style="margin:0 4px 10px">每个字母都有自己的声音。点一点，听听它怎么发音，跟着读！</p>
+    <div class="backrow"><button class="backbtn" onclick="go('home')">⬅️ 回家</button><h2 class="title" style="margin:0">🔤 自然拼读</h2></div>
+    <p class="subtle" style="margin:0 4px 10px">一节一节来。学会自然拼读，看到单词就能拼出来读！</p>
     <div id="phonicsBody"></div>
+  </div>
+
+  <!-- ===== Phonics: one lesson ===== -->
+  <div id="phonicsLesson" class="screen">
+    <div class="backrow"><button class="backbtn" onclick="go('phonics')">⬅️ 返回</button><h2 class="title" id="phLessonTitle" style="margin:0"></h2></div>
+    <div id="phLessonBody"></div>
+    <div class="feedback" id="phFeedback"></div>
+    <div class="listen-tip" id="phTip"></div>
   </div>
 
   <!-- ===== Badges / progress ===== -->
@@ -756,6 +778,76 @@ const TALK = [
 
 // WORLDS = word-map (secondary). Each level: 5 words + a science card.
 const WORLDS = [
+  { id:'color', emoji:'🌈', name:'颜色世界', color:'linear-gradient(145deg,#ff9a9e,#fecfef)', levels:[
+    { name:'第 1 关 · 彩虹颜色', words:[
+      {em:'🔴', en:'red', ipa:'/red/', cn:'红色', s:{en:'The apple is red.', cn:'苹果是红色的。'}},
+      {em:'🟡', en:'yellow', ipa:'/ˈjeloʊ/', cn:'黄色', s:{en:'The sun is yellow.', cn:'太阳是黄色的。'}},
+      {em:'🔵', en:'blue', ipa:'/bluː/', cn:'蓝色', s:{en:'The sky is blue.', cn:'天空是蓝色的。'}},
+      {em:'🟢', en:'green', ipa:'/ɡriːn/', cn:'绿色', s:{en:'The tree is green.', cn:'树是绿色的。'}},
+      {em:'🟠', en:'orange', ipa:'/ˈɔːrɪndʒ/', cn:'橙色', s:{en:'The orange is orange.', cn:'橙子是橙色的。'}},
+      {em:'🟣', en:'purple', ipa:'/ˈpɜːrpəl/', cn:'紫色', s:{en:'The grape is purple.', cn:'葡萄是紫色的。'}},
+      {em:'⚫', en:'black', ipa:'/blæk/', cn:'黑色', s:{en:'The cat is black.', cn:'这只猫是黑色的。'}},
+      {em:'⚪', en:'white', ipa:'/waɪt/', cn:'白色', s:{en:'The snow is white.', cn:'雪是白色的。'}},
+    ], sci:{em:'🌈', title:'彩虹有几种颜色', text:'彩虹有 7 种颜色：红橙黄绿蓝靛紫，是太阳光穿过小水珠变出来的！'}},
+  ]},
+  { id:'num', emoji:'🔢', name:'数字王国', color:'linear-gradient(145deg,#a1c4fd,#c2e9fb)', levels:[
+    { name:'第 1 关 · 1 到 10', words:[
+      {em:'1️⃣', en:'one', ipa:'/wʌn/', cn:'一', s:{en:'I have one nose.', cn:'我有一个鼻子。'}},
+      {em:'2️⃣', en:'two', ipa:'/tuː/', cn:'二', s:{en:'I have two eyes.', cn:'我有两只眼睛。'}},
+      {em:'3️⃣', en:'three', ipa:'/θriː/', cn:'三', s:{en:'I see three birds.', cn:'我看见三只鸟。'}},
+      {em:'4️⃣', en:'four', ipa:'/fɔːr/', cn:'四', s:{en:'A dog has four legs.', cn:'狗有四条腿。'}},
+      {em:'5️⃣', en:'five', ipa:'/faɪv/', cn:'五', s:{en:'I have five fingers.', cn:'我有五根手指。'}},
+      {em:'6️⃣', en:'six', ipa:'/sɪks/', cn:'六', s:{en:'I am six years old.', cn:'我六岁。'}},
+      {em:'7️⃣', en:'seven', ipa:'/ˈsevən/', cn:'七', s:{en:'A week has seven days.', cn:'一周有七天。'}},
+      {em:'8️⃣', en:'eight', ipa:'/eɪt/', cn:'八', s:{en:'A spider has eight legs.', cn:'蜘蛛有八条腿。'}},
+      {em:'9️⃣', en:'nine', ipa:'/naɪn/', cn:'九', s:{en:'I go to bed at nine.', cn:'我九点睡觉。'}},
+      {em:'🔟', en:'ten', ipa:'/ten/', cn:'十', s:{en:'I have ten toes.', cn:'我有十个脚趾。'}},
+    ], sci:{em:'🖐️', title:'为什么数到十进位', text:'因为我们有十根手指！古时候人扳着手指数数，数满十就进一位，这就是十进制。'}},
+  ]},
+  { id:'stationery', emoji:'✏️', name:'文具盒', color:'linear-gradient(145deg,#fbc2eb,#a6c1ee)', levels:[
+    { name:'第 1 关 · 我的文具', words:[
+      {em:'✏️', en:'pencil', ipa:'/ˈpensl/', cn:'铅笔', s:{en:'I write with a pencil.', cn:'我用铅笔写字。'}},
+      {em:'🖊️', en:'pen', ipa:'/pen/', cn:'钢笔', s:{en:'This is my pen.', cn:'这是我的钢笔。'}},
+      {em:'📏', en:'ruler', ipa:'/ˈruːlər/', cn:'尺子', s:{en:'A ruler is straight.', cn:'尺子是直的。'}},
+      {em:'📓', en:'book', ipa:'/bʊk/', cn:'书', s:{en:'I read a book.', cn:'我读一本书。'}},
+      {em:'🧰', en:'pencil box', ipa:'/ˈpensl bɒks/', cn:'铅笔盒', s:{en:'My pencil box is red.', cn:'我的铅笔盒是红色的。'}},
+      {em:'🎒', en:'bag', ipa:'/bæɡ/', cn:'书包', s:{en:'My bag is big.', cn:'我的书包很大。'}},
+      {em:'🧽', en:'eraser', ipa:'/ɪˈreɪsər/', cn:'橡皮', s:{en:'I use an eraser.', cn:'我用橡皮擦。'}},
+      {em:'🖍️', en:'crayon', ipa:'/ˈkreɪən/', cn:'蜡笔', s:{en:'I draw with a crayon.', cn:'我用蜡笔画画。'}},
+    ], sci:{em:'✏️', title:'铅笔里没有铅', text:'铅笔里其实是“石墨”，一点都不含铅！一支铅笔大约能画出 50 公里长的线呢。'}},
+  ]},
+  { id:'body', emoji:'🧍', name:'我的身体', color:'linear-gradient(145deg,#ffecd2,#fcb69f)', levels:[
+    { name:'第 1 关 · 认识身体', words:[
+      {em:'😀', en:'head', ipa:'/hed/', cn:'头', s:{en:'Touch your head.', cn:'摸摸你的头。'}},
+      {em:'👁️', en:'eye', ipa:'/aɪ/', cn:'眼睛', s:{en:'I see with my eyes.', cn:'我用眼睛看。'}},
+      {em:'👃', en:'nose', ipa:'/noʊz/', cn:'鼻子', s:{en:'I smell with my nose.', cn:'我用鼻子闻。'}},
+      {em:'👄', en:'mouth', ipa:'/maʊθ/', cn:'嘴', s:{en:'I eat with my mouth.', cn:'我用嘴吃东西。'}},
+      {em:'👂', en:'ear', ipa:'/ɪr/', cn:'耳朵', s:{en:'I hear with my ears.', cn:'我用耳朵听。'}},
+      {em:'✋', en:'hand', ipa:'/hænd/', cn:'手', s:{en:'Clap your hands!', cn:'拍拍手！'}},
+      {em:'🦶', en:'foot', ipa:'/fʊt/', cn:'脚', s:{en:'I kick with my foot.', cn:'我用脚踢。'}},
+      {em:'🦵', en:'leg', ipa:'/leɡ/', cn:'腿', s:{en:'I run with my legs.', cn:'我用腿跑步。'}},
+      {em:'💪', en:'arm', ipa:'/ɑːrm/', cn:'手臂', s:{en:'My arms are strong.', cn:'我的手臂很有力。'}},
+      {em:'🙂', en:'face', ipa:'/feɪs/', cn:'脸', s:{en:'Wash your face.', cn:'洗洗脸。'}},
+    ], sci:{em:'👀', title:'眼睛冷知识', text:'我们每天大约眨眼 2 万次！眨眼能帮眼睛保湿、把小灰尘冲走。'}},
+  ]},
+  { id:'family', emoji:'👨‍👩‍👧', name:'家人和职业', color:'linear-gradient(145deg,#fddb92,#d1fdff)', levels:[
+    { name:'第 1 关 · 我的家人', words:[
+      {em:'👨', en:'father', ipa:'/ˈfɑːðər/', cn:'爸爸', s:{en:'My father is tall.', cn:'我爸爸很高。'}},
+      {em:'👩', en:'mother', ipa:'/ˈmʌðər/', cn:'妈妈', s:{en:'I love my mother.', cn:'我爱我的妈妈。'}},
+      {em:'👦', en:'brother', ipa:'/ˈbrʌðər/', cn:'兄弟', s:{en:'My brother is funny.', cn:'我的兄弟很搞笑。'}},
+      {em:'👧', en:'sister', ipa:'/ˈsɪstər/', cn:'姐妹', s:{en:'My sister is kind.', cn:'我的姐妹很善良。'}},
+      {em:'👪', en:'family', ipa:'/ˈfæməli/', cn:'家庭', s:{en:'I love my family.', cn:'我爱我的家。'}},
+      {em:'👶', en:'baby', ipa:'/ˈbeɪbi/', cn:'宝宝', s:{en:'The baby is cute.', cn:'这个宝宝真可爱。'}},
+    ], sci:{em:'❤️', title:'family 的小暖意', text:'有个说法：family = Father And Mother, I Love You（爸爸妈妈我爱你）每个词的第一个字母！'}},
+    { name:'第 2 关 · 长大做什么', words:[
+      {em:'👨‍⚕️', en:'doctor', ipa:'/ˈdɒktər/', cn:'医生', s:{en:'A doctor helps sick people.', cn:'医生帮助生病的人。'}},
+      {em:'👩‍🏫', en:'teacher', ipa:'/ˈtiːtʃər/', cn:'老师', s:{en:'My teacher is nice.', cn:'我的老师很好。'}},
+      {em:'👨‍🍳', en:'cook', ipa:'/kʊk/', cn:'厨师', s:{en:'A cook makes food.', cn:'厨师做食物。'}},
+      {em:'👨‍🌾', en:'farmer', ipa:'/ˈfɑːrmər/', cn:'农民', s:{en:'A farmer grows food.', cn:'农民种粮食。'}},
+      {em:'👷', en:'worker', ipa:'/ˈwɜːrkər/', cn:'工人', s:{en:'A worker builds houses.', cn:'工人盖房子。'}},
+      {em:'🚌', en:'bus driver', ipa:'/bʌs ˈdraɪvər/', cn:'公交车司机', s:{en:'A bus driver drives a bus.', cn:'公交车司机开公交车。'}},
+    ], sci:{em:'🌟', title:'长大做什么都很棒', text:'不管做什么工作，只要认真、善良、帮助别人，就是了不起的人！'}},
+  ]},
   { id:'animal', emoji:'🦁', name:'动物世界', color:'linear-gradient(145deg,#f6d365,#fda085)', levels:[
     { name:'第 1 关 · 小动物', words:[
       {em:'🐱', en:'cat', ipa:'/kæt/', cn:'猫'},
@@ -806,58 +898,241 @@ const WORLDS = [
   ]},
 ];
 
-// CONV — reference conversation topics: short A/B dialogues to imitate together.
+// CONV — conversation topics by scene/level; original dialogues to imitate together.
+const CONV_CATS = [
+  {n:1, name:'① 打招呼（最简单）'},
+  {n:2, name:'② 在家里（生活场景）'},
+  {n:3, name:'③ 在学校（学校场景）'},
+  {n:4, name:'④ 故事和笑话（有趣）'},
+];
 const CONV = [
-  { id:'hello', emoji:'👋', title:'打招呼', lines:[
+  // ---- ① greetings ----
+  { id:'hello', cat:1, emoji:'👋', title:'打招呼', lines:[
     {who:'A', en:'Hi!', cn:'嗨！'},
     {who:'B', en:'Hello!', cn:'你好！'},
     {who:'A', en:'How are you?', cn:'你好吗？'},
     {who:'B', en:'I am good, thank you!', cn:'我很好，谢谢你！'},
   ]},
-  { id:'name', emoji:'🙋', title:'你叫什么名字', lines:[
+  { id:'name', cat:1, emoji:'🙋', title:'你叫什么名字', lines:[
     {who:'A', en:'What is your name?', cn:'你叫什么名字？'},
     {who:'B', en:'My name is Rex.', cn:'我叫 Rex。'},
     {who:'A', en:'Nice to meet you!', cn:'很高兴认识你！'},
     {who:'B', en:'Nice to meet you too!', cn:'我也很高兴认识你！'},
   ]},
-  { id:'age', emoji:'🎂', title:'你几岁啦', lines:[
+  { id:'age', cat:1, emoji:'🎂', title:'你几岁啦', lines:[
     {who:'A', en:'How old are you?', cn:'你几岁了？'},
     {who:'B', en:'I am eight years old.', cn:'我八岁了。'},
     {who:'A', en:'When is your birthday?', cn:'你的生日是什么时候？'},
     {who:'B', en:'It is in May.', cn:'在五月。'},
   ]},
-  { id:'like', emoji:'❤️', title:'我喜欢', lines:[
-    {who:'A', en:'What do you like?', cn:'你喜欢什么？'},
-    {who:'B', en:'I like dinosaurs!', cn:'我喜欢恐龙！'},
-    {who:'A', en:'Me too!', cn:'我也是！'},
-    {who:'B', en:'Cool!', cn:'太酷啦！'},
-  ]},
-  { id:'day', emoji:'🌞', title:'今天怎么样', lines:[
+  { id:'day', cat:1, emoji:'🌞', title:'今天怎么样', lines:[
     {who:'A', en:'How was your day?', cn:'你今天过得怎么样？'},
     {who:'B', en:'It was great!', cn:'很棒！'},
     {who:'A', en:'What did you do?', cn:'你做了什么？'},
     {who:'B', en:'I played football.', cn:'我踢足球了。'},
   ]},
-  { id:'food', emoji:'🍎', title:'吃点什么', lines:[
-    {who:'A', en:'Are you hungry?', cn:'你饿了吗？'},
-    {who:'B', en:'Yes, I am.', cn:'是的，我饿了。'},
-    {who:'A', en:'What do you want?', cn:'你想要什么？'},
-    {who:'B', en:'An apple, please.', cn:'一个苹果，谢谢。'},
+  // ---- ② home / daily life ----
+  { id:'getup', cat:2, emoji:'⏰', title:'起床啦', lines:[
+    {who:'A', en:'Good morning! Time to get up!', cn:'早上好！该起床啦！'},
+    {who:'B', en:"OK, Mom. I'm coming.", cn:'好的，妈妈，我来了。'},
+    {who:'A', en:'Wash your face and brush your teeth.', cn:'洗脸，刷牙。'},
+    {who:'B', en:'OK, I will!', cn:'好的，我这就去！'},
   ]},
-  { id:'play', emoji:'🎮', title:'一起玩吧（进阶）', lines:[
-    {who:'A', en:'Do you want to play with me?', cn:'你想和我一起玩吗？'},
-    {who:'B', en:'Yes! What shall we play?', cn:'好呀！我们玩什么？'},
-    {who:'A', en:"Let's play hide and seek!", cn:'我们玩捉迷藏吧！'},
-    {who:'B', en:'Great idea! You count first.', cn:'好主意！你先数数。'},
-    {who:'A', en:'OK. One, two, three...', cn:'好。一、二、三……'},
+  { id:'breakfast', cat:2, emoji:'🥣', title:'吃早饭', lines:[
+    {who:'A', en:'Breakfast is ready!', cn:'早饭好啦！'},
+    {who:'B', en:"What's for breakfast?", cn:'早饭吃什么？'},
+    {who:'A', en:'Milk and eggs.', cn:'牛奶和鸡蛋。'},
+    {who:'B', en:'Yummy! Thank you, Mom!', cn:'好吃！谢谢妈妈！'},
   ]},
-  { id:'shop', emoji:'🛍️', title:'在商店（进阶）', lines:[
+  { id:'goout', cat:2, emoji:'🛝', title:'出去玩', lines:[
+    {who:'B', en:'Mom, can I go out and play?', cn:'妈妈，我能出去玩吗？'},
+    {who:'A', en:'Yes, but come back at five.', cn:'可以，但五点要回来。'},
+    {who:'B', en:'OK! See you later!', cn:'好的！回头见！'},
+    {who:'A', en:'Have fun! Be careful!', cn:'玩得开心！小心点！'},
+  ]},
+  { id:'help', cat:2, emoji:'🧹', title:'我来帮忙', lines:[
+    {who:'A', en:'Can you help me, please?', cn:'你能帮我一下吗？'},
+    {who:'B', en:'Sure, Mom. What can I do?', cn:'当然，妈妈。我能做什么？'},
+    {who:'A', en:'Please clean the table.', cn:'请擦一下桌子。'},
+    {who:'B', en:'No problem!', cn:'没问题！'},
+  ]},
+  { id:'bedtime', cat:2, emoji:'🌙', title:'睡觉啦', lines:[
+    {who:'A', en:"It's late. Time for bed.", cn:'不早了，该睡觉了。'},
+    {who:'B', en:'Can I read one more book?', cn:'我能再看一本书吗？'},
+    {who:'A', en:'OK, just one. Good night!', cn:'好，就一本。晚安！'},
+    {who:'B', en:'Good night, Mom. I love you!', cn:'晚安妈妈，我爱你！'},
+  ]},
+  { id:'shop', cat:2, emoji:'🛍️', title:'买东西', lines:[
     {who:'A', en:'Excuse me, how much is it?', cn:'请问，这个多少钱？'},
     {who:'B', en:'It is two pounds.', cn:'两英镑。'},
     {who:'A', en:'Can I have a red one, please?', cn:'我可以要一个红色的吗？'},
     {who:'B', en:'Sure. Here you are.', cn:'当然，给你。'},
     {who:'A', en:'Thank you very much!', cn:'非常感谢！'},
   ]},
+  // ---- ③ school ----
+  { id:'toschool', cat:3, emoji:'🎒', title:'上学路上', lines:[
+    {who:'A', en:'Have a nice day at school!', cn:'在学校要开心哦！'},
+    {who:'B', en:'Thank you, Mom! Bye!', cn:'谢谢妈妈！再见！'},
+    {who:'A', en:'Listen to your teacher.', cn:'要听老师的话。'},
+    {who:'B', en:'I will. See you!', cn:'我会的。再见！'},
+  ]},
+  { id:'teacher', cat:3, emoji:'👩‍🏫', title:'和老师', lines:[
+    {who:'A', en:'Good morning, Miss Lin.', cn:'早上好，林老师。'},
+    {who:'B', en:'Good morning! Sit down, please.', cn:'早上好！请坐。'},
+    {who:'A', en:'May I go to the toilet?', cn:'我可以去洗手间吗？'},
+    {who:'B', en:'Yes, of course.', cn:'当然可以。'},
+  ]},
+  { id:'classroom', cat:3, emoji:'📚', title:'在课堂', lines:[
+    {who:'A', en:'Open your books, please.', cn:'请打开你们的书。'},
+    {who:'B', en:'Which page?', cn:'哪一页？'},
+    {who:'A', en:'Page ten.', cn:'第十页。'},
+    {who:'B', en:'OK, thank you.', cn:'好的，谢谢。'},
+  ]},
+  { id:'afterschool', cat:3, emoji:'🏫', title:'放学聊学校', lines:[
+    {who:'A', en:'How was school today?', cn:'今天学校怎么样？'},
+    {who:'B', en:'It was great!', cn:'很棒！'},
+    {who:'A', en:'What did you learn?', cn:'你学了什么？'},
+    {who:'B', en:'I learned some English!', cn:'我学了一些英语！'},
+    {who:'A', en:'Well done! I am proud of you.', cn:'真棒！我为你骄傲。'},
+  ]},
+  // ---- ④ jokes / fun ----
+  { id:'joke1', cat:4, emoji:'🚪', title:'敲门笑话', lines:[
+    {who:'A', en:'Knock, knock!', cn:'咚咚咚！'},
+    {who:'B', en:"Who's there?", cn:'谁呀？'},
+    {who:'A', en:'Cow.', cn:'一头牛。'},
+    {who:'B', en:'Cow who?', cn:'什么牛？'},
+    {who:'A', en:'No! A cow says "Moo"!', cn:'不对！牛会说“哞——”！'},
+  ]},
+  { id:'joke2', cat:4, emoji:'🐼', title:'猜一猜', lines:[
+    {who:'A', en:'What is black and white and loves bamboo?', cn:'什么是黑白色、还爱吃竹子？'},
+    {who:'B', en:'A panda!', cn:'熊猫！'},
+    {who:'A', en:'Yes! You are so clever!', cn:'对！你真聪明！'},
+    {who:'B', en:'Haha, that was easy!', cn:'哈哈，太简单啦！'},
+  ]},
+  { id:'joke3', cat:4, emoji:'🐱', title:'和猫说话', lines:[
+    {who:'A', en:'I can talk to animals!', cn:'我会和动物说话！'},
+    {who:'B', en:'Really? Say something to my cat.', cn:'真的？跟我的猫说句话。'},
+    {who:'A', en:'"Meow, meow!"', cn:'“喵，喵！”'},
+    {who:'B', en:'Haha! What did she say?', cn:'哈哈！她说什么？'},
+    {who:'A', en:'She said, "Feed me!"', cn:'她说：“喂我吃饭！”'},
+  ]},
+];
+
+// COUNTRIES — fun facts about real countries (facts, original wording). Read-for-fun,
+// slightly harder English. Each country: sections (landmarks/fun facts/culture) + a guess.
+const COUNTRIES = [
+  { id:'cn', flag:'🇨🇳', name:'China', cn:'中国',
+    sections:[
+      { icon:'🏛️', title:'著名景点 Landmarks', facts:[
+        {em:'🧱', en:'The Great Wall is over 20,000 km long!', cn:'长城超过 2 万公里长！'},
+        {em:'🏯', en:'The Forbidden City has almost 1,000 buildings.', cn:'故宫有将近 1000 座房子。'},
+        {em:'🐼', en:'Pandas live in the mountains of China.', cn:'熊猫住在中国的大山里。'},
+      ]},
+      { icon:'🤯', title:'冷知识 Fun facts', facts:[
+        {em:'🧨', en:'Chinese people invented paper and fireworks.', cn:'中国人发明了纸和烟花。'},
+        {em:'🚄', en:'China has some of the fastest trains in the world.', cn:'中国有世界上最快的火车之一。'},
+        {em:'🍜', en:'Noodles in China can be super long!', cn:'中国的面条可以拉得超级长！'},
+      ]},
+      { icon:'🎎', title:'文化 Culture', facts:[
+        {em:'🧧', en:'Kids get red envelopes at Spring Festival.', cn:'过年时小朋友会收到红包。'},
+        {em:'🥢', en:'People eat with chopsticks.', cn:'人们用筷子吃饭。'},
+        {em:'🐉', en:'The Chinese dragon brings good luck.', cn:'中国龙象征好运。'},
+      ]},
+    ],
+    quiz:[ {q:'Which animal is the treasure of China?', qcn:'哪种动物是中国的国宝？',
+      options:[{en:'Panda',cn:'熊猫'},{en:'Lion',cn:'狮子'},{en:'Tiger',cn:'老虎'}],
+      answer:'Panda', reveal:'Yes! Pandas eat bamboo for up to 12 hours a day!', revealcn:'对！熊猫一天能吃 12 个小时的竹子！'} ] },
+
+  { id:'uk', flag:'🇬🇧', name:'the UK', cn:'英国',
+    sections:[
+      { icon:'🏛️', title:'著名景点 Landmarks', facts:[
+        {em:'🕰️', en:'Big Ben is a giant clock in London.', cn:'大本钟是伦敦的一座大钟。'},
+        {em:'🎡', en:'The London Eye is a huge wheel by the river.', cn:'伦敦眼是河边的巨大摩天轮。'},
+        {em:'🚌', en:'London has red double-decker buses.', cn:'伦敦有红色的双层巴士。'},
+      ]},
+      { icon:'🤯', title:'冷知识 Fun facts', facts:[
+        {em:'🌧️', en:'It rains a lot in the UK!', cn:'英国经常下雨！'},
+        {em:'⬅️', en:'People drive on the left side of the road.', cn:'人们靠左边开车。'},
+        {em:'🫖', en:'British people love drinking tea.', cn:'英国人很爱喝茶。'},
+      ]},
+      { icon:'🎎', title:'文化 Culture', facts:[
+        {em:'🍟', en:'Fish and chips is a famous British food.', cn:'炸鱼薯条是有名的英国菜。'},
+        {em:'🙏', en:'People say "please" and "thank you" a lot.', cn:'人们经常说“请”和“谢谢”。'},
+      ]},
+    ],
+    quiz:[ {q:'Which side of the road do people drive on in the UK?', qcn:'在英国，人们靠哪边开车？',
+      options:[{en:'The left',cn:'左边'},{en:'The right',cn:'右边'},{en:'The middle',cn:'中间'}],
+      answer:'The left', reveal:'Right! In the UK cars drive on the LEFT.', revealcn:'没错！英国的车靠左行驶。'} ] },
+
+  { id:'us', flag:'🇺🇸', name:'the USA', cn:'美国',
+    sections:[
+      { icon:'🏛️', title:'著名景点 Landmarks', facts:[
+        {em:'🗽', en:'The Statue of Liberty stands in New York.', cn:'自由女神像矗立在纽约。'},
+        {em:'🏜️', en:'The Grand Canyon is a huge, deep valley.', cn:'大峡谷是又大又深的峡谷。'},
+      ]},
+      { icon:'🤯', title:'冷知识 Fun facts', facts:[
+        {em:'5️⃣', en:'The USA has 50 states.', cn:'美国有 50 个州。'},
+        {em:'🍔', en:'The hamburger is very popular there.', cn:'汉堡在那里非常受欢迎。'},
+        {em:'🎃', en:'On Halloween, kids dress up and get candy.', cn:'万圣节小朋友会装扮、要糖果。'},
+      ]},
+      { icon:'🎎', title:'文化 Culture', facts:[
+        {em:'🏀', en:'People love basketball and baseball.', cn:'人们喜欢篮球和棒球。'},
+      ]},
+    ],
+    quiz:[ {q:'How many states does the USA have?', qcn:'美国有多少个州？',
+      options:[{en:'Fifty',cn:'50 个'},{en:'Ten',cn:'10 个'},{en:'One hundred',cn:'100 个'}],
+      answer:'Fifty', reveal:'Correct! The USA has 50 states.', revealcn:'答对了！美国有 50 个州。'} ] },
+
+  { id:'fr', flag:'🇫🇷', name:'France', cn:'法国',
+    sections:[
+      { icon:'🏛️', title:'著名景点 Landmarks', facts:[
+        {em:'🗼', en:'The Eiffel Tower is in Paris.', cn:'埃菲尔铁塔在巴黎。'},
+        {em:'🖼️', en:'Paris has a big, famous art museum.', cn:'巴黎有一座著名的大美术馆。'},
+      ]},
+      { icon:'🤯', title:'冷知识 Fun facts', facts:[
+        {em:'🧀', en:'France makes over 1,000 kinds of cheese!', cn:'法国有 1000 多种奶酪！'},
+        {em:'🥖', en:'French bread is long and crispy.', cn:'法国面包又长又脆。'},
+      ]},
+      { icon:'🎎', title:'文化 Culture', facts:[
+        {em:'👋', en:'People say "Bonjour" for hello.', cn:'人们用“Bonjour”打招呼。'},
+        {em:'🥐', en:'Many people eat croissants for breakfast.', cn:'很多人早餐吃可颂。'},
+      ]},
+    ],
+    quiz:[ {q:'What do French people say for "hello"?', qcn:'法国人说“你好”是哪个词？',
+      options:[{en:'Bonjour',cn:'Bonjour（法语你好）'},{en:'Hello',cn:'Hello'},{en:'Ni hao',cn:'你好'}],
+      answer:'Bonjour', reveal:'Oui! "Bonjour" means hello in French.', revealcn:'对！“Bonjour”是法语的“你好”。'} ] },
+
+  { id:'au', flag:'🇦🇺', name:'Australia', cn:'澳大利亚',
+    sections:[
+      { icon:'🏛️', title:'著名景点 Landmarks', facts:[
+        {em:'🐚', en:'The Sydney Opera House looks like big shells.', cn:'悉尼歌剧院像一片片大贝壳。'},
+        {em:'🐠', en:'The Great Barrier Reef is full of colorful fish.', cn:'大堡礁里满是彩色的鱼。'},
+      ]},
+      { icon:'🤯', title:'冷知识 Fun facts', facts:[
+        {em:'🦘', en:'Kangaroos hop on their two big legs.', cn:'袋鼠用两条大长腿蹦蹦跳。'},
+        {em:'🐨', en:'Koalas sleep up to 20 hours a day!', cn:'考拉一天能睡 20 个小时！'},
+        {em:'🔄', en:'When China is in winter, Australia is in summer.', cn:'中国是冬天时，澳大利亚正是夏天。'},
+      ]},
+    ],
+    quiz:[ {q:'Which animal carries its baby in a pocket?', qcn:'哪种动物用“口袋”装宝宝？',
+      options:[{en:'Kangaroo',cn:'袋鼠'},{en:'Koala',cn:'考拉'},{en:'Dog',cn:'狗'}],
+      answer:'Kangaroo', reveal:'Yes! A baby kangaroo is called a joey.', revealcn:'对！小袋鼠叫 joey。'} ] },
+
+  { id:'eg', flag:'🇪🇬', name:'Egypt', cn:'埃及',
+    sections:[
+      { icon:'🏛️', title:'著名景点 Landmarks', facts:[
+        {em:'🔺', en:'The Pyramids are huge and very old.', cn:'金字塔又大又古老。'},
+        {em:'🦁', en:'The Sphinx has a lion body and a human face.', cn:'狮身人面像有狮子的身体、人的脸。'},
+        {em:'🏞️', en:'The Nile is a very long river.', cn:'尼罗河是一条很长很长的河。'},
+      ]},
+      { icon:'🤯', title:'冷知识 Fun facts', facts:[
+        {em:'⏳', en:'The Pyramids are over 4,000 years old!', cn:'金字塔有 4000 多年历史！'},
+        {em:'🐈', en:'Ancient Egyptians really loved cats.', cn:'古埃及人非常喜爱猫。'},
+      ]},
+    ],
+    quiz:[ {q:'What is the giant triangle building in Egypt?', qcn:'埃及那个巨大的三角形建筑是什么？',
+      options:[{en:'A pyramid',cn:'金字塔'},{en:'A castle',cn:'城堡'},{en:'A tower',cn:'塔'}],
+      answer:'A pyramid', reveal:'Right! Kings were buried inside the pyramids.', revealcn:'对！古代的国王就葬在金字塔里。'} ] },
 ];
 
 // COURSE — original lessons aligned to the grade-3 curriculum scope (same words &
@@ -905,28 +1180,90 @@ const COURSE = [
   },
 ];
 
-// Phonics — grouped natural-phonics (自然拼读): short vowels, magic-e, vowel teams.
+// Phonics — a lesson-by-lesson natural-phonics course. Each lesson has its own screen.
+// item: {key, say?(letter to read first), rep?(times), ipa, hint, words:[{w,em,cn}]}
 const PHONICS = [
-  { group:'① 5 个短元音（a e i o u）', rule:'元音在短单词里读“短音”，又快又短', items:[
-    {ch:'a', ipa:'/æ/', word:'cat', em:'🐱', cn:'猫（张大嘴“ae”）'},
-    {ch:'e', ipa:'/e/', word:'hen', em:'🐔', cn:'母鸡（像“唉”）'},
-    {ch:'i', ipa:'/ɪ/', word:'pig', em:'🐷', cn:'猪（短短的“衣”）'},
-    {ch:'o', ipa:'/ɒ/', word:'dog', em:'🐶', cn:'狗（圆嘴“喔”）'},
-    {ch:'u', ipa:'/ʌ/', word:'cup', em:'🥤', cn:'杯子（短“啊”）'},
-  ]},
-  { group:'② 神奇的 e（长音·字母本音）', rule:'词尾加个不发音的 e，前面的元音就“读自己的名字”', items:[
-    {ch:'a…e', ipa:'/eɪ/', word:'cake', em:'🎂', cn:'蛋糕（a 读“诶”）'},
-    {ch:'i…e', ipa:'/aɪ/', word:'bike', em:'🚲', cn:'自行车（i 读“爱”）'},
-    {ch:'o…e', ipa:'/oʊ/', word:'home', em:'🏠', cn:'家（o 读“欧”）'},
-    {ch:'u…e', ipa:'/juː/', word:'cute', em:'🥰', cn:'可爱（u 读“优”）'},
-  ]},
-  { group:'③ 元音组合（两个字母发一个音）', rule:'两个字母组队，一起发一个新音', items:[
-    {ch:'ai / ay', ipa:'/eɪ/', word:'rain', em:'🌧️', cn:'雨（“诶”）'},
-    {ch:'ee / ea', ipa:'/iː/', word:'tree', em:'🌳', cn:'树（长“衣”）'},
-    {ch:'oo', ipa:'/uː/', word:'moon', em:'🌙', cn:'月亮（长“乌”）'},
-    {ch:'oa', ipa:'/oʊ/', word:'boat', em:'⛵', cn:'小船（“欧”）'},
-    {ch:'ow / ou', ipa:'/aʊ/', word:'cow', em:'🐄', cn:'奶牛（“奥”）'},
-  ]},
+  { id:'p1', title:'第1课 · 字母王国', emoji:'👑',
+    intro:'英语有 26 个字母。其中 5 个是“国王” 👑 —— a e i o u，叫“元音”；剩下 21 个是“平民”，叫“辅音”。几乎每个单词里都藏着国王！先来认认 5 位国王的名字。',
+    items:[
+      {key:'A a', say:'A', rep:3, ipa:'/eɪ/', hint:'国王① 名字读“诶”', words:[]},
+      {key:'E e', say:'E', rep:3, ipa:'/iː/', hint:'国王② 名字读“衣”', words:[]},
+      {key:'I i', say:'I', rep:3, ipa:'/aɪ/', hint:'国王③ 名字读“爱”', words:[]},
+      {key:'O o', say:'O', rep:3, ipa:'/oʊ/', hint:'国王④ 名字读“欧”', words:[]},
+      {key:'U u', say:'U', rep:3, ipa:'/juː/', hint:'国王⑤ 名字读“优”', words:[]},
+    ]},
+  { id:'p2', title:'第2课 · 5个元音·短音', emoji:'🔤',
+    intro:'国王在短单词里常常读“短音”，又快又短。先跟着读三遍字母，再读单词、找找那个音。',
+    items:[
+      {key:'a', say:'a', rep:3, ipa:'/æ/', hint:'嘴张大，“ae”', words:[{w:'cat',em:'🐱',cn:'猫'},{w:'apple',em:'🍎',cn:'苹果'}]},
+      {key:'e', say:'e', rep:3, ipa:'/e/', hint:'像“唉”', words:[{w:'hen',em:'🐔',cn:'母鸡'},{w:'bed',em:'🛏️',cn:'床'}]},
+      {key:'i', say:'i', rep:3, ipa:'/ɪ/', hint:'短短的“衣”', words:[{w:'pig',em:'🐷',cn:'猪'},{w:'six',em:'6️⃣',cn:'六'}]},
+      {key:'o', say:'o', rep:3, ipa:'/ɒ/', hint:'圆嘴“喔”', words:[{w:'dog',em:'🐶',cn:'狗'},{w:'box',em:'📦',cn:'盒子'}]},
+      {key:'u', say:'u', rep:3, ipa:'/ʌ/', hint:'短“啊”', words:[{w:'cup',em:'🥤',cn:'杯子'},{w:'bus',em:'🚌',cn:'公交车'}]},
+    ]},
+  { id:'p3', title:'第3课 · 神奇的 e', emoji:'✨',
+    intro:'单词结尾加一个不发音的 e，前面的元音就会“读自己的名字”（长音）。比如 cap→cape、hop→hope。',
+    items:[
+      {key:'a…e', say:'A', rep:3, ipa:'/eɪ/', hint:'a 读“诶”', words:[{w:'cake',em:'🎂',cn:'蛋糕'},{w:'name',em:'🏷️',cn:'名字'}]},
+      {key:'i…e', say:'I', rep:3, ipa:'/aɪ/', hint:'i 读“爱”', words:[{w:'bike',em:'🚲',cn:'自行车'},{w:'kite',em:'🪁',cn:'风筝'}]},
+      {key:'o…e', say:'O', rep:3, ipa:'/oʊ/', hint:'o 读“欧”', words:[{w:'home',em:'🏠',cn:'家'},{w:'nose',em:'👃',cn:'鼻子'}]},
+      {key:'u…e', say:'U', rep:3, ipa:'/juː/', hint:'u 读“优”', words:[{w:'cute',em:'🥰',cn:'可爱的'},{w:'June',em:'📅',cn:'六月'}]},
+    ]},
+  { id:'p4', title:'第4课 · 元音组合', emoji:'👫',
+    intro:'两个字母组队，一起发一个新的音。',
+    items:[
+      {key:'ai / ay', ipa:'/eɪ/', hint:'读“诶”', words:[{w:'rain',em:'🌧️',cn:'雨'},{w:'day',em:'📆',cn:'一天'}]},
+      {key:'ee / ea', ipa:'/iː/', hint:'长长的“衣”', words:[{w:'tree',em:'🌳',cn:'树'},{w:'eat',em:'🍽️',cn:'吃'}]},
+      {key:'oo', ipa:'/uː/', hint:'长长的“乌”', words:[{w:'moon',em:'🌙',cn:'月亮'},{w:'food',em:'🍚',cn:'食物'}]},
+      {key:'oa', ipa:'/oʊ/', hint:'读“欧”', words:[{w:'boat',em:'⛵',cn:'小船'},{w:'goat',em:'🐐',cn:'山羊'}]},
+      {key:'ow / ou', ipa:'/aʊ/', hint:'读“奥”', words:[{w:'cow',em:'🐄',cn:'奶牛'},{w:'house',em:'🏡',cn:'房子'}]},
+      {key:'oi / oy', ipa:'/ɔɪ/', hint:'读“奥伊”', words:[{w:'boy',em:'👦',cn:'男孩'},{w:'toy',em:'🧸',cn:'玩具'}]},
+    ]},
+  { id:'p5', title:'第5课 · 辅音（上）', emoji:'🅱️',
+    intro:'平民辅音的音。听单词，找出开头那个音。',
+    items:[
+      {key:'B b', ipa:'/b/', hint:'双唇一碰', words:[{w:'ball',em:'⚽',cn:'球'}]},
+      {key:'C c', ipa:'/k/', hint:'喉咙“可”', words:[{w:'cat',em:'🐱',cn:'猫'}]},
+      {key:'D d', ipa:'/d/', hint:'舌尖顶上牙', words:[{w:'dog',em:'🐶',cn:'狗'}]},
+      {key:'F f', ipa:'/f/', hint:'上牙咬下唇吹气', words:[{w:'fish',em:'🐟',cn:'鱼'}]},
+      {key:'G g', ipa:'/ɡ/', hint:'喉咙“个”', words:[{w:'goat',em:'🐐',cn:'山羊'}]},
+      {key:'H h', ipa:'/h/', hint:'哈气“喝”', words:[{w:'hat',em:'🎩',cn:'帽子'}]},
+      {key:'J j', ipa:'/dʒ/', hint:'“至”', words:[{w:'jump',em:'🤸',cn:'跳'}]},
+      {key:'K k', ipa:'/k/', hint:'和 c 一样“可”', words:[{w:'key',em:'🔑',cn:'钥匙'}]},
+      {key:'L l', ipa:'/l/', hint:'舌尖顶上“了”', words:[{w:'lion',em:'🦁',cn:'狮子'}]},
+      {key:'M m', ipa:'/m/', hint:'闭嘴哼“姆”', words:[{w:'moon',em:'🌙',cn:'月亮'}]},
+    ]},
+  { id:'p6', title:'第6课 · 辅音（下）', emoji:'🆎',
+    intro:'剩下的辅音。听单词，找出开头那个音。',
+    items:[
+      {key:'N n', ipa:'/n/', hint:'舌尖顶上“呢”', words:[{w:'nose',em:'👃',cn:'鼻子'}]},
+      {key:'P p', ipa:'/p/', hint:'双唇喷气“泼”', words:[{w:'pig',em:'🐷',cn:'猪'}]},
+      {key:'Qu qu', ipa:'/kw/', hint:'q 总和 u 一起“括”', words:[{w:'queen',em:'👑',cn:'女王'}]},
+      {key:'R r', ipa:'/r/', hint:'卷舌“若”', words:[{w:'red',em:'🔴',cn:'红色'}]},
+      {key:'S s', ipa:'/s/', hint:'小蛇“丝~”', words:[{w:'sun',em:'☀️',cn:'太阳'}]},
+      {key:'T t', ipa:'/t/', hint:'舌尖轻弹“特”', words:[{w:'ten',em:'🔟',cn:'十'}]},
+      {key:'V v', ipa:'/v/', hint:'上牙咬下唇发声', words:[{w:'van',em:'🚐',cn:'面包车'}]},
+      {key:'W w', ipa:'/w/', hint:'圆嘴“乌”', words:[{w:'water',em:'💧',cn:'水'}]},
+      {key:'Y y', ipa:'/j/', hint:'“耶”', words:[{w:'yellow',em:'🟡',cn:'黄色'}]},
+      {key:'Z z', ipa:'/z/', hint:'蜜蜂“兹~”', words:[{w:'zoo',em:'🦓',cn:'动物园'}]},
+    ]},
+  { id:'p7', title:'第7课 · 辅音组合', emoji:'🔗',
+    intro:'两个辅音组队，也会发一个新音。',
+    items:[
+      {key:'sh', ipa:'/ʃ/', hint:'安静“嘘~”', words:[{w:'fish',em:'🐟',cn:'鱼'},{w:'ship',em:'🚢',cn:'轮船'}]},
+      {key:'ch', ipa:'/tʃ/', hint:'打喷嚏“去”', words:[{w:'chair',em:'🪑',cn:'椅子'},{w:'lunch',em:'🍱',cn:'午饭'}]},
+      {key:'th', ipa:'/θ,ð/', hint:'舌尖伸牙缝', words:[{w:'thank',em:'🙏',cn:'谢谢'},{w:'this',em:'👉',cn:'这个'}]},
+      {key:'wh', ipa:'/w/', hint:'圆嘴“乌”', words:[{w:'white',em:'⚪',cn:'白色'},{w:'what',em:'❓',cn:'什么'}]},
+      {key:'ck', ipa:'/k/', hint:'词尾“可”', words:[{w:'duck',em:'🦆',cn:'鸭子'},{w:'clock',em:'⏰',cn:'时钟'}]},
+      {key:'ng', ipa:'/ŋ/', hint:'鼻音“嗯”', words:[{w:'king',em:'🤴',cn:'国王'},{w:'sing',em:'🎤',cn:'唱歌'}]},
+    ]},
+  { id:'p8', title:'第8课 · r 的魔法', emoji:'🌀',
+    intro:'元音后面跟着 r，会变成卷舌的新音。',
+    items:[
+      {key:'ar', ipa:'/ɑːr/', hint:'张嘴卷舌“啊r”', words:[{w:'car',em:'🚗',cn:'汽车'},{w:'star',em:'⭐',cn:'星星'}]},
+      {key:'or', ipa:'/ɔːr/', hint:'圆嘴卷舌“哦r”', words:[{w:'fork',em:'🍴',cn:'叉子'},{w:'corn',em:'🌽',cn:'玉米'}]},
+      {key:'er / ir / ur', ipa:'/ɜːr/', hint:'卷舌“儿”', words:[{w:'bird',em:'🐦',cn:'鸟'},{w:'nurse',em:'👩‍⚕️',cn:'护士'}]},
+    ]},
 ];
 
 // STORIES — short, simple, everyday-life stories (Peppa-style short sentences).
@@ -1258,6 +1595,7 @@ function go(id){
   window.scrollTo(0,0);
   if(id==='home') renderHome();
   if(id==='talkList') renderTalkList();
+  if(id==='countryList') renderCountryList();
   if(id==='storyList') renderStoryList();
   if(id==='convList') renderConvList();
   if(id==='gamesList') renderGamesList();
@@ -1355,12 +1693,7 @@ document.getElementById('talkNext').onclick = ()=>{
 };
 
 /* ---------------- Worlds ---------------- */
-function worldUnlocked(wIdx){
-  if(wIdx===0) return true;
-  // unlock next world when previous world fully done
-  const prev = WORLDS[wIdx-1];
-  return prev.levels.every((_,i)=> S.levelsDone.includes(prev.id+':'+i));
-}
+function worldUnlocked(wIdx){ return true; }  // all themes open; levels within a theme stay sequential
 function levelUnlocked(w, lvIdx){
   if(lvIdx===0) return true;
   return S.levelsDone.includes(w.id+':'+(lvIdx-1));
@@ -1418,6 +1751,14 @@ function renderWordCard(){
   document.getElementById('wordEn').textContent=wd.en;
   document.getElementById('wordIpa').textContent=wd.ipa;
   document.getElementById('wordCn').textContent=wd.cn;
+  const sd=document.getElementById('wordSentence');
+  if(wd.s){
+    sd.innerHTML='<div style="background:#f4f8ff;border-radius:14px;padding:10px;margin-top:8px">📝 <span id="wsEn" style="font-weight:800;font-size:17px"></span>'+
+      '<div class="subtle" style="margin-top:2px">'+wd.s.cn+'</div>'+
+      '<button class="sp" id="wsPlay" style="margin-top:6px">🔊 听句子</button></div>';
+    renderTappable(document.getElementById('wsEn'), wd.s.en);
+    document.getElementById('wsPlay').onclick=()=> speak(wd.s.en);
+  } else sd.innerHTML='';
   document.getElementById('wordFeedback').textContent='';
   document.getElementById('wordTip').textContent='';
   const dots=document.getElementById('wordDots'); dots.innerHTML='';
@@ -1523,19 +1864,52 @@ function finishLevel(){
 /* ---------------- Phonics ---------------- */
 function renderPhonics(){
   const box=document.getElementById('phonicsBody'); box.innerHTML='';
-  PHONICS.forEach(g=>{
-    const h=document.createElement('div'); h.className='card'; h.style.padding='12px 14px'; h.style.marginBottom='10px';
-    h.innerHTML='<div style="font-weight:900;font-size:17px">'+g.group+'</div><div class="subtle" style="margin-top:3px">'+g.rule+'</div>';
-    box.appendChild(h);
-    g.items.forEach(p=>{
-      const b=document.createElement('button'); b.className='listrow';
-      b.innerHTML='<div class="lem">'+p.em+'</div>'+
-        '<div class="lt"><div class="a">'+p.ch+' &nbsp; <span style="color:var(--purple-d)">'+p.ipa+'</span></div>'+
-        '<div class="b">'+p.word+' · '+p.cn+'</div></div><div class="lock">🔊</div>';
-      b.onclick=()=>{ speak(p.word); toast('跟我读：'+p.word); };
-      box.appendChild(b);
-    });
+  PHONICS.forEach((L,i)=>{
+    const b=document.createElement('button'); b.className='listrow';
+    b.innerHTML='<div class="lem">'+(L.emoji||'🔤')+'</div><div class="lt"><div class="a">'+L.title+'</div><div class="b">'+L.items.length+' 个发音 · 点开学</div></div><div class="lock">▶️</div>';
+    b.onclick=()=> openPhonicsLesson(i);
+    box.appendChild(b);
   });
+}
+// Play: read the letter `say` `rep` times, then the example words, one by one.
+function playPhonics(item){
+  const seq=[];
+  if(item.say){ for(let i=0;i<(item.rep||1);i++) seq.push(item.say); }
+  (item.words||[]).forEach(w=> seq.push(w.w));
+  if(!seq.length) return;
+  let k=0; const step=()=>{ if(k>=seq.length) return; speak(seq[k]); k++; setTimeout(step, 1000); };
+  step();
+}
+function openPhonicsLesson(idx){
+  const L=PHONICS[idx];
+  document.getElementById('phLessonTitle').textContent=L.title;
+  document.getElementById('phFeedback').textContent=''; document.getElementById('phTip').textContent='';
+  const body=document.getElementById('phLessonBody'); body.innerHTML='';
+  if(L.intro){ const intro=document.createElement('div'); intro.className='card'; intro.style.background='#f4f8ff';
+    intro.innerHTML='<div style="font-size:15px;line-height:1.6;color:var(--ink)">'+L.intro+'</div>'; body.appendChild(intro); }
+  L.items.forEach(item=>{
+    const c=document.createElement('div'); c.className='card';
+    const head=document.createElement('div'); head.style.cssText='display:flex;align-items:center;gap:10px';
+    head.innerHTML='<div style="font-size:30px;font-weight:900;color:var(--purple-d)">'+item.key+'</div>'+
+      '<div style="flex:1"><div style="font-weight:800">'+item.ipa+'</div><div class="subtle">'+item.hint+'</div></div>';
+    const listen=document.createElement('button'); listen.className='btn btn-blue'; listen.style.cssText='padding:8px 14px;font-size:15px'; listen.textContent='🔊 听'; listen.onclick=()=> playPhonics(item);
+    head.appendChild(listen); c.appendChild(head);
+    (item.words||[]).forEach(w=>{
+      const row=document.createElement('div'); row.className='listrow'; row.style.marginTop='8px';
+      const em=document.createElement('div'); em.className='lem'; em.textContent=w.em;
+      const lt=document.createElement('div'); lt.className='lt';
+      const a=document.createElement('div'); a.className='a'; renderTappable(a, w.w);
+      const bcn=document.createElement('div'); bcn.className='b'; bcn.textContent=w.cn;
+      lt.appendChild(a); lt.appendChild(bcn);
+      const sp=document.createElement('button'); sp.className='sp'; sp.textContent='🔊'; sp.onclick=()=> speak(w.w);
+      const prac=document.createElement('button'); prac.className='sp'; prac.textContent='🎤 跟读'; prac.style.marginLeft='6px';
+      prac.onclick=()=> listenAndCheck(w.w, document.getElementById('phFeedback'), document.getElementById('phTip'), (st)=>{ addStars(st); popStars(st); });
+      row.appendChild(em); row.appendChild(lt); row.appendChild(sp); row.appendChild(prac);
+      c.appendChild(row);
+    });
+    body.appendChild(c);
+  });
+  go('phonicsLesson'); markToday();
 }
 
 /* ---------------- Badges screen ---------------- */
@@ -1814,14 +2188,78 @@ function answerStoryQuiz(btn, right, q){
   setTimeout(()=>{ toast('🎉 故事听完啦！'); go('storyList'); }, 1500);
 }
 
+/* ---------------- Countries (fun facts + guess) ---------------- */
+function renderCountryList(){
+  const box=document.getElementById('countryListBody'); box.innerHTML='';
+  COUNTRIES.forEach((c,i)=>{
+    const b=document.createElement('button'); b.className='listrow';
+    b.innerHTML='<div class="lem">'+c.flag+'</div><div class="lt"><div class="a">'+c.name+' · '+c.cn+'</div><div class="b">景点 · 冷知识 · 文化 · 猜猜看</div></div><div class="lock">▶️</div>';
+    b.onclick=()=> openCountry(i);
+    box.appendChild(b);
+  });
+}
+function openCountry(i){
+  const c=COUNTRIES[i];
+  document.getElementById('countryTitle').textContent=c.flag+' '+c.name+' '+c.cn;
+  const body=document.getElementById('countryBody'); body.innerHTML='';
+  c.sections.forEach(sec=>{
+    const card=document.createElement('div'); card.className='card';
+    card.innerHTML='<div style="font-weight:900;font-size:17px;margin-bottom:6px">'+sec.icon+' '+sec.title+'</div>';
+    sec.facts.forEach(f=>{
+      const row=document.createElement('div'); row.className='listrow'; row.style.marginBottom='8px';
+      const em=document.createElement('div'); em.className='lem'; em.textContent=f.em;
+      const lt=document.createElement('div'); lt.className='lt';
+      const a=document.createElement('div'); a.className='a'; a.style.fontSize='16px'; renderTappable(a, f.en);
+      const bcn=document.createElement('div'); bcn.className='b'; bcn.textContent=f.cn;
+      lt.appendChild(a); lt.appendChild(bcn);
+      const sp=document.createElement('button'); sp.className='sp'; sp.textContent='🔊'; sp.onclick=()=> speak(f.en);
+      row.appendChild(em); row.appendChild(lt); row.appendChild(sp);
+      card.appendChild(row);
+    });
+    body.appendChild(card);
+  });
+  (c.quiz||[]).forEach(q=>{
+    const card=document.createElement('div'); card.className='card'; card.style.background='#fff7d6';
+    const head=document.createElement('div'); head.style.cssText='font-weight:900;font-size:17px'; head.textContent='❓ 猜猜看';
+    const qen=document.createElement('div'); qen.style.cssText='font-weight:800;margin-top:6px'; renderTappable(qen, q.q);
+    const qcn=document.createElement('div'); qcn.className='subtle'; qcn.textContent=q.qcn;
+    card.appendChild(head); card.appendChild(qen); card.appendChild(qcn);
+    const opts=document.createElement('div'); opts.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:10px';
+    const msg=document.createElement('div'); msg.className='feedback'; msg.style.textAlign='left'; msg.style.marginTop='8px';
+    let solved=false;
+    q.options.forEach(o=>{
+      const b=document.createElement('button'); b.className='btn btn-ghost'; b.style.cssText='text-align:left;font-size:16px';
+      b.innerHTML=o.en+' &nbsp;<span style="color:var(--ink-soft);font-weight:700">'+o.cn+'</span>';
+      b.onclick=()=>{
+        speak(o.en);
+        if(o.en===q.answer){ b.style.background='var(--green-d)'; b.style.color='#fff';
+          msg.innerHTML='⭐ '+(q.reveal||'答对啦！')+'<br><span class="subtle">'+(q.revealcn||'')+'</span>';
+          if(!solved){ solved=true; addStars(1); popStars(1); } }
+        else { b.style.background='#ffb4b4'; msg.textContent='💛 再想想，点一个试试～'; }
+      };
+      opts.appendChild(b);
+    });
+    card.appendChild(opts); card.appendChild(msg);
+    body.appendChild(card);
+  });
+  go('countryPlay'); markToday();
+}
+
 /* ---------------- Conversation topics ---------------- */
 function renderConvList(){
   const box=document.getElementById('convListBody'); box.innerHTML='';
-  CONV.forEach((c,i)=>{
-    const b=document.createElement('button'); b.className='listrow';
-    b.innerHTML='<div class="lem">'+c.emoji+'</div><div class="lt"><div class="a">'+c.title+'</div><div class="b">'+c.lines.length+' 句对话</div></div><div class="lock">▶️</div>';
-    b.onclick=()=> openConv(i);
-    box.appendChild(b);
+  CONV_CATS.forEach(cat=>{
+    const items=CONV.filter(c=>c.cat===cat.n);
+    if(!items.length) return;
+    const h=document.createElement('div'); h.style.cssText='font-weight:900;font-size:16px;margin:14px 4px 6px'; h.textContent=cat.name;
+    box.appendChild(h);
+    items.forEach(c=>{
+      const idx=CONV.indexOf(c);
+      const b=document.createElement('button'); b.className='listrow';
+      b.innerHTML='<div class="lem">'+c.emoji+'</div><div class="lt"><div class="a">'+c.title+'</div><div class="b">'+c.lines.length+' 句对话</div></div><div class="lock">▶️</div>';
+      b.onclick=()=> openConv(idx);
+      box.appendChild(b);
+    });
   });
 }
 let convCtx=null;
@@ -1837,8 +2275,10 @@ function openConv(i){
     const cn=document.createElement('div'); cn.className='cn'; cn.textContent=ln.cn;
     const sp=document.createElement('button'); sp.className='sp'; sp.textContent='🔊 听'; sp.onclick=()=> speak(ln.en);
     const prac=document.createElement('button'); prac.className='sp'; prac.textContent='🎤 练'; prac.style.marginLeft='6px';
-    prac.onclick=()=> listenAndCheck(ln.en, document.getElementById('convFeedback'), document.getElementById('convTip'), (st)=>{ addStars(st); popStars(st); });
-    bub.appendChild(en); bub.appendChild(cn); bub.appendChild(sp); bub.appendChild(prac);
+    const fb=document.createElement('div'); fb.className='feedback'; fb.style.cssText='font-size:15px;min-height:0;text-align:left;margin-top:6px';
+    const tp=document.createElement('div'); tp.className='listen-tip'; tp.style.textAlign='left';
+    prac.onclick=()=> listenAndCheck(ln.en, fb, tp, (st)=>{ addStars(st); popStars(st); });
+    bub.appendChild(en); bub.appendChild(cn); bub.appendChild(sp); bub.appendChild(prac); bub.appendChild(fb); bub.appendChild(tp);
     row.appendChild(who); row.appendChild(bub); body.appendChild(row);
   });
   go('convPlay'); markToday();
