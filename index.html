@@ -445,13 +445,25 @@
     <div id="courseListBody"></div>
   </div>
 
-  <!-- ===== COURSE: one unit ===== -->
-  <div id="unitPlay" class="screen">
-    <div class="backrow"><button class="backbtn" onclick="go('courseList')">⬅️ 返回</button><h2 class="title" id="unitTitle" style="margin:0"></h2></div>
-    <div id="unitBody"></div>
-    <div class="feedback" id="unitFeedback"></div>
-    <div class="listen-tip" id="unitTip"></div>
-    <button class="btn big btn-green" id="unitDone" style="margin-top:6px">🎉 学完这一单元</button>
+  <!-- ===== COURSE: unit hub (boards) ===== -->
+  <div id="unitHub" class="screen">
+    <div class="backrow"><button class="backbtn" onclick="go('courseList')">⬅️ 返回</button><h2 class="title" id="unitHubTitle" style="margin:0"></h2></div>
+    <p class="subtle" style="margin:0 4px 10px">一个板块一个板块闯，全部完成就能领 🎓 单元毕业证！</p>
+    <div id="unitHubBody"></div>
+  </div>
+
+  <!-- ===== COURSE: one board ===== -->
+  <div id="unitBoard" class="screen">
+    <div class="backrow"><button class="backbtn" onclick="go('unitHub')">⬅️ 返回</button><h2 class="title" id="unitBoardTitle" style="margin:0"></h2></div>
+    <div id="unitBoardBody"></div>
+  </div>
+
+  <!-- ===== COURSE: certificate ===== -->
+  <div id="unitCert" class="screen">
+    <div class="backrow"><button class="backbtn" onclick="go('unitHub')">⬅️ 返回</button><h2 class="title" style="margin:0">🎓 毕业证</h2></div>
+    <div class="card" id="certBody" style="text-align:center"></div>
+    <p class="subtle" style="text-align:center">截个图，给爸爸妈妈看看你的毕业证吧！</p>
+    <button class="btn big btn-green" onclick="go('courseList')" style="margin-top:6px">🏠 回单元列表</button>
   </div>
 
   <!-- ===== GAMES: hub ===== -->
@@ -1352,25 +1364,25 @@ const COUNTRIES = [
 // language functions; original dialogues with our own characters, no textbook art/text).
 const COURSE = [
   { id:'u1', title:'Unit 1 · Hello!', cn:'打招呼', ready:true,
-    goals:['和别人打招呼','问名字、说自己的名字','会说"早上好""你好吗""很高兴认识你""再见"'],
     words:[
-      {en:'hello', cn:'你好', em:'👋'},
-      {en:'hi', cn:'嗨；你好', em:'🙋'},
-      {en:'I', cn:'我', em:'🧒'},
-      {en:'name', cn:'名字', em:'🏷️'},
-      {en:'fine', cn:'很好', em:'😊'},
-      {en:'goodbye', cn:'再见', em:'👋'},
-      {en:'bye', cn:'拜拜', em:'✋'},
-      {en:'morning', cn:'早上', em:'🌅'},
-      {en:'thank you', cn:'谢谢', em:'🙏'},
-      {en:'nice', cn:'愉快的；好的', em:'🌸'},
-      {en:'meet', cn:'遇见', em:'🤝'},
+      {en:'hello', cn:'你好', em:'👋', s:{en:'Hello! I am Tom.', cn:'你好！我是 Tom。'}},
+      {en:'hi', cn:'嗨；你好', em:'🙋', s:{en:'Hi! Nice to meet you.', cn:'嗨！很高兴认识你。'}},
+      {en:'I', cn:'我', em:'🧒', s:{en:'I am a student.', cn:'我是一名学生。'}},
+      {en:'name', cn:'名字', em:'🏷️', s:{en:'My name is Mia.', cn:'我叫 Mia。'}},
+      {en:'you', cn:'你', em:'👉', s:{en:'How are you?', cn:'你好吗？'}},
+      {en:'fine', cn:'很好', em:'😊', s:{en:'I am fine, thank you.', cn:'我很好，谢谢。'}},
+      {en:'thanks', cn:'谢谢', em:'🙏', s:{en:'Thanks a lot!', cn:'非常感谢！'}},
+      {en:'good', cn:'好的', em:'👍', s:{en:'Good morning!', cn:'早上好！'}},
+      {en:'morning', cn:'早上', em:'🌅', s:{en:'Good morning, everyone!', cn:'大家早上好！'}},
+      {en:'nice', cn:'愉快的', em:'🌸', s:{en:'Nice to meet you!', cn:'很高兴认识你！'}},
+      {en:'meet', cn:'遇见', em:'🤝', s:{en:'Nice to meet you, too!', cn:'我也很高兴认识你！'}},
+      {en:'goodbye', cn:'再见', em:'👋', s:{en:'Goodbye! See you!', cn:'再见！回头见！'}},
     ],
     grammar:[
-      {point:'介绍我自己', examples:[{en:"I'm Tom.", cn:'我是 Tom。'},{en:'My name is Tom.', cn:'我的名字叫 Tom。'}]},
+      {point:'介绍我自己', examples:[{en:'I am Tom.', cn:'我是 Tom。'},{en:"I'm Tom.", cn:'我是 Tom。（缩写）'},{en:'My name is Tom.', cn:'我的名字叫 Tom。'}]},
       {point:'问别人叫什么', examples:[{en:"What's your name?", cn:'你叫什么名字？'},{en:'My name is Mia.', cn:'我叫 Mia。'}]},
-      {point:'问好 & 回答', examples:[{en:'How are you?', cn:'你好吗？'},{en:"I'm fine, thank you.", cn:'我很好，谢谢。'}]},
-      {point:'常用问候语', examples:[{en:'Good morning!', cn:'早上好！'},{en:'Nice to meet you!', cn:'很高兴认识你！'},{en:'Goodbye! / Bye!', cn:'再见！'}]},
+      {point:'问好 & 回答', examples:[{en:'How are you?', cn:'你好吗？'},{en:"I'm fine, thanks.", cn:'我很好，谢谢。'}]},
+      {point:'问候 & 告别', examples:[{en:'Hello! / Good morning!', cn:'你好！/ 早上好！'},{en:'Nice to meet you!', cn:'很高兴认识你！'},{en:'Goodbye! / Bye!', cn:'再见！'}]},
     ],
     dialogues:[
       { title:'认识新朋友', lines:[
@@ -1379,17 +1391,27 @@ const COURSE = [
         {who:'A', en:'Nice to meet you!', cn:'很高兴认识你！'},
         {who:'B', en:'Nice to meet you, too!', cn:'我也很高兴认识你！'},
       ]},
-      { title:'早上好 · 你好吗', lines:[
-        {who:'A', en:'Good morning, Mia!', cn:'早上好，Mia！'},
-        {who:'B', en:'Good morning, Tom! How are you?', cn:'早上好，Tom！你好吗？'},
-        {who:'A', en:"I'm fine, thank you. And you?", cn:'我很好，谢谢。你呢？'},
-        {who:'B', en:"I'm fine, too!", cn:'我也很好！'},
-      ]},
-      { title:'再见啦', lines:[
-        {who:'A', en:'Goodbye, Mia!', cn:'再见，Mia！'},
-        {who:'B', en:'Bye, Tom! See you later!', cn:'拜拜，Tom！回头见！'},
+      { title:'早上好 · 再见', lines:[
+        {who:'A', en:'Good morning, Mia! How are you?', cn:'早上好，Mia！你好吗？'},
+        {who:'B', en:"I'm fine, thanks. And you?", cn:'我很好，谢谢。你呢？'},
+        {who:'A', en:"I'm fine, too. Goodbye!", cn:'我也很好。再见！'},
+        {who:'B', en:'Bye! See you later!', cn:'拜拜！回头见！'},
       ]},
     ],
+    situ:[
+      {prompt:'Hello!', cn:'别人跟你说 Hello!', options:[{en:'Hello!', ok:true},{en:'Goodbye!'},{en:'Thank you!'}]},
+      {prompt:"What's your name?", cn:'别人问你叫什么名字', options:[{en:'My name is Mia.', ok:true},{en:"I'm fine."},{en:'Good morning.'}]},
+      {prompt:'How are you?', cn:'别人问你好吗', options:[{en:"I'm fine, thanks.", ok:true},{en:"I'm Tom."},{en:'Bye!'}]},
+      {prompt:'Good morning!', cn:'早上有人跟你问好', options:[{en:'Good morning!', ok:true},{en:'Goodbye!'},{en:'Sorry.'}]},
+      {prompt:'Nice to meet you!', cn:'别人说很高兴认识你', options:[{en:'Nice to meet you, too!', ok:true},{en:'How are you?'},{en:'Thank you.'}]},
+    ],
+    dub:{ title:'Tom 和 Mia', lines:[
+      {who:'A', en:'Hello! I am Tom.', cn:'你好！我是 Tom。'},
+      {who:'B', en:'Hi! My name is Mia.', cn:'嗨！我叫 Mia。'},
+      {who:'A', en:'Nice to meet you!', cn:'很高兴认识你！'},
+      {who:'B', en:'Nice to meet you, too!', cn:'我也是！'},
+    ]},
+    task:{ text:'去用英文跟爸爸妈妈打个招呼吧！比如说 “Hello! Good morning!”，把它录下来发给家长～', say:'Hello! Good morning!' },
   },
 ];
 
@@ -1581,6 +1603,7 @@ const DEFAULT = {
   stars:0, wordsLearned:[], talkDone:[], levelsDone:[], badges:[],
   storiesDone:[],                      // ids of finished stories
   unitsDone:[],                        // ids of finished course units
+  unitBoards:{},                       // per-unit board progress {u1:{words:true,...}}
   countriesVisited:[],                 // passport stamps collected
   reward:{ text:'', target:0 },        // parent-set real-world reward
   rewardReached:false,                 // celebrated for the current reward?
@@ -1835,6 +1858,7 @@ function go(id){
   if(id==='convList') renderConvList();
   if(id==='gamesList') renderGamesList();
   if(id==='courseList') renderCourseList();
+  if(id==='unitHub') renderUnitHub();
   if(id==='mapWorlds') renderWorlds();
   if(id==='phonics') renderPhonics();
   if(id==='badges') renderBadges();
@@ -2593,96 +2617,157 @@ document.getElementById('convPlayAll').onclick=function(){
 document.getElementById('convSendVoice').onclick=()=> recordAndSend('voice');
 document.getElementById('convSendVideo').onclick=()=> recordAndSend('video');
 
-/* ---------------- Course (unit-based lessons) ---------------- */
+/* ---------------- Course (unit-based, board unlock + certificate) ---------------- */
 let courseCtx=null;
 function renderCourseList(){
   const box=document.getElementById('courseListBody'); box.innerHTML='';
   COURSE.forEach((u,i)=>{
     const done=(S.unitsDone||[]).includes(u.id);
     const b=document.createElement('button'); b.className='listrow';
-    b.innerHTML='<div class="lem">📗</div><div class="lt"><div class="a">'+u.title+'</div><div class="b">'+u.cn+(done?' · ✅ 学过':'')+'</div></div><div class="lock">▶️</div>';
-    b.onclick=()=> renderUnit(i);
+    b.innerHTML='<div class="lem">📗</div><div class="lt"><div class="a">'+u.title+'</div><div class="b">'+u.cn+(done?' · 🎓 已毕业':'')+'</div></div><div class="lock">▶️</div>';
+    b.onclick=()=> openUnitHub(i);
     box.appendChild(b);
   });
   const more=document.createElement('div'); more.className='subtle'; more.style.cssText='text-align:center;margin-top:12px'; more.textContent='Unit 2、3… 陆续更新中';
   box.appendChild(more);
 }
-function unitPracRow(en){
-  // returns [listenBtn, pracBtn] wired to speak / Azure practice using unit feedback
-  const listen=document.createElement('button'); listen.className='sp'; listen.textContent='🔊 听'; listen.onclick=()=> speak(en);
-  const prac=document.createElement('button'); prac.className='sp'; prac.textContent='🎤 练'; prac.style.marginLeft='6px';
-  prac.onclick=()=> listenAndCheck(en, document.getElementById('unitFeedback'), document.getElementById('unitTip'), (st)=>{ addStars(st); popStars(st); });
-  return [listen, prac];
+const BOARDS=[
+  {key:'words', em:'🔑', name:'核心单词'},
+  {key:'grammar', em:'📖', name:'语法小魔法'},
+  {key:'dialogue', em:'💬', name:'情景对话'},
+  {key:'situ', em:'🎮', name:'情景反应'},
+  {key:'dub', em:'🎬', name:'配音秀'},
+  {key:'task', em:'🏆', name:'单元任务'},
+];
+function uBoards(uid){ if(!S.unitBoards) S.unitBoards={}; if(!S.unitBoards[uid]) S.unitBoards[uid]={}; return S.unitBoards[uid]; }
+function boardDone(uid,key){ return !!uBoards(uid)[key]; }
+function markBoardDone(uid,key){ const m=uBoards(uid); if(!m[key]){ m[key]=true; save(); addStars(1); } }
+function boardUnlocked(uid,idx){ return idx===0 || boardDone(uid, BOARDS[idx-1].key); }
+function allBoardsDone(uid){ return BOARDS.every(b=> boardDone(uid,b.key)); }
+function openUnitHub(i){ courseCtx={i, u:COURSE[i]}; go('unitHub'); markToday(); }
+function renderUnitHub(){
+  if(!courseCtx) return;
+  const u=courseCtx.u; document.getElementById('unitHubTitle').textContent=u.title;
+  const box=document.getElementById('unitHubBody'); box.innerHTML='';
+  BOARDS.forEach((b,idx)=>{
+    const done=boardDone(u.id,b.key), un=boardUnlocked(u.id,idx);
+    const btn=document.createElement('button'); btn.className='listrow'+(un?'':' locked');
+    btn.innerHTML='<div class="lem">'+b.em+'</div><div class="lt"><div class="a">'+b.name+'</div><div class="b">'+(done?'✅ 完成':(un?'点开学习':'先完成上一个解锁'))+'</div></div><div class="lock">'+(un?(done?'✅':'▶️'):'🔒')+'</div>';
+    if(un) btn.onclick=()=> openBoard(idx);
+    box.appendChild(btn);
+  });
+  const all=allBoardsDone(u.id);
+  const cert=document.createElement('button'); cert.className='btn big '+(all?'btn-green':'btn-ghost'); cert.style.marginTop='12px';
+  cert.textContent=all?'🎓 领取单元毕业证！':'🎓 全部完成后领毕业证';
+  cert.onclick=()=>{ if(all) showCertificate(); else toast('把上面 6 个板块都完成就能领啦！'); };
+  box.appendChild(cert);
 }
-function renderUnit(i){
-  const u=COURSE[i]; courseCtx={ i, u };
-  document.getElementById('unitTitle').textContent=u.title;
-  document.getElementById('unitFeedback').textContent=''; document.getElementById('unitTip').textContent='';
-  const body=document.getElementById('unitBody'); body.innerHTML='';
-
-  // goals
-  const g=document.createElement('div'); g.className='card';
-  g.innerHTML='<div style="font-weight:900;font-size:17px">🎯 这一单元你会学到</div>'+u.goals.map(x=>'<div class="subtle" style="margin-top:4px">• '+x+'</div>').join('');
-  body.appendChild(g);
-
-  // words
-  const wc=document.createElement('div'); wc.className='card';
-  wc.innerHTML='<div style="font-weight:900;font-size:17px;margin-bottom:6px">🔑 核心单词</div>';
-  u.words.forEach(w=>{
-    const row=document.createElement('div'); row.className='listrow'; row.style.marginBottom='8px';
-    const em=document.createElement('div'); em.className='lem'; em.textContent=w.em;
-    const lt=document.createElement('div'); lt.className='lt';
-    const a=document.createElement('div'); a.className='a'; renderTappable(a, w.en);
-    const bcn=document.createElement('div'); bcn.className='b'; bcn.textContent=w.cn;
-    lt.appendChild(a); lt.appendChild(bcn);
-    const [listen,prac]=unitPracRow(w.en);
-    row.appendChild(em); row.appendChild(lt); row.appendChild(listen); row.appendChild(prac);
-    wc.appendChild(row);
-  });
-  body.appendChild(wc);
-
-  // grammar
-  const gc=document.createElement('div'); gc.className='card';
-  gc.innerHTML='<div style="font-weight:900;font-size:17px;margin-bottom:6px">📖 语法小贴士</div>';
-  u.grammar.forEach(p=>{
-    const pt=document.createElement('div'); pt.style.marginBottom='10px';
-    pt.innerHTML='<div style="font-weight:800;color:var(--purple-d)">'+p.point+'</div>';
-    p.examples.forEach(ex=>{
-      const line=document.createElement('div'); line.style.cssText='display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap';
-      const en=document.createElement('div'); en.style.cssText='flex:1;min-width:120px;font-weight:800'; renderTappable(en, ex.en);
-      const cn=document.createElement('span'); cn.className='subtle'; cn.textContent=ex.cn;
-      const sp=document.createElement('button'); sp.className='sp'; sp.textContent='🔊'; sp.onclick=()=> speak(ex.en);
-      line.appendChild(en); line.appendChild(cn); line.appendChild(sp); pt.appendChild(line);
-    });
-    gc.appendChild(pt);
-  });
-  body.appendChild(gc);
-
-  // dialogues
-  u.dialogues.forEach(d=>{
-    const dc=document.createElement('div'); dc.className='card';
-    dc.innerHTML='<div style="font-weight:900;font-size:17px;margin-bottom:8px">💬 对话：'+d.title+'</div>';
-    d.lines.forEach(ln=>{
-      const row=document.createElement('div'); row.className='convline';
-      const who=document.createElement('div'); who.className='convwho '+(ln.who==='A'?'a':'b'); who.textContent=ln.who;
-      const bub=document.createElement('div'); bub.className='convbubble';
-      const en=document.createElement('div'); en.className='en'; renderTappable(en, ln.en);
-      const cn=document.createElement('div'); cn.className='cn'; cn.textContent=ln.cn;
-      const [listen,prac]=unitPracRow(ln.en);
-      bub.appendChild(en); bub.appendChild(cn); bub.appendChild(listen); bub.appendChild(prac);
-      row.appendChild(who); row.appendChild(bub); dc.appendChild(row);
-    });
-    body.appendChild(dc);
-  });
-
-  go('unitPlay'); markToday();
+function boardCard(title){ const c=document.createElement('div'); c.className='card'; if(title) c.innerHTML='<div style="font-weight:900;font-size:17px;margin-bottom:6px">'+title+'</div>'; return c; }
+function doneBtn(label,key){
+  const b=document.createElement('button'); b.className='btn big btn-green'; b.style.marginTop='12px'; b.textContent=label;
+  b.onclick=()=>{ markBoardDone(courseCtx.u.id,key); popStars(1); toast('✅ 完成！'); go('unitHub'); if(allBoardsDone(courseCtx.u.id)) setTimeout(()=>toast('🎓 全部完成！可以领毕业证啦'),700); };
+  return b;
 }
-document.getElementById('unitDone').onclick=function(){
+function convLineEl(ln){
+  const row=document.createElement('div'); row.className='convline';
+  const who=document.createElement('div'); who.className='convwho '+(ln.who==='A'?'a':'b'); who.textContent=ln.who;
+  const bub=document.createElement('div'); bub.className='convbubble';
+  const en=document.createElement('div'); en.className='en'; renderTappable(en,ln.en);
+  const cn=document.createElement('div'); cn.className='cn'; cn.textContent=ln.cn;
+  const sp=document.createElement('button'); sp.className='sp'; sp.textContent='🔊 听'; sp.onclick=()=> speak(ln.en);
+  const p=phPrac(ln.en);
+  bub.appendChild(en); bub.appendChild(cn); bub.appendChild(sp); bub.appendChild(p.prac); bub.appendChild(p.results);
+  row.appendChild(who); row.appendChild(bub); return row;
+}
+function openBoard(idx){
+  const u=courseCtx.u, b=BOARDS[idx]; courseCtx.board=b;
+  document.getElementById('unitBoardTitle').textContent=b.em+' '+b.name;
+  const body=document.getElementById('unitBoardBody'); body.innerHTML='';
+  renderBoard(b.key, body, u);
+  go('unitBoard');
+}
+function renderBoard(key, body, u){
+  if(key==='words'){
+    const c=boardCard('🔑 核心单词（点单词听，🎤跟读给分）');
+    u.words.forEach(w=>{
+      const row=document.createElement('div'); row.className='listrow'; row.style.marginBottom='8px';
+      const em=document.createElement('div'); em.className='lem'; em.textContent=w.em;
+      const lt=document.createElement('div'); lt.className='lt';
+      const a=document.createElement('div'); a.className='a'; renderTappable(a,w.en);
+      const bcn=document.createElement('div'); bcn.className='b'; bcn.textContent=w.cn+(w.s?'　'+w.s.cn:'');
+      lt.appendChild(a); lt.appendChild(bcn);
+      const sp=document.createElement('button'); sp.className='sp'; sp.textContent='🔊'; sp.onclick=()=> speak(w.s?w.s.en:w.en);
+      const p=phPrac(w.en);
+      row.appendChild(em); row.appendChild(lt); row.appendChild(sp); row.appendChild(p.prac);
+      c.appendChild(row); c.appendChild(p.results);
+    });
+    body.appendChild(c); body.appendChild(doneBtn('✅ 学完单词','words'));
+  } else if(key==='grammar'){
+    u.grammar.forEach(pt=>{
+      const c=boardCard('📖 '+pt.point);
+      pt.examples.forEach(ex=>{
+        const line=document.createElement('div'); line.style.cssText='display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap';
+        const en=document.createElement('div'); en.style.cssText='flex:1;min-width:120px;font-weight:800'; renderTappable(en,ex.en);
+        const cn=document.createElement('span'); cn.className='subtle'; cn.textContent=ex.cn;
+        const sp=document.createElement('button'); sp.className='sp'; sp.textContent='🔊'; sp.onclick=()=> speak(ex.en);
+        const p=phPrac(ex.en);
+        line.appendChild(en); line.appendChild(cn); line.appendChild(sp); line.appendChild(p.prac);
+        c.appendChild(line); c.appendChild(p.results);
+      });
+      body.appendChild(c);
+    });
+    body.appendChild(doneBtn('✅ 学会啦','grammar'));
+  } else if(key==='dialogue'){
+    u.dialogues.forEach(d=>{ const c=boardCard('💬 '+d.title); d.lines.forEach(ln=> c.appendChild(convLineEl(ln))); body.appendChild(c); });
+    const send=document.createElement('button'); send.className='btn btn-pink'; send.style.cssText='width:100%;margin-top:6px'; send.textContent='🎤 录一段发给家长'; send.onclick=()=> recordAndSend('voice');
+    body.appendChild(send); body.appendChild(doneBtn('✅ 练完对话','dialogue'));
+  } else if(key==='situ'){
+    courseCtx.si=0; const c=boardCard(''); c.id='situCard'; body.appendChild(c); renderSitu();
+  } else if(key==='dub'){
+    const c=boardCard('🎬 给这段对话配音：一句一句念，读完能听自己的');
+    u.dub.lines.forEach(ln=> c.appendChild(convLineEl(ln))); body.appendChild(c);
+    const send=document.createElement('button'); send.className='btn btn-purple'; send.style.cssText='width:100%;margin-top:6px'; send.textContent='🎬 录整段配音发给家长'; send.onclick=()=> recordAndSend('voice');
+    body.appendChild(send); body.appendChild(doneBtn('✅ 配音完成','dub'));
+  } else if(key==='task'){
+    const c=boardCard('🏆 单元任务');
+    const t=document.createElement('div'); t.style.cssText='font-size:16px;line-height:1.6'; t.textContent=u.task.text; c.appendChild(t);
+    const hear=document.createElement('button'); hear.className='sp'; hear.textContent='🔊 听示范'; hear.style.marginTop='8px'; hear.onclick=()=> speak(u.task.say); c.appendChild(hear);
+    body.appendChild(c);
+    const rec=document.createElement('button'); rec.className='btn big btn-pink'; rec.style.cssText='width:100%;margin-top:10px'; rec.textContent='🎤 录一句打招呼发给家长'; rec.onclick=()=> recordAndSend('voice');
+    body.appendChild(rec); body.appendChild(doneBtn('✅ 完成打卡','task'));
+  }
+}
+function renderSitu(){
+  const u=courseCtx.u, items=u.situ, c=document.getElementById('situCard');
+  if(courseCtx.si>=items.length){
+    c.innerHTML='<div style="font-weight:900;font-size:18px">🎉 情景反应全答对！</div>';
+    document.getElementById('unitBoardBody').appendChild(doneBtn('✅ 完成','situ')); return;
+  }
+  const it=items[courseCtx.si];
+  c.innerHTML='<div class="subtle">别人对你说（'+(courseCtx.si+1)+'/'+items.length+'）：</div>'+
+    '<div style="font-size:22px;font-weight:900;margin:6px 0" id="situPrompt"></div><div class="subtle">'+it.cn+'</div>'+
+    '<div style="font-weight:800;margin-top:10px">你应该回：</div><div id="situOpts" style="display:flex;flex-direction:column;gap:8px;margin-top:8px"></div><div class="feedback" id="situMsg"></div>';
+  renderTappable(document.getElementById('situPrompt'), it.prompt); speak(it.prompt);
+  const box=document.getElementById('situOpts');
+  shuffle(it.options.slice()).forEach(o=>{
+    const b=document.createElement('button'); b.className='btn btn-ghost'; b.style.textAlign='left'; b.textContent=o.en;
+    b.onclick=()=>{ speak(o.en);
+      if(o.ok){ sfx('match'); b.style.background='var(--green-d)'; b.style.color='#fff'; document.getElementById('situMsg').textContent='⭐ 答对啦！'; addStars(1); popStars(1); courseCtx.si++; setTimeout(renderSitu,900); }
+      else { sfx('wrong'); b.style.background='#ffb4b4'; document.getElementById('situMsg').textContent='💛 再想想～'; } };
+    box.appendChild(b);
+  });
+}
+function showCertificate(){
   const u=courseCtx.u;
-  if(!S.unitsDone) S.unitsDone=[];
-  if(!S.unitsDone.includes(u.id)){ S.unitsDone.push(u.id); save(); }
-  addStars(3); popStars(3); confettiBurst(); toast('🎉 '+u.title+' 学完啦！'); go('courseList');
-};
+  document.getElementById('certBody').innerHTML='<div style="font-size:60px">🎓</div>'+
+    '<div style="font-size:24px;font-weight:900;margin:8px 0">毕业证书</div>'+
+    '<div style="font-size:18px">恭喜 <b>'+(S.name||'小朋友')+'</b> 🎉</div>'+
+    '<div style="margin:8px 0;font-size:16px">你完成了 <b>'+u.title+'</b>！</div>'+
+    '<div class="subtle">'+new Date().toLocaleDateString()+'</div>'+
+    '<div style="margin-top:10px;font-size:24px">⭐ ⭐ ⭐</div>';
+  if(!S.unitsDone) S.unitsDone=[]; if(!S.unitsDone.includes(u.id)){ S.unitsDone.push(u.id); save(); addStars(3); }
+  confettiBurst(); go('unitCert');
+}
 
 /* ---------------- Sound effects (synthesized, no files) ---------------- */
 let _sfxCtx=null;
