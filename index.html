@@ -217,6 +217,16 @@
   .convbubble .en{ font-size:20px; font-weight:900; }
   .convbubble .cn{ font-size:14px; color:var(--ink-soft); margin-top:2px; }
   .convbubble .sp{ border:none; background:#eef4fb; border-radius:12px; padding:4px 10px; font-size:13px; font-weight:800; margin-top:6px; cursor:pointer; color:var(--ink); }
+
+  /* ---------- Games ---------- */
+  .matchgrid{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+  .mcard{ aspect-ratio:1; border-radius:14px; border:none; background:linear-gradient(145deg,#a78bfa,#7c3aed); color:#fff; font-size:20px; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow); padding:2px; text-align:center; line-height:1.05; }
+  .mcard.open{ background:#fff; color:var(--ink); }
+  .mcard.done{ background:#c8f7c5; color:#1b5e20; opacity:.55; }
+  .bubblefield{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:12px 0; }
+  .bubble{ border:none; border-radius:40px; padding:16px 10px; font-size:20px; font-weight:900; background:linear-gradient(145deg,#5ee7df,#66a6ff); color:#fff; box-shadow:var(--shadow); cursor:pointer; }
+  .bubble:active{ transform:translateY(2px); }
+  .bubble.right{ background:var(--green-d); } .bubble.wrong{ background:#ffb4b4; color:#7a1a1a; }
 </style>
 
 <div class="app">
@@ -267,6 +277,10 @@
         <div class="emoji">📖</div>
         <div><div class="t">听故事</div><div class="d">好听的小故事 · 边听边学英语</div></div>
       </button>
+      <button class="tile full" style="background:linear-gradient(145deg,#4facfe,#00f2fe)" onclick="go('courseList')">
+        <div class="emoji">📚</div>
+        <div><div class="t">课本同步课</div><div class="d">跟着单元学：单词 · 语法 · 对话</div></div>
+      </button>
       <button class="tile" style="background:linear-gradient(145deg,#ff9a9e,#ff6f91)" onclick="go('talkList')">
         <div class="emoji">💬</div>
         <div><div class="t">开口说话</div><div class="d">打招呼 · 日常口语（主打）</div></div>
@@ -282,6 +296,10 @@
       <button class="tile" style="background:linear-gradient(145deg,#a18cd1,#fbc2eb)" onclick="go('phonics')">
         <div class="emoji">🔤</div>
         <div><div class="t">音标小课堂</div><div class="d">认识字母的声音</div></div>
+      </button>
+      <button class="tile" style="background:linear-gradient(145deg,#f093fb,#f5576c)" onclick="go('gamesList')">
+        <div class="emoji">🎮</div>
+        <div><div class="t">游戏</div><div class="d">消消乐 · 泡泡 · 更多</div></div>
       </button>
       <button class="tile" style="background:linear-gradient(145deg,#fbc687,#ff8c42)" onclick="go('badges')">
         <div class="emoji">🏅</div>
@@ -371,8 +389,58 @@
     <div class="backrow"><button class="backbtn" onclick="go('convList')">⬅️ 返回</button><h2 class="title" id="convTitle" style="margin:0"></h2></div>
     <div class="card">
       <div id="convBody"></div>
+      <div class="feedback" id="convFeedback"></div>
+      <div class="listen-tip" id="convTip"></div>
       <button class="btn big btn-blue" id="convPlayAll" style="margin-top:6px">▶️ 从头听一遍</button>
-      <p class="subtle" style="text-align:center;margin-top:10px">💡 你读 A、孩子读 B，再换过来！用「家庭消息」的 🎤 录下来发给对方～</p>
+      <div class="storyctrl" style="margin-top:10px">
+        <button class="btn btn-pink" id="convSendVoice">🎤 录给家长</button>
+        <button class="btn btn-purple" id="convSendVideo">📹 录给家长</button>
+      </div>
+      <p class="subtle" style="text-align:center;margin-top:10px">💡 每句点「🎤练」自己读读看；练熟了就录一段发给家长！</p>
+    </div>
+  </div>
+
+  <!-- ===== COURSE: unit list ===== -->
+  <div id="courseList" class="screen">
+    <div class="backrow"><button class="backbtn" onclick="go('home')">⬅️ 回家</button><h2 class="title" style="margin:0">📚 课本同步课</h2></div>
+    <p class="subtle" style="margin:0 4px 10px">跟着课本单元学：先学单词，再看语法小贴士，最后练对话。学完能用这单元的话和爸妈聊！</p>
+    <div id="courseListBody"></div>
+  </div>
+
+  <!-- ===== COURSE: one unit ===== -->
+  <div id="unitPlay" class="screen">
+    <div class="backrow"><button class="backbtn" onclick="go('courseList')">⬅️ 返回</button><h2 class="title" id="unitTitle" style="margin:0"></h2></div>
+    <div id="unitBody"></div>
+    <div class="feedback" id="unitFeedback"></div>
+    <div class="listen-tip" id="unitTip"></div>
+    <button class="btn big btn-green" id="unitDone" style="margin-top:6px">🎉 学完这一单元</button>
+  </div>
+
+  <!-- ===== GAMES: hub ===== -->
+  <div id="gamesList" class="screen">
+    <div class="backrow"><button class="backbtn" onclick="go('home')">⬅️ 回家</button><h2 class="title" style="margin:0">🎮 游戏</h2></div>
+    <div id="gamesListBody"></div>
+  </div>
+
+  <!-- ===== GAME: memory match ===== -->
+  <div id="gameMatch" class="screen">
+    <div class="backrow"><button class="backbtn" onclick="go('gamesList')">⬅️ 返回</button><h2 class="title" style="margin:0">🍭 单词消消乐</h2></div>
+    <p class="subtle" style="margin:0 4px 10px">翻开两张，把 <b>图案</b> 和 <b>英文</b> 配成一对！</p>
+    <div id="matchGrid" class="matchgrid"></div>
+    <div class="feedback" id="matchMsg"></div>
+    <button class="btn big btn-ghost" id="matchAgain" style="margin-top:12px;display:none">🔄 再来一局</button>
+  </div>
+
+  <!-- ===== GAME: bubble pop ===== -->
+  <div id="gameBubble" class="screen">
+    <div class="backrow"><button class="backbtn" onclick="go('gamesList')">⬅️ 返回</button><h2 class="title" style="margin:0">🎈 单词泡泡</h2></div>
+    <div class="card" style="text-align:center">
+      <div class="subtle">看图案，戳破对的英文泡泡！</div>
+      <div style="font-size:88px" id="bubbleEmoji">🐱</div>
+      <div id="bubbleField" class="bubblefield"></div>
+      <div class="subtle">得分：<b><span id="bubbleScore">0</span> / <span id="bubbleTotal">10</span></b></div>
+      <div class="feedback" id="bubbleMsg"></div>
+      <button class="btn big btn-ghost" id="bubbleAgain" style="margin-top:6px;display:none">🔄 再来一局</button>
     </div>
   </div>
 
@@ -543,7 +611,7 @@
       <div style="background:#f4f8ff;border-radius:14px;padding:10px;margin-bottom:8px">
         <div style="font-weight:900;font-size:14px;margin-bottom:6px">第一台设备（先在一台填一次，生成连接码）</div>
         <input class="in" id="famUrl" placeholder="Supabase Project URL（https://xxx.supabase.co）" style="margin-bottom:6px">
-        <input class="in" id="famKey" placeholder="Supabase anon public key（很长一串）" style="margin-bottom:6px">
+        <textarea class="in" id="famKey" placeholder="Supabase anon public key（很长一串，一定要粘全，结尾是 …YchQ）" style="margin-bottom:6px;min-height:66px;font-size:12px"></textarea>
         <button class="btn btn-green" style="width:100%" id="famMakeBtn">生成连接码</button>
       </div>
       <div style="background:#f4fff6;border-radius:14px;padding:10px">
@@ -562,6 +630,7 @@
         </div>
         <label class="fld">连接码（其它设备粘这个就能加入）</label>
         <textarea class="in" id="famCodeOut" readonly style="font-size:12px;min-height:60px"></textarea>
+        <button class="btn btn-blue" style="width:100%;margin-top:8px" id="famTestBtn">🔌 测试连接</button>
         <div class="rowbtns" style="margin-top:8px">
           <button class="btn btn-ghost" id="famCopyBtn">📋 复制连接码</button>
           <button class="btn btn-ghost" id="famUnpairBtn" style="color:#c0392b">断开</button>
@@ -669,6 +738,20 @@ const TALK = [
     {em:'😅', en:'Sorry.', ipa:'/ˈsɑːri/', cn:'对不起。'},
     {em:'👌', en:"That's OK!", ipa:'/ðæts oʊˈkeɪ/', cn:'没关系！'},
   ]},
+  { id:'school', emoji:'🏫', title:'在学校（进阶）', lines:[
+    {em:'🚻', en:'May I go to the toilet?', ipa:'/meɪ aɪ ɡoʊ tə ðə ˈtɔɪlət/', cn:'我可以去洗手间吗？'},
+    {em:'🤔', en:"Sorry, I don't understand.", ipa:'/ˈsɑːri aɪ doʊnt ˌʌndərˈstænd/', cn:'对不起，我不明白。'},
+    {em:'🙋', en:'Can you help me, please?', ipa:'/kæn juː help miː pliːz/', cn:'你能帮帮我吗？'},
+    {em:'⏰', en:"Sorry, I'm late.", ipa:'/ˈsɑːri aɪm leɪt/', cn:'对不起，我迟到了。'},
+    {em:'👩‍🏫', en:'Thank you, teacher!', ipa:'/θæŋk juː ˈtiːtʃər/', cn:'谢谢老师！'},
+  ]},
+  { id:'myday', emoji:'⏰', title:'我的一天（进阶）', lines:[
+    {em:'🌅', en:'I get up at seven.', ipa:'/aɪ ɡet ʌp æt ˈsevən/', cn:'我七点起床。'},
+    {em:'🏫', en:'I go to school by bus.', ipa:'/aɪ ɡoʊ tə skuːl baɪ bʌs/', cn:'我坐公交车去上学。'},
+    {em:'🍚', en:'I have lunch at noon.', ipa:'/aɪ hæv lʌntʃ æt nuːn/', cn:'我中午吃午饭。'},
+    {em:'📝', en:'I do my homework after school.', ipa:'/aɪ duː maɪ ˈhoʊmwɜːrk ˈæftər skuːl/', cn:'放学后我做作业。'},
+    {em:'🛌', en:'I go to bed at nine.', ipa:'/aɪ ɡoʊ tə bed æt naɪn/', cn:'我九点睡觉。'},
+  ]},
 ];
 
 // WORLDS = word-map (secondary). Each level: 5 words + a science card.
@@ -761,18 +844,89 @@ const CONV = [
     {who:'A', en:'What do you want?', cn:'你想要什么？'},
     {who:'B', en:'An apple, please.', cn:'一个苹果，谢谢。'},
   ]},
+  { id:'play', emoji:'🎮', title:'一起玩吧（进阶）', lines:[
+    {who:'A', en:'Do you want to play with me?', cn:'你想和我一起玩吗？'},
+    {who:'B', en:'Yes! What shall we play?', cn:'好呀！我们玩什么？'},
+    {who:'A', en:"Let's play hide and seek!", cn:'我们玩捉迷藏吧！'},
+    {who:'B', en:'Great idea! You count first.', cn:'好主意！你先数数。'},
+    {who:'A', en:'OK. One, two, three...', cn:'好。一、二、三……'},
+  ]},
+  { id:'shop', emoji:'🛍️', title:'在商店（进阶）', lines:[
+    {who:'A', en:'Excuse me, how much is it?', cn:'请问，这个多少钱？'},
+    {who:'B', en:'It is two pounds.', cn:'两英镑。'},
+    {who:'A', en:'Can I have a red one, please?', cn:'我可以要一个红色的吗？'},
+    {who:'B', en:'Sure. Here you are.', cn:'当然，给你。'},
+    {who:'A', en:'Thank you very much!', cn:'非常感谢！'},
+  ]},
 ];
 
-// Phonics — a few letters/sounds to demystify pronunciation.
+// COURSE — original lessons aligned to the grade-3 curriculum scope (same words &
+// language functions; original dialogues with our own characters, no textbook art/text).
+const COURSE = [
+  { id:'u1', title:'Unit 1 · Hello!', cn:'打招呼', ready:true,
+    goals:['和别人打招呼','问名字、说自己的名字','会说"早上好""你好吗""很高兴认识你""再见"'],
+    words:[
+      {en:'hello', cn:'你好', em:'👋'},
+      {en:'hi', cn:'嗨；你好', em:'🙋'},
+      {en:'I', cn:'我', em:'🧒'},
+      {en:'name', cn:'名字', em:'🏷️'},
+      {en:'fine', cn:'很好', em:'😊'},
+      {en:'goodbye', cn:'再见', em:'👋'},
+      {en:'bye', cn:'拜拜', em:'✋'},
+      {en:'morning', cn:'早上', em:'🌅'},
+      {en:'thank you', cn:'谢谢', em:'🙏'},
+      {en:'nice', cn:'愉快的；好的', em:'🌸'},
+      {en:'meet', cn:'遇见', em:'🤝'},
+    ],
+    grammar:[
+      {point:'介绍我自己', examples:[{en:"I'm Tom.", cn:'我是 Tom。'},{en:'My name is Tom.', cn:'我的名字叫 Tom。'}]},
+      {point:'问别人叫什么', examples:[{en:"What's your name?", cn:'你叫什么名字？'},{en:'My name is Mia.', cn:'我叫 Mia。'}]},
+      {point:'问好 & 回答', examples:[{en:'How are you?', cn:'你好吗？'},{en:"I'm fine, thank you.", cn:'我很好，谢谢。'}]},
+      {point:'常用问候语', examples:[{en:'Good morning!', cn:'早上好！'},{en:'Nice to meet you!', cn:'很高兴认识你！'},{en:'Goodbye! / Bye!', cn:'再见！'}]},
+    ],
+    dialogues:[
+      { title:'认识新朋友', lines:[
+        {who:'A', en:"Hello! I'm Tom. What's your name?", cn:'你好！我是 Tom。你叫什么名字？'},
+        {who:'B', en:'Hi! My name is Mia.', cn:'嗨！我叫 Mia。'},
+        {who:'A', en:'Nice to meet you!', cn:'很高兴认识你！'},
+        {who:'B', en:'Nice to meet you, too!', cn:'我也很高兴认识你！'},
+      ]},
+      { title:'早上好 · 你好吗', lines:[
+        {who:'A', en:'Good morning, Mia!', cn:'早上好，Mia！'},
+        {who:'B', en:'Good morning, Tom! How are you?', cn:'早上好，Tom！你好吗？'},
+        {who:'A', en:"I'm fine, thank you. And you?", cn:'我很好，谢谢。你呢？'},
+        {who:'B', en:"I'm fine, too!", cn:'我也很好！'},
+      ]},
+      { title:'再见啦', lines:[
+        {who:'A', en:'Goodbye, Mia!', cn:'再见，Mia！'},
+        {who:'B', en:'Bye, Tom! See you later!', cn:'拜拜，Tom！回头见！'},
+      ]},
+    ],
+  },
+];
+
+// Phonics — grouped natural-phonics (自然拼读): short vowels, magic-e, vowel teams.
 const PHONICS = [
-  {ch:'A a', ipa:'/æ/', word:'apple', em:'🍎', cn:'像“ea”，张大嘴巴'},
-  {ch:'B b', ipa:'/b/', word:'ball', em:'⚽', cn:'双唇一碰，“布”'},
-  {ch:'C c', ipa:'/k/', word:'cat', em:'🐱', cn:'喉咙里的“可”'},
-  {ch:'D d', ipa:'/d/', word:'dog', em:'🐶', cn:'舌尖顶上牙，“的”'},
-  {ch:'E e', ipa:'/e/', word:'egg', em:'🥚', cn:'像“唉”'},
-  {ch:'F f', ipa:'/f/', word:'fish', em:'🐟', cn:'上牙咬下唇，吹气'},
-  {ch:'S s', ipa:'/s/', word:'sun', em:'☀️', cn:'像小蛇“丝~”'},
-  {ch:'T t', ipa:'/t/', word:'ten', em:'🔟', cn:'舌尖轻弹，“特”'},
+  { group:'① 5 个短元音（a e i o u）', rule:'元音在短单词里读“短音”，又快又短', items:[
+    {ch:'a', ipa:'/æ/', word:'cat', em:'🐱', cn:'猫（张大嘴“ae”）'},
+    {ch:'e', ipa:'/e/', word:'hen', em:'🐔', cn:'母鸡（像“唉”）'},
+    {ch:'i', ipa:'/ɪ/', word:'pig', em:'🐷', cn:'猪（短短的“衣”）'},
+    {ch:'o', ipa:'/ɒ/', word:'dog', em:'🐶', cn:'狗（圆嘴“喔”）'},
+    {ch:'u', ipa:'/ʌ/', word:'cup', em:'🥤', cn:'杯子（短“啊”）'},
+  ]},
+  { group:'② 神奇的 e（长音·字母本音）', rule:'词尾加个不发音的 e，前面的元音就“读自己的名字”', items:[
+    {ch:'a…e', ipa:'/eɪ/', word:'cake', em:'🎂', cn:'蛋糕（a 读“诶”）'},
+    {ch:'i…e', ipa:'/aɪ/', word:'bike', em:'🚲', cn:'自行车（i 读“爱”）'},
+    {ch:'o…e', ipa:'/oʊ/', word:'home', em:'🏠', cn:'家（o 读“欧”）'},
+    {ch:'u…e', ipa:'/juː/', word:'cute', em:'🥰', cn:'可爱（u 读“优”）'},
+  ]},
+  { group:'③ 元音组合（两个字母发一个音）', rule:'两个字母组队，一起发一个新音', items:[
+    {ch:'ai / ay', ipa:'/eɪ/', word:'rain', em:'🌧️', cn:'雨（“诶”）'},
+    {ch:'ee / ea', ipa:'/iː/', word:'tree', em:'🌳', cn:'树（长“衣”）'},
+    {ch:'oo', ipa:'/uː/', word:'moon', em:'🌙', cn:'月亮（长“乌”）'},
+    {ch:'oa', ipa:'/oʊ/', word:'boat', em:'⛵', cn:'小船（“欧”）'},
+    {ch:'ow / ou', ipa:'/aʊ/', word:'cow', em:'🐄', cn:'奶牛（“奥”）'},
+  ]},
 ];
 
 // STORIES — short, simple, everyday-life stories (Peppa-style short sentences).
@@ -876,6 +1030,7 @@ const DEFAULT = {
   name:'小朋友', avatar:'🦁', pin:'1234',
   stars:0, wordsLearned:[], talkDone:[], levelsDone:[], badges:[],
   storiesDone:[],                      // ids of finished stories
+  unitsDone:[],                        // ids of finished course units
   reward:{ text:'', target:0 },        // parent-set real-world reward
   rewardReached:false,                 // celebrated for the current reward?
   azure:{ key:'', region:'' },         // Azure Speech pronunciation assessment
@@ -1105,6 +1260,8 @@ function go(id){
   if(id==='talkList') renderTalkList();
   if(id==='storyList') renderStoryList();
   if(id==='convList') renderConvList();
+  if(id==='gamesList') renderGamesList();
+  if(id==='courseList') renderCourseList();
   if(id==='mapWorlds') renderWorlds();
   if(id==='phonics') renderPhonics();
   if(id==='badges') renderBadges();
@@ -1366,13 +1523,18 @@ function finishLevel(){
 /* ---------------- Phonics ---------------- */
 function renderPhonics(){
   const box=document.getElementById('phonicsBody'); box.innerHTML='';
-  PHONICS.forEach(p=>{
-    const b=document.createElement('button'); b.className='listrow';
-    b.innerHTML=`<div class="lem">${p.em}</div>
-      <div class="lt"><div class="a">${p.ch} &nbsp; <span style="color:var(--purple-d)">${p.ipa}</span></div>
-      <div class="b">${p.word} · ${p.cn}</div></div><div class="lock">🔊</div>`;
-    b.onclick=()=>{ speak(p.word); toast('跟我读：'+p.word); };
-    box.appendChild(b);
+  PHONICS.forEach(g=>{
+    const h=document.createElement('div'); h.className='card'; h.style.padding='12px 14px'; h.style.marginBottom='10px';
+    h.innerHTML='<div style="font-weight:900;font-size:17px">'+g.group+'</div><div class="subtle" style="margin-top:3px">'+g.rule+'</div>';
+    box.appendChild(h);
+    g.items.forEach(p=>{
+      const b=document.createElement('button'); b.className='listrow';
+      b.innerHTML='<div class="lem">'+p.em+'</div>'+
+        '<div class="lt"><div class="a">'+p.ch+' &nbsp; <span style="color:var(--purple-d)">'+p.ipa+'</span></div>'+
+        '<div class="b">'+p.word+' · '+p.cn+'</div></div><div class="lock">🔊</div>';
+      b.onclick=()=>{ speak(p.word); toast('跟我读：'+p.word); };
+      box.appendChild(b);
+    });
   });
 }
 
@@ -1674,7 +1836,9 @@ function openConv(i){
     const en=document.createElement('div'); en.className='en'; renderTappable(en, ln.en);
     const cn=document.createElement('div'); cn.className='cn'; cn.textContent=ln.cn;
     const sp=document.createElement('button'); sp.className='sp'; sp.textContent='🔊 听'; sp.onclick=()=> speak(ln.en);
-    bub.appendChild(en); bub.appendChild(cn); bub.appendChild(sp);
+    const prac=document.createElement('button'); prac.className='sp'; prac.textContent='🎤 练'; prac.style.marginLeft='6px';
+    prac.onclick=()=> listenAndCheck(ln.en, document.getElementById('convFeedback'), document.getElementById('convTip'), (st)=>{ addStars(st); popStars(st); });
+    bub.appendChild(en); bub.appendChild(cn); bub.appendChild(sp); bub.appendChild(prac);
     row.appendChild(who); row.appendChild(bub); body.appendChild(row);
   });
   go('convPlay'); markToday();
@@ -1684,6 +1848,207 @@ document.getElementById('convPlayAll').onclick=function(){
   const step=()=>{ if(!convCtx || k>=lines.length) return; speak(lines[k].en); const d=1200+lines[k].en.split(/\s+/).length*450; k++; setTimeout(step,d); };
   step();
 };
+document.getElementById('convSendVoice').onclick=()=> recordAndSend('voice');
+document.getElementById('convSendVideo').onclick=()=> recordAndSend('video');
+
+/* ---------------- Course (unit-based lessons) ---------------- */
+let courseCtx=null;
+function renderCourseList(){
+  const box=document.getElementById('courseListBody'); box.innerHTML='';
+  COURSE.forEach((u,i)=>{
+    const done=(S.unitsDone||[]).includes(u.id);
+    const b=document.createElement('button'); b.className='listrow';
+    b.innerHTML='<div class="lem">📗</div><div class="lt"><div class="a">'+u.title+'</div><div class="b">'+u.cn+(done?' · ✅ 学过':'')+'</div></div><div class="lock">▶️</div>';
+    b.onclick=()=> renderUnit(i);
+    box.appendChild(b);
+  });
+  const more=document.createElement('div'); more.className='subtle'; more.style.cssText='text-align:center;margin-top:12px'; more.textContent='Unit 2、3… 陆续更新中';
+  box.appendChild(more);
+}
+function unitPracRow(en){
+  // returns [listenBtn, pracBtn] wired to speak / Azure practice using unit feedback
+  const listen=document.createElement('button'); listen.className='sp'; listen.textContent='🔊 听'; listen.onclick=()=> speak(en);
+  const prac=document.createElement('button'); prac.className='sp'; prac.textContent='🎤 练'; prac.style.marginLeft='6px';
+  prac.onclick=()=> listenAndCheck(en, document.getElementById('unitFeedback'), document.getElementById('unitTip'), (st)=>{ addStars(st); popStars(st); });
+  return [listen, prac];
+}
+function renderUnit(i){
+  const u=COURSE[i]; courseCtx={ i, u };
+  document.getElementById('unitTitle').textContent=u.title;
+  document.getElementById('unitFeedback').textContent=''; document.getElementById('unitTip').textContent='';
+  const body=document.getElementById('unitBody'); body.innerHTML='';
+
+  // goals
+  const g=document.createElement('div'); g.className='card';
+  g.innerHTML='<div style="font-weight:900;font-size:17px">🎯 这一单元你会学到</div>'+u.goals.map(x=>'<div class="subtle" style="margin-top:4px">• '+x+'</div>').join('');
+  body.appendChild(g);
+
+  // words
+  const wc=document.createElement('div'); wc.className='card';
+  wc.innerHTML='<div style="font-weight:900;font-size:17px;margin-bottom:6px">🔑 核心单词</div>';
+  u.words.forEach(w=>{
+    const row=document.createElement('div'); row.className='listrow'; row.style.marginBottom='8px';
+    const em=document.createElement('div'); em.className='lem'; em.textContent=w.em;
+    const lt=document.createElement('div'); lt.className='lt';
+    const a=document.createElement('div'); a.className='a'; renderTappable(a, w.en);
+    const bcn=document.createElement('div'); bcn.className='b'; bcn.textContent=w.cn;
+    lt.appendChild(a); lt.appendChild(bcn);
+    const [listen,prac]=unitPracRow(w.en);
+    row.appendChild(em); row.appendChild(lt); row.appendChild(listen); row.appendChild(prac);
+    wc.appendChild(row);
+  });
+  body.appendChild(wc);
+
+  // grammar
+  const gc=document.createElement('div'); gc.className='card';
+  gc.innerHTML='<div style="font-weight:900;font-size:17px;margin-bottom:6px">📖 语法小贴士</div>';
+  u.grammar.forEach(p=>{
+    const pt=document.createElement('div'); pt.style.marginBottom='10px';
+    pt.innerHTML='<div style="font-weight:800;color:var(--purple-d)">'+p.point+'</div>';
+    p.examples.forEach(ex=>{
+      const line=document.createElement('div'); line.style.cssText='display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap';
+      const en=document.createElement('div'); en.style.cssText='flex:1;min-width:120px;font-weight:800'; renderTappable(en, ex.en);
+      const cn=document.createElement('span'); cn.className='subtle'; cn.textContent=ex.cn;
+      const sp=document.createElement('button'); sp.className='sp'; sp.textContent='🔊'; sp.onclick=()=> speak(ex.en);
+      line.appendChild(en); line.appendChild(cn); line.appendChild(sp); pt.appendChild(line);
+    });
+    gc.appendChild(pt);
+  });
+  body.appendChild(gc);
+
+  // dialogues
+  u.dialogues.forEach(d=>{
+    const dc=document.createElement('div'); dc.className='card';
+    dc.innerHTML='<div style="font-weight:900;font-size:17px;margin-bottom:8px">💬 对话：'+d.title+'</div>';
+    d.lines.forEach(ln=>{
+      const row=document.createElement('div'); row.className='convline';
+      const who=document.createElement('div'); who.className='convwho '+(ln.who==='A'?'a':'b'); who.textContent=ln.who;
+      const bub=document.createElement('div'); bub.className='convbubble';
+      const en=document.createElement('div'); en.className='en'; renderTappable(en, ln.en);
+      const cn=document.createElement('div'); cn.className='cn'; cn.textContent=ln.cn;
+      const [listen,prac]=unitPracRow(ln.en);
+      bub.appendChild(en); bub.appendChild(cn); bub.appendChild(listen); bub.appendChild(prac);
+      row.appendChild(who); row.appendChild(bub); dc.appendChild(row);
+    });
+    body.appendChild(dc);
+  });
+
+  go('unitPlay'); markToday();
+}
+document.getElementById('unitDone').onclick=function(){
+  const u=courseCtx.u;
+  if(!S.unitsDone) S.unitsDone=[];
+  if(!S.unitsDone.includes(u.id)){ S.unitsDone.push(u.id); save(); }
+  addStars(3); popStars(3); confettiBurst(); toast('🎉 '+u.title+' 学完啦！'); go('courseList');
+};
+
+/* ---------------- Games ---------------- */
+function wordPool(){
+  const pool=[];
+  WORLDS.forEach(w=> w.levels.forEach(lv=> lv.words.forEach(wd=> pool.push({en:wd.en, cn:wd.cn, em:wd.em}))));
+  return pool;
+}
+const GAMES=[
+  {id:'match', em:'🍭', name:'单词消消乐', desc:'图案配英文', ready:true},
+  {id:'bubble', em:'🎈', name:'单词泡泡', desc:'戳破对的词', ready:true},
+  {id:'snake', em:'🐍', name:'贪吃蛇吃单词', desc:'即将推出', ready:false},
+  {id:'tongue', em:'👅', name:'绕口令闯关', desc:'即将推出', ready:false},
+  {id:'order', em:'🧩', name:'拼句子', desc:'即将推出', ready:false},
+  {id:'flash', em:'⚡', name:'听音闪电点词', desc:'即将推出', ready:false},
+  {id:'hidden', em:'🔤', name:'找隐藏单词', desc:'即将推出', ready:false},
+];
+function renderGamesList(){
+  const box=document.getElementById('gamesListBody'); box.innerHTML='';
+  GAMES.forEach(g=>{
+    const b=document.createElement('button'); b.className='listrow'+(g.ready?'':' locked');
+    b.innerHTML='<div class="lem">'+g.em+'</div><div class="lt"><div class="a">'+g.name+'</div><div class="b">'+g.desc+'</div></div><div class="lock">'+(g.ready?'▶️':'🔒')+'</div>';
+    if(g.ready) b.onclick=()=>{ if(g.id==='match') startMatch(); else if(g.id==='bubble') startBubble(); };
+    box.appendChild(b);
+  });
+}
+
+/* Game: memory match (图案 ↔ 英文) */
+let matchCtx=null;
+function startMatch(){
+  const words=shuffle(wordPool()).slice(0,6);
+  const cards=[];
+  words.forEach((w,i)=>{ cards.push({pair:i, face:w.em, kind:'em', w:w}); cards.push({pair:i, face:w.en, kind:'en', w:w}); });
+  matchCtx={ cards:shuffle(cards), matched:0, lock:false };
+  document.getElementById('matchMsg').textContent='';
+  document.getElementById('matchAgain').style.display='none';
+  go('gameMatch'); renderMatch(); markToday();
+}
+function renderMatch(){
+  const grid=document.getElementById('matchGrid'); grid.innerHTML='';
+  matchCtx.cards.forEach((c,idx)=>{
+    const b=document.createElement('button'); b.className='mcard';
+    if(c.done){ b.className='mcard done'; b.textContent=c.face; }
+    else if(c.opened){ b.className='mcard open'; b.textContent=c.face; }
+    else b.textContent='?';
+    b.onclick=()=> flipCard(idx);
+    grid.appendChild(b);
+  });
+}
+function flipCard(idx){
+  if(matchCtx.lock) return;
+  const c=matchCtx.cards[idx];
+  if(c.done||c.opened) return;
+  c.opened=true; renderMatch(); speak(c.w.en);
+  const opened=matchCtx.cards.filter(x=>x.opened && !x.done);
+  if(opened.length===2){
+    matchCtx.lock=true;
+    if(opened[0].pair===opened[1].pair){
+      setTimeout(()=>{ opened.forEach(x=>{x.done=true;x.opened=false;}); matchCtx.matched++; matchCtx.lock=false; renderMatch();
+        addStars(1); popStars(1);
+        if(matchCtx.matched>=6){ confettiBurst(); addStars(2); document.getElementById('matchMsg').textContent='🎉 全部配对成功！'; document.getElementById('matchAgain').style.display='block'; }
+      }, 550);
+    } else {
+      setTimeout(()=>{ opened.forEach(x=>x.opened=false); matchCtx.lock=false; renderMatch(); }, 950);
+    }
+  }
+}
+document.getElementById('matchAgain').onclick=()=> startMatch();
+
+/* Game: bubble pop (看图选词) */
+let bubbleCtx=null;
+function startBubble(){
+  bubbleCtx={ q:0, total:10, score:0, pool:shuffle(wordPool()) };
+  document.getElementById('bubbleAgain').style.display='none';
+  go('gameBubble'); renderBubble(); markToday();
+}
+function renderBubble(){
+  const c=bubbleCtx;
+  if(c.q>=c.total){
+    document.getElementById('bubbleField').innerHTML='';
+    document.getElementById('bubbleScore').textContent=c.score;
+    document.getElementById('bubbleMsg').textContent='🎉 完成！得分 '+c.score+'/'+c.total;
+    const stars=Math.max(1, Math.round(c.score/c.total*3)); addStars(stars); popStars(stars); confettiBurst();
+    document.getElementById('bubbleAgain').style.display='block';
+    return;
+  }
+  const cur=c.pool[c.q % c.pool.length];
+  document.getElementById('bubbleEmoji').textContent=cur.em;
+  document.getElementById('bubbleScore').textContent=c.score;
+  document.getElementById('bubbleTotal').textContent=c.total;
+  document.getElementById('bubbleMsg').textContent='';
+  let opts=[cur]; const others=shuffle(c.pool.filter(w=>w.en!==cur.en)).slice(0,3);
+  opts=shuffle(opts.concat(others));
+  const field=document.getElementById('bubbleField'); field.innerHTML='';
+  opts.forEach(o=>{
+    const b=document.createElement('button'); b.className='bubble'; b.textContent=o.en;
+    b.onclick=()=> popBubble(o.en===cur.en, cur, b);
+    field.appendChild(b);
+  });
+  speak(cur.en);
+}
+function popBubble(right, cur, btn){
+  document.querySelectorAll('#bubbleField .bubble').forEach(b=> b.disabled=true);
+  if(right){ btn.classList.add('right'); bubbleCtx.score++; document.getElementById('bubbleMsg').textContent='✅ 太棒！'; }
+  else { btn.classList.add('wrong'); document.querySelectorAll('#bubbleField .bubble').forEach(b=>{ if(b.textContent===cur.en) b.classList.add('right'); }); document.getElementById('bubbleMsg').textContent='💛 正确是 '+cur.en; }
+  speak(cur.en); bubbleCtx.q++;
+  setTimeout(renderBubble, 850);
+}
+document.getElementById('bubbleAgain').onclick=()=> startBubble();
 
 /* ---------------- Reward (parent-set, real-world) ---------------- */
 function renderRewardBanner(){
@@ -1776,6 +2141,7 @@ async function famUpload(blob, ext){
     headers: famHeaders({ 'Content-Type': blob.type || 'application/octet-stream' }), body: blob });
   return fam.url + '/storage/v1/object/public/family-media/' + path;
 }
+async function famTest(){ try{ await famFetch(); return {ok:true}; }catch(e){ return {ok:false, err:(e&&e.message)||String(e)}; } }
 
 /* ---------- Record voice/video, then upload + send ---------- */
 async function recordAndSend(kind){
@@ -1899,11 +2265,12 @@ document.getElementById('famMakeBtn').onclick=()=>{
   if(key.length<20){ toast('key 看起来不对（应该很长一串）'); return; }
   fam={ url:url.replace(/\/$/,''), key:key, room:randRoom(), name:(fam&&fam.name)||'' }; saveFam();
   renderFamSection(); renderHome(); initFamily();
-  toast('✅ 连接码已生成，记得给这台起个名字');
+  famTest().then(t=> toast(t.ok ? '✅ 连接成功！连接码已生成' : '⚠️ 连不上：'+t.err+'（检查 key 是否粘全）'));
 };
 document.getElementById('famJoinBtn').onclick=()=>{
   try{ applyPairCode(document.getElementById('famPaste').value);
-    renderFamSection(); renderHome(); initFamily(); toast('✅ 加入成功！给这台起个名字吧'); }
+    renderFamSection(); renderHome(); initFamily();
+    famTest().then(t=> toast(t.ok ? '✅ 加入成功！可以互发消息了' : '⚠️ 连不上：'+t.err+'（连接码可能没复制全）')); }
   catch(e){ toast('连接码无效，请重新复制'); }
 };
 document.getElementById('famNameSave').onclick=()=>{
@@ -1916,6 +2283,11 @@ document.getElementById('famCopyBtn').onclick=()=>{
   try{ document.execCommand('copy'); }catch(e){}
   if(navigator.clipboard) navigator.clipboard.writeText(el.value).catch(()=>{});
   toast('已复制连接码');
+};
+document.getElementById('famTestBtn').onclick=async ()=>{
+  const st=document.getElementById('famStatus'); st.textContent='🔌 测试中…';
+  const t=await famTest();
+  st.textContent = t.ok ? '✅ 连接成功！可以互发消息了。' : '❌ 连不上：'+t.err+'　→ 多半是 key 没粘全，点"断开"重填一次。';
 };
 document.getElementById('famUnpairBtn').onclick=()=>{
   if(confirm('断开家庭消息连接？（这台设备就收不到消息了）')){
