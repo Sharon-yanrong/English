@@ -519,12 +519,19 @@
 
   <!-- ===== GAME: snake ===== -->
   <div id="gameSnake" class="screen">
-    <div class="backrow"><button class="backbtn" onclick="go('gamesList')">⬅️ 返回</button><h2 class="title" style="margin:0">🐍 贪吃蛇吃单词</h2></div>
-    <div class="card" style="text-align:center">
-      <div style="font-size:18px;font-weight:900">吃掉：<span id="snakeTarget" style="color:var(--pink-d)"></span></div>
-      <div class="subtle" style="margin:4px 0">得分：<b id="snakeScore">0</b> / 8</div>
+    <div class="backrow"><button class="backbtn" onclick="go('gamesList')">⬅️ 返回</button><h2 class="title" style="margin:0">🐍 贪吃蛇</h2></div>
+    <div id="snakeMenu" class="card" style="text-align:center">
+      <div style="font-weight:900;font-size:18px;margin-bottom:12px">选一个玩法 🐍</div>
+      <button class="btn big btn-green" id="snakeModeWord" style="margin-bottom:10px">🍎 吃整词<br><span style="font-size:13px;font-weight:600">看中文，吃对的英文词</span></button>
+      <button class="btn big btn-blue" id="snakeModeSpell">🔡 拼单词<br><span style="font-size:13px;font-weight:600">听发音，按字母顺序吃</span></button>
+    </div>
+    <div id="snakeGame" class="card" style="text-align:center;display:none">
+      <div id="snakeTopWord" style="font-size:18px;font-weight:900">吃掉：<span id="snakeTarget" style="color:var(--pink-d)"></span></div>
+      <div id="snakeCollected" style="font-size:22px;font-weight:900;letter-spacing:3px;display:none;color:var(--green-d)"></div>
+      <div class="subtle" style="margin:4px 0">得分：<b id="snakeScore">0</b></div>
       <canvas id="snakeCanvas" width="300" height="300" style="background:#eef4fb;border-radius:16px;max-width:100%;touch-action:none"></canvas>
       <div id="snakeMsg" class="feedback"></div>
+      <button class="btn btn-ghost" id="snakeHint" style="display:none;margin-top:4px">💡 提示（看完整单词）</button>
       <div style="display:grid;grid-template-columns:repeat(3,56px);gap:6px;justify-content:center;margin-top:8px">
         <div></div><button class="btn btn-ghost" id="snUp">⬆️</button><div></div>
         <button class="btn btn-ghost" id="snLeft">⬅️</button><button class="btn btn-ghost" id="snDown">⬇️</button><button class="btn btn-ghost" id="snRight">➡️</button>
@@ -542,6 +549,23 @@
       <div id="hiddenGrid" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center"></div>
       <div id="hiddenMsg" class="feedback"></div>
       <button class="btn btn-green" id="hiddenNext" style="display:none;margin-top:10px">下一句 ➡️</button>
+    </div>
+  </div>
+
+  <!-- ===== GAME: breakout ===== -->
+  <div id="gameBrick" class="screen">
+    <div class="backrow"><button class="backbtn" onclick="go('gamesList')">⬅️ 返回</button><h2 class="title" style="margin:0">🧱 打砖块背单词</h2></div>
+    <div class="card" style="text-align:center">
+      <div class="subtle">左右移动挡板接住小球，把上面的单词砖块全部打碎！</div>
+      <div style="margin:6px 0"><span id="brickLives">❤️❤️❤️</span> · 关卡 <b id="brickLevel">1</b> · 得分 <b id="brickScore">0</b></div>
+      <canvas id="brickCanvas" width="320" height="380" style="background:#0b1e3a;border-radius:16px;max-width:100%;touch-action:none"></canvas>
+      <div id="brickMsg" class="feedback"></div>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:8px">
+        <button class="btn btn-ghost" id="brickLeft" style="flex:1;max-width:130px;font-size:22px">⬅️</button>
+        <button class="btn btn-ghost" id="brickRight" style="flex:1;max-width:130px;font-size:22px">➡️</button>
+      </div>
+      <div class="subtle" style="margin-top:6px">也可以直接用手指在画面上左右滑动挡板</div>
+      <button class="btn big btn-ghost" id="brickAgain" style="display:none;margin-top:8px">🔄 再来一局</button>
     </div>
   </div>
 
@@ -1800,6 +1824,7 @@ function toast(msg){
 function go(id){
   if(id!=='storyPlay' && typeof stopStoryAuto==='function') stopStoryAuto();
   if(id!=='gameSnake' && typeof snakeState!=='undefined' && snakeState && snakeState.timer){ clearInterval(snakeState.timer); snakeState.alive=false; }
+  if(id!=='gameBrick' && typeof brickState!=='undefined' && brickState){ brickState.running=false; if(typeof brickRAF!=='undefined' && brickRAF) cancelAnimationFrame(brickRAF); }
   document.querySelectorAll('.screen').forEach(s=> s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   window.scrollTo(0,0);
@@ -2687,6 +2712,7 @@ const GAMES=[
   {id:'order', em:'🧩', name:'拼句子', desc:'把单词排成句', ready:true},
   {id:'snake', em:'🐍', name:'贪吃蛇吃单词', desc:'吃掉对的单词', ready:true},
   {id:'hidden', em:'🔤', name:'找隐藏单词', desc:'按顺序连成句', ready:true},
+  {id:'brick', em:'🧱', name:'打砖块背单词', desc:'挡板接球砸单词砖', ready:true},
 ];
 function renderGamesList(){
   const box=document.getElementById('gamesListBody'); box.innerHTML='';
@@ -2699,8 +2725,9 @@ function renderGamesList(){
       else if(g.id==='flash') startFlash();
       else if(g.id==='tongue') startTongue();
       else if(g.id==='order') startOrder();
-      else if(g.id==='snake') startSnake();
+      else if(g.id==='snake') openSnakeMenu();
       else if(g.id==='hidden') startHidden();
+      else if(g.id==='brick') startBrick();
     };
     box.appendChild(b);
   });
@@ -2757,24 +2784,24 @@ document.getElementById('matchAgain').onclick=()=> startMatch();
 /* Game: bubble pop (看图选词) */
 let bubbleCtx=null;
 function startBubble(){
-  bubbleCtx={ q:0, total:10, score:0, pool:shuffle(wordPool()) };
+  bubbleCtx={ need:10, score:0, pool:shuffle(wordPool()), pi:0, cur:null };
   document.getElementById('bubbleAgain').style.display='none';
   go('gameBubble'); renderBubble(); markToday();
 }
 function renderBubble(){
   const c=bubbleCtx;
-  if(c.q>=c.total){
+  if(c.score>=c.need){
     document.getElementById('bubbleField').innerHTML='';
     document.getElementById('bubbleScore').textContent=c.score;
-    document.getElementById('bubbleMsg').textContent='🎉 完成！得分 '+c.score+'/'+c.total;
-    const stars=Math.max(1, Math.round(c.score/c.total*3)); addStars(stars); popStars(stars); confettiBurst();
+    document.getElementById('bubbleMsg').textContent='🎉 满分 '+c.score+'/'+c.need+'！太棒啦！';
+    addStars(3); popStars(3); confettiBurst();
     document.getElementById('bubbleAgain').style.display='block';
     return;
   }
-  const cur=c.pool[c.q % c.pool.length];
+  const cur=c.pool[c.pi % c.pool.length]; c.pi++; c.cur=cur;
   document.getElementById('bubbleEmoji').textContent=cur.em;
   document.getElementById('bubbleScore').textContent=c.score;
-  document.getElementById('bubbleTotal').textContent=c.total;
+  document.getElementById('bubbleTotal').textContent=c.need;
   document.getElementById('bubbleMsg').textContent='';
   let opts=[cur]; const others=shuffle(c.pool.filter(w=>w.en!==cur.en)).slice(0,3);
   opts=shuffle(opts.concat(others));
@@ -2788,10 +2815,17 @@ function renderBubble(){
 }
 function popBubble(right, cur, btn){
   document.querySelectorAll('#bubbleField .bubble').forEach(b=> b.disabled=true);
-  if(right){ sfx('pop'); btn.classList.add('right'); bubbleCtx.score++; document.getElementById('bubbleMsg').innerHTML='✅ '+cur.en+' = <b>'+cur.cn+'</b>'; }
-  else { sfx('wrong'); btn.classList.add('wrong'); document.querySelectorAll('#bubbleField .bubble').forEach(b=>{ if(b.textContent===cur.en) b.classList.add('right'); }); document.getElementById('bubbleMsg').textContent='💛 正确是 '+cur.en; }
-  speak(cur.en); bubbleCtx.q++;
-  setTimeout(renderBubble, 850);
+  if(right){
+    sfx('pop'); btn.classList.add('right'); bubbleCtx.score++;
+    document.getElementById('bubbleMsg').innerHTML='✅ '+cur.en+' = <b>'+cur.cn+'</b>';
+    speak(cur.en); setTimeout(renderBubble, 850);
+  } else {
+    // wrong: the same word comes back — keep going until you reach 10/10
+    sfx('wrong'); btn.classList.add('wrong');
+    document.getElementById('bubbleMsg').innerHTML='💛 再试试！这是 '+cur.en+' = '+cur.cn;
+    speak(cur.en);
+    setTimeout(()=>{ bubbleCtx.pi--; renderBubble(); }, 1000);
+  }
 }
 document.getElementById('bubbleAgain').onclick=()=> startBubble();
 
@@ -2857,31 +2891,42 @@ const ORDER=[
   {en:'I go to school.', cn:'我去上学。'},
   {en:'She is my friend.', cn:'她是我的朋友。'},
 ];
+const WORDCN={i:'我','i':'我',like:'喜欢',apples:'苹果',the:'这/那',cat:'猫',is:'是',black:'黑色的',how:'怎样',are:'是',you:'你',my:'我的',name:'名字',rex:'Rex',can:'能',run:'跑',fast:'快',sun:'太阳',hot:'热的',go:'去',to:'到',school:'学校',she:'她',friend:'朋友',we:'我们',he:'他',and:'和',it:'它',a:'一个',big:'大的',small:'小的',happy:'开心的',love:'爱',mom:'妈妈',dad:'爸爸',jump:'跳',high:'高',star:'星星',bright:'明亮的',dog:'狗'};
+function wcn(w){ return WORDCN[w] || WORDCN[w.toLowerCase()] || ''; }
 let orderCtx=null;
 function startOrder(){ orderCtx={i:0, list:shuffle(ORDER.slice())}; go('gameOrder'); renderOrder(); markToday(); }
 function renderOrder(){
   const c=orderCtx, item=c.list[c.i];
   document.getElementById('orderHint').textContent='把单词排成：“'+item.cn+'”';
-  document.getElementById('orderMsg').textContent=''; document.getElementById('orderNext').style.display='none';
   c.punct = (item.en.match(/[.?!]$/)||[''])[0];
   c.words = item.en.replace(/[.?!]$/,'').split(/\s+/);
-  c.answer=[];
-  document.getElementById('orderTarget').textContent='';
+  c.bank = shuffle(c.words.slice()); c.answer=[];
+  drawOrder();
+}
+function drawOrder(){
+  const c=orderCtx;
+  // answer row — tap a placed word to take it back and re-order
+  const tgt=document.getElementById('orderTarget');
+  tgt.style.cssText='min-height:48px;margin:12px 0;display:flex;flex-wrap:wrap;gap:6px;justify-content:center';
+  tgt.innerHTML='';
+  c.answer.forEach((w,idx)=>{
+    const b=document.createElement('button'); b.className='sp'; b.style.cssText='font-size:18px;padding:8px 12px;background:#e7f9d8';
+    b.textContent=w; b.onclick=()=>{ c.bank.push(w); c.answer.splice(idx,1); speak(w); drawOrder(); };
+    tgt.appendChild(b);
+  });
+  // bank — word + Chinese, tap adds to answer and reads it
   const bank=document.getElementById('orderBank'); bank.innerHTML='';
-  shuffle(c.words.map((w,idx)=>({w,idx}))).forEach(o=>{
-    const b=document.createElement('button'); b.className='sp'; b.style.cssText='font-size:18px;padding:10px 14px';
-    b.textContent=o.w;
-    b.onclick=()=>{ if(b.disabled) return; b.disabled=true; b.style.opacity='.35'; c.answer.push(o.w); updateOrder(); };
+  c.bank.forEach((w,idx)=>{
+    const b=document.createElement('button'); b.className='sp'; b.style.cssText='font-size:17px;padding:8px 12px;display:flex;flex-direction:column;align-items:center;line-height:1.15';
+    b.innerHTML='<span>'+w+'</span>'+(wcn(w)?'<span style="font-size:10px;color:#8a8a8a">'+wcn(w)+'</span>':'');
+    b.onclick=()=>{ c.answer.push(w); c.bank.splice(idx,1); speak(w); drawOrder(); };
     bank.appendChild(b);
   });
-}
-function updateOrder(){
-  const c=orderCtx;
-  const built=c.answer.join(' ');
-  document.getElementById('orderTarget').textContent = built + (c.answer.length===c.words.length?c.punct:'');
+  // check when all placed
+  document.getElementById('orderMsg').textContent=''; document.getElementById('orderNext').style.display='none';
   if(c.answer.length===c.words.length){
-    if(built===c.words.join(' ')){ sfx('match'); speak(c.list[c.i].en); document.getElementById('orderMsg').textContent='🎉 完全正确！'; addStars(2); popStars(2); confettiBurst(); document.getElementById('orderNext').style.display='block'; }
-    else { sfx('wrong'); document.getElementById('orderMsg').textContent='💛 顺序不太对，点“重来”再试一次'; }
+    if(c.answer.join(' ')===c.words.join(' ')){ sfx('match'); speak(c.list[c.i].en); document.getElementById('orderMsg').textContent='🎉 完全正确！'; addStars(2); popStars(2); confettiBurst(); document.getElementById('orderNext').style.display='block'; }
+    else { sfx('wrong'); document.getElementById('orderMsg').textContent='💛 顺序不对，点已放的词可以拿回来重排'; }
   }
 }
 document.getElementById('orderClear').onclick=()=> renderOrder();
@@ -2889,30 +2934,50 @@ document.getElementById('orderNext').onclick=()=>{ if(orderCtx.i<orderCtx.list.l
 
 /* Game: snake eats the correct word (贪吃蛇) */
 let snakeState=null;
-function startSnake(){
-  const cv=document.getElementById('snakeCanvas');
-  const cols=15, rows=15, cell=Math.floor(cv.width/cols);
+const SPELLWORDS=[
+  {en:'hello',cn:'你好'},{en:'name',cn:'名字'},{en:'red',cn:'红色'},{en:'blue',cn:'蓝色'},{en:'cat',cn:'猫'},{en:'dog',cn:'狗'},
+  {en:'sun',cn:'太阳'},{en:'book',cn:'书'},{en:'pen',cn:'钢笔'},{en:'ten',cn:'十'},{en:'fish',cn:'鱼'},{en:'milk',cn:'牛奶'},
+  {en:'star',cn:'星星'},{en:'cake',cn:'蛋糕'},{en:'bird',cn:'小鸟'}
+];
+function openSnakeMenu(){ go('gameSnake'); document.getElementById('snakeMenu').style.display='block'; document.getElementById('snakeGame').style.display='none'; if(snakeState&&snakeState.timer) clearInterval(snakeState.timer); }
+function startSnake(mode){
+  mode=mode||'word';
+  document.getElementById('snakeMenu').style.display='none'; document.getElementById('snakeGame').style.display='block';
+  const cv=document.getElementById('snakeCanvas'); const cols=15, rows=15, cell=Math.floor(cv.width/cols);
   if(snakeState && snakeState.timer) clearInterval(snakeState.timer);
-  snakeState={cols,rows,cell,snake:[{x:7,y:7},{x:6,y:7},{x:5,y:7}],dir:{x:1,y:0},nextDir:{x:1,y:0},foods:[],score:0,target:null,alive:true,timer:null};
-  document.getElementById('snakeScore').textContent='0';
-  document.getElementById('snakeMsg').textContent='';
-  document.getElementById('snakeAgain').style.display='none';
-  go('gameSnake'); snakeNewRound(); snakeDraw();
-  snakeState.timer=setInterval(snakeTick, 430); markToday();
+  snakeState={mode,cols,rows,cell,snake:[{x:7,y:7},{x:6,y:7},{x:5,y:7}],dir:{x:1,y:0},nextDir:{x:1,y:0},foods:[],score:0,target:null,word:null,letters:[],collected:1,alive:true,timer:null};
+  document.getElementById('snakeScore').textContent='0'; document.getElementById('snakeMsg').textContent=''; document.getElementById('snakeAgain').style.display='none';
+  document.getElementById('snakeTopWord').style.display = mode==='word'?'block':'none';
+  document.getElementById('snakeCollected').style.display = mode==='spell'?'block':'none';
+  document.getElementById('snakeHint').style.display = mode==='spell'?'inline-block':'none';
+  snakeNewRound(); snakeDraw();
+  snakeState.timer=setInterval(snakeTick, mode==='spell'?470:430); markToday();
+}
+function snakePlace(label,correct){
+  const s=snakeState; let x,y,t=0;
+  do{ x=Math.floor(Math.random()*s.cols); y=Math.floor(Math.random()*s.rows); t++; }
+  while(t<80 && (s.snake.some(p=>p.x===x&&p.y===y) || s.foods.some(f=>f.x===x&&f.y===y)));
+  s.foods.push({x,y,label,correct});
 }
 function snakeNewRound(){
-  const s=snakeState; const pool=shuffle(wordPool());
-  const correct=pool[0]; s.target=correct;
-  document.getElementById('snakeTarget').textContent=correct.cn;
-  speak(correct.en);
-  const chosen=[correct, pool[1], pool[2], pool[3]]; s.foods=[];
-  chosen.forEach(w=>{
-    let x,y,t=0;
-    do{ x=Math.floor(Math.random()*s.cols); y=Math.floor(Math.random()*s.rows); t++; }
-    while(t<80 && (s.snake.some(p=>p.x===x&&p.y===y) || s.foods.some(f=>f.x===x&&f.y===y)));
-    s.foods.push({x,y,word:w.en,correct:w.en===correct.en});
-  });
+  const s=snakeState;
+  if(s.mode==='spell'){ snakeSpellNewWord(); return; }
+  const pool=shuffle(wordPool()); const correct=pool[0]; s.target=correct;
+  document.getElementById('snakeTarget').textContent=correct.cn; speak(correct.en);
+  s.foods=[]; [correct,pool[1],pool[2],pool[3]].forEach(w=> snakePlace(w.en, w.en===correct.en));
   s.foods=shuffle(s.foods);
+}
+function spellShown(){ const s=snakeState; return s.letters.map((L,i)=> i<s.collected?L:'_').join(' '); }
+function snakeSpellNewWord(){
+  const s=snakeState; const w=shuffle(SPELLWORDS.slice())[0]; s.word=w; s.letters=w.en.split(''); s.collected=1;
+  document.getElementById('snakeCollected').textContent=spellShown()+'   ('+w.cn+')'; speak(w.en);
+  snakeSpellPlaceLetter();
+}
+function snakeSpellPlaceLetter(){
+  const s=snakeState; const need=s.letters[s.collected];
+  const abc='abcdefghijklmnopqrstuvwxyz'.split('');
+  const items=shuffle([need].concat(shuffle(abc.filter(L=>L!==need)).slice(0,3)));
+  s.foods=[]; items.forEach(L=> snakePlace(L, L===need));
 }
 function snakeTick(){
   const s=snakeState; if(!s||!s.alive) return;
@@ -2921,10 +2986,19 @@ function snakeTick(){
   if(s.snake.some(p=>p.x===hx&&p.y===hy)){ snakeOver(); return; }
   s.snake.unshift({x:hx,y:hy});
   const f=s.foods.find(f=>f.x===hx&&f.y===hy);
-  if(f && f.correct){ sfx('match'); s.score++; document.getElementById('snakeScore').textContent=s.score; speak(f.word); addStars(1); popStars(1);
-    if(s.score>=8){ snakeWin(); return; } snakeNewRound(); /* grow: keep tail */ }
-  else if(f && !f.correct){ sfx('wrong'); document.getElementById('snakeMsg').textContent='💛 那不是“'+s.target.cn+'”'; s.foods=s.foods.filter(x=>x!==f); s.snake.pop(); }
-  else { s.snake.pop(); }
+  if(s.mode==='spell'){
+    if(f && f.correct){ sfx('pop'); s.collected++; document.getElementById('snakeCollected').textContent=spellShown()+'   ('+s.word.cn+')';
+      if(s.collected>=s.letters.length){ sfx('match'); speak(s.word.en); s.score++; document.getElementById('snakeScore').textContent=s.score; addStars(1); popStars(1);
+        if(s.score>=5){ snakeWin(); return; } snakeSpellNewWord(); }
+      else { snakeSpellPlaceLetter(); } }
+    else if(f && !f.correct){ sfx('wrong'); document.getElementById('snakeMsg').textContent='💛 下一个字母不是这个哦'; s.foods=s.foods.filter(x=>x!==f); s.snake.pop(); }
+    else { s.snake.pop(); }
+  } else {
+    if(f && f.correct){ sfx('match'); s.score++; document.getElementById('snakeScore').textContent=s.score; speak(f.label); addStars(1); popStars(1);
+      if(s.score>=8){ snakeWin(); return; } snakeNewRound(); }
+    else if(f && !f.correct){ sfx('wrong'); document.getElementById('snakeMsg').textContent='💛 那不是“'+s.target.cn+'”'; s.foods=s.foods.filter(x=>x!==f); s.snake.pop(); }
+    else { s.snake.pop(); }
+  }
   snakeDraw();
 }
 function snakeDraw(){
@@ -2932,22 +3006,25 @@ function snakeDraw(){
   const cv=document.getElementById('snakeCanvas'), ctx=cv.getContext('2d');
   ctx.clearRect(0,0,cv.width,cv.height);
   s.foods.forEach(f=>{
-    const cx=f.x*s.cell+s.cell/2, cy=f.y*s.cell+s.cell/2;
-    ctx.font='bold 11px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
-    const w=ctx.measureText(f.word).width+10;
+    const cx=f.x*s.cell+s.cell/2, cy=f.y*s.cell+s.cell/2, single=f.label.length<=2;
+    ctx.font='bold '+(single?15:11)+'px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    const w=Math.max(s.cell-2, ctx.measureText(f.label).width+10);
     ctx.fillStyle='#ff7eb3'; ctx.fillRect(cx-w/2, cy-9, w, 18);
-    ctx.fillStyle='#fff'; ctx.fillText(f.word, cx, cy);
+    ctx.fillStyle='#fff'; ctx.fillText(f.label, cx, cy);
   });
   s.snake.forEach((p,i)=>{ ctx.fillStyle=i===0?'#22c55e':'#7be495'; ctx.fillRect(p.x*s.cell+1,p.y*s.cell+1,s.cell-2,s.cell-2); });
 }
 function snakeSetDir(x,y){ const s=snakeState; if(!s||!s.alive) return; if(s.dir.x===-x&&s.dir.y===-y) return; s.nextDir={x,y}; }
 function snakeOver(){ const s=snakeState; s.alive=false; clearInterval(s.timer); document.getElementById('snakeMsg').textContent='😅 撞到自己啦！得分 '+s.score; document.getElementById('snakeAgain').style.display='block'; snakeDraw(); }
-function snakeWin(){ const s=snakeState; s.alive=false; clearInterval(s.timer); confettiBurst(); addStars(3); popStars(3); document.getElementById('snakeMsg').textContent='🎉 太厉害啦！吃对 8 个单词！'; document.getElementById('snakeAgain').style.display='block'; }
+function snakeWin(){ const s=snakeState; s.alive=false; clearInterval(s.timer); confettiBurst(); addStars(3); popStars(3); document.getElementById('snakeMsg').textContent='🎉 太厉害啦，你赢了！'; document.getElementById('snakeAgain').style.display='block'; }
 document.getElementById('snUp').onclick=()=>snakeSetDir(0,-1);
 document.getElementById('snDown').onclick=()=>snakeSetDir(0,1);
 document.getElementById('snLeft').onclick=()=>snakeSetDir(-1,0);
 document.getElementById('snRight').onclick=()=>snakeSetDir(1,0);
-document.getElementById('snakeAgain').onclick=()=> startSnake();
+document.getElementById('snakeAgain').onclick=()=> startSnake(snakeState?snakeState.mode:'word');
+document.getElementById('snakeModeWord').onclick=()=> startSnake('word');
+document.getElementById('snakeModeSpell').onclick=()=> startSnake('spell');
+document.getElementById('snakeHint').onclick=()=>{ if(snakeState&&snakeState.word){ document.getElementById('snakeMsg').textContent='💡 '+snakeState.word.en; speak(snakeState.word.en); } };
 document.addEventListener('keydown',e=>{ if(!snakeState || (document.querySelector('.screen.active')||{}).id!=='gameSnake') return;
   if(e.key==='ArrowUp'){snakeSetDir(0,-1);e.preventDefault();} else if(e.key==='ArrowDown'){snakeSetDir(0,1);e.preventDefault();}
   else if(e.key==='ArrowLeft'){snakeSetDir(-1,0);e.preventDefault();} else if(e.key==='ArrowRight'){snakeSetDir(1,0);e.preventDefault();} });
@@ -2991,6 +3068,72 @@ function renderHidden(){
   });
 }
 document.getElementById('hiddenNext').onclick=()=>{ if(hiddenCtx.i<hiddenCtx.list.length-1){ hiddenCtx.i++; renderHidden(); } else { toast('🎉 找隐藏单词全部完成！'); go('gamesList'); } };
+
+/* Game: breakout — break word bricks with a paddle & ball (打砖块背单词) */
+let brickState=null, brickRAF=null, brickLeftHeld=false, brickRightHeld=false;
+function startBrick(){
+  const cv=document.getElementById('brickCanvas');
+  brickState={ cv, W:cv.width, H:cv.height, paddle:{w:66,h:12,x:cv.width/2-33}, ball:null, bricks:[], lives:3, level:1, score:0, running:true };
+  document.getElementById('brickAgain').style.display='none';
+  document.getElementById('brickLives').textContent='❤️❤️❤️';
+  document.getElementById('brickLevel').textContent='1'; document.getElementById('brickScore').textContent='0'; document.getElementById('brickMsg').textContent='';
+  go('gameBrick');
+  brickBuildLevel(); brickResetBall();
+  if(brickRAF) cancelAnimationFrame(brickRAF);
+  brickLoop(); markToday();
+}
+function brickBuildLevel(){
+  const s=brickState; const cols=4, rows=Math.min(2+s.level,5), pad=6, bw=(s.W-pad*(cols+1))/cols, bh=22;
+  const pool=shuffle(wordPool()); const colors=['#ff7eb3','#ffd23f','#4ade80','#38bdf8','#a78bfa']; s.bricks=[]; let k=0;
+  for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){ const w=pool[k%pool.length]; k++;
+    s.bricks.push({x:pad+c*(bw+pad), y:40+r*(bh+pad), w:bw, h:bh, word:w.en, cn:w.cn, color:colors[r%colors.length]}); }
+}
+function brickResetBall(){ const s=brickState; s.ball={ x:s.W/2, y:s.H-42, r:6, vx:(Math.random()<.5?-1:1)*(2+s.level*0.2), vy:-(2.4+s.level*0.2) }; s.paddle.x=s.W/2-s.paddle.w/2; }
+function brickLoop(){
+  const s=brickState; if(!s||!s.running) return;
+  if(brickLeftHeld) s.paddle.x-=6; if(brickRightHeld) s.paddle.x+=6;
+  s.paddle.x=Math.max(0,Math.min(s.W-s.paddle.w,s.paddle.x));
+  const b=s.ball; b.x+=b.vx; b.y+=b.vy;
+  if(b.x<b.r){ b.x=b.r; b.vx=-b.vx; } if(b.x>s.W-b.r){ b.x=s.W-b.r; b.vx=-b.vx; }
+  if(b.y<b.r){ b.y=b.r; b.vy=Math.abs(b.vy); }
+  const py=s.H-24;
+  if(b.vy>0 && b.y+b.r>=py && b.y+b.r<=py+s.paddle.h+10 && b.x>=s.paddle.x && b.x<=s.paddle.x+s.paddle.w){
+    b.vy=-Math.abs(b.vy); b.vx=((b.x-(s.paddle.x+s.paddle.w/2))/(s.paddle.w/2))*3.4; sfx('pop');
+  }
+  for(let i=0;i<s.bricks.length;i++){ const br=s.bricks[i];
+    if(b.x>br.x-b.r && b.x<br.x+br.w+b.r && b.y>br.y-b.r && b.y<br.y+br.h+b.r){
+      s.bricks.splice(i,1); s.score++; document.getElementById('brickScore').textContent=s.score; sfx('match'); speak(br.word);
+      document.getElementById('brickMsg').innerHTML='🧱 '+br.word+' = <b>'+br.cn+'</b>'; b.vy=-b.vy; break;
+    }
+  }
+  if(b.y-b.r>s.H){ s.lives--; document.getElementById('brickLives').textContent='❤️'.repeat(Math.max(0,s.lives))||'💔';
+    if(s.lives<=0){ brickOver(); return; } brickResetBall(); }
+  if(s.bricks.length===0){ s.level++; document.getElementById('brickLevel').textContent=s.level; document.getElementById('brickMsg').textContent='🎉 过关！下一关更多砖块～'; addStars(2); popStars(2); confettiBurst(); brickBuildLevel(); brickResetBall(); }
+  brickDraw();
+  brickRAF=requestAnimationFrame(brickLoop);
+}
+function brickDraw(){
+  const s=brickState, ctx=s.cv.getContext('2d'); ctx.clearRect(0,0,s.W,s.H);
+  s.bricks.forEach(br=>{ ctx.fillStyle=br.color; ctx.fillRect(br.x,br.y,br.w,br.h);
+    ctx.fillStyle='#fff'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.font='bold 10px sans-serif'; if(ctx.measureText(br.word).width>br.w-4) ctx.font='bold 8px sans-serif';
+    ctx.fillText(br.word, br.x+br.w/2, br.y+br.h/2); });
+  ctx.fillStyle='#ffd23f'; ctx.fillRect(s.paddle.x,s.H-24,s.paddle.w,s.paddle.h);
+  const b=s.ball; ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2); ctx.fill();
+}
+function brickOver(){ const s=brickState; s.running=false; if(brickRAF) cancelAnimationFrame(brickRAF); document.getElementById('brickMsg').textContent='😅 生命用完啦！得分 '+s.score; document.getElementById('brickAgain').style.display='block'; }
+document.getElementById('brickAgain').onclick=()=> startBrick();
+(function(){
+  const L=document.getElementById('brickLeft'), R=document.getElementById('brickRight'), cv=document.getElementById('brickCanvas');
+  const hold=(el,set)=>{ el.addEventListener('mousedown',()=>set(true)); el.addEventListener('mouseup',()=>set(false)); el.addEventListener('mouseleave',()=>set(false));
+    el.addEventListener('touchstart',e=>{e.preventDefault();set(true);},{passive:false}); el.addEventListener('touchend',e=>{e.preventDefault();set(false);},{passive:false}); };
+  hold(L,v=>brickLeftHeld=v); hold(R,v=>brickRightHeld=v);
+  function moveTo(clientX){ if(!brickState)return; const rect=cv.getBoundingClientRect(), sc=cv.width/rect.width, x=(clientX-rect.left)*sc; brickState.paddle.x=Math.max(0,Math.min(cv.width-brickState.paddle.w, x-brickState.paddle.w/2)); }
+  cv.addEventListener('touchmove',e=>{ moveTo(e.touches[0].clientX); },{passive:true});
+  cv.addEventListener('mousemove',e=>{ if(e.buttons) moveTo(e.clientX); });
+  document.addEventListener('keydown',e=>{ if((document.querySelector('.screen.active')||{}).id!=='gameBrick')return; if(e.key==='ArrowLeft'){brickLeftHeld=true;e.preventDefault();} else if(e.key==='ArrowRight'){brickRightHeld=true;e.preventDefault();} });
+  document.addEventListener('keyup',e=>{ if(e.key==='ArrowLeft')brickLeftHeld=false; else if(e.key==='ArrowRight')brickRightHeld=false; });
+})();
 
 /* ---------------- Reward (parent-set, real-world) ---------------- */
 function renderRewardBanner(){
