@@ -813,12 +813,13 @@
 <div class="mask" id="recMask">
   <div class="modal" style="text-align:center">
     <h3 id="recTitle">🎤 录音</h3>
-    <video id="recPreview" playsinline muted style="display:none;width:100%;border-radius:16px;background:#000;max-height:50vh"></video>
+    <div id="recRef" style="display:none;background:#f4f8ff;border-radius:14px;padding:10px;margin-bottom:8px;font-size:17px;font-weight:800"></div>
+    <video id="recPreview" playsinline muted style="display:none;width:100%;border-radius:16px;background:#000;max-height:45vh"></video>
     <div id="recTimer" style="font-size:40px;font-weight:900;margin:10px 0;color:var(--pink-d)">0s</div>
-    <div class="subtle">说完点「停止并发送」（最长 15 秒）</div>
+    <div class="subtle">照着上面的句子读，读完点「停止」（最长 15 秒）</div>
     <div class="rowbtns" style="margin-top:14px">
       <button class="btn btn-ghost" id="recCancel">取消</button>
-      <button class="btn btn-green" id="recStopSend">⏹️ 停止并发送</button>
+      <button class="btn btn-green" id="recStopSend">⏹️ 停止</button>
     </div>
   </div>
 </div>
@@ -1411,7 +1412,21 @@ const COURSE = [
       {who:'A', en:'Nice to meet you!', cn:'很高兴认识你！'},
       {who:'B', en:'Nice to meet you, too!', cn:'我也是！'},
     ]},
-    task:{ text:'去用英文跟爸爸妈妈打个招呼吧！比如说 “Hello! Good morning!”，把它录下来发给家长～', say:'Hello! Good morning!' },
+    story:{ title:'🐶 小狗 Pup 交新朋友', intro:'小狗 Pup 在公园里遇到了小猫 Kit。听听它们怎么用英语打招呼，再自己读一读！',
+      lines:[
+        {who:'A', who2:'🐶Pup', en:'Hi! I am Pup.', cn:'嗨！我是 Pup。'},
+        {who:'B', who2:'🐱Kit', en:'Hello! My name is Kit.', cn:'你好！我叫 Kit。'},
+        {who:'A', who2:'🐶Pup', en:'Nice to meet you, Kit!', cn:'很高兴认识你，Kit！'},
+        {who:'B', who2:'🐱Kit', en:'Nice to meet you, too!', cn:'我也很高兴认识你！'},
+        {who:'A', who2:'🐶Pup', en:'How are you today?', cn:'你今天好吗？'},
+        {who:'B', who2:'🐱Kit', en:'I am fine, thank you! Let us play!', cn:'我很好，谢谢！我们一起玩吧！'},
+      ],
+      quiz:[
+        {q:'Pup 说 “Hi! I am Pup.”，Kit 应该怎么回答？', options:[{en:'Hello! My name is Kit.',ok:true},{en:'Goodbye!'},{en:'Thank you.'}]},
+        {q:'有人对你说 “Nice to meet you!”，你回什么？', options:[{en:'Nice to meet you, too!',ok:true},{en:'I am fine.'},{en:'Good morning.'}]},
+        {q:'“How are you?” 是什么意思？', options:[{en:'你好吗？',ok:true},{en:'你叫什么名字？'},{en:'再见！'}]},
+      ]
+    },
   },
 ];
 
@@ -1740,11 +1755,11 @@ async function azureAssess(target, feedbackEl, tipEl, onStars){
   try{ res = await assessPronunciation(target, secs); }
   catch(e){ res = undefined; }
   clearInterval(iv); tipEl.textContent='';
-  let msg, stars;
+  let msg, stars, acc=null;
   if(res===undefined){ msg='💛 很勇敢，再读一遍试试！'; stars=1; }
   else if(res===null){ msg='💛 没太听清，凑近一点、大声点再读一遍～'; stars=1; }
   else {
-    const a=Math.round(res.accuracy);
+    const a=Math.round(res.accuracy); acc=a;
     let weak=null; res.words.forEach(w=>{ if(w.err!=='None' || w.acc<70){ if(!weak || w.acc<weak.acc) weak=w; } });
     if(a>=85){ msg='⭐ 发音很棒！'+a+' 分'; stars=3; }
     else if(a>=70){ msg='👍 不错哦！'+a+' 分'+(weak?'，「'+weak.word+'」再清楚一点点':''); stars=2; }
@@ -1757,7 +1772,7 @@ async function azureAssess(target, feedbackEl, tipEl, onStars){
     tipEl.innerHTML='<button type="button" id="azPlayMine" class="btn btn-blue" style="padding:8px 16px;font-size:15px">🔁 听听我自己读的</button>';
     const pb=document.getElementById('azPlayMine'); if(pb) pb.onclick=()=> playMyVoice();
   }
-  onStars(stars);
+  onStars(stars, acc);
 }
 
 function listenAndCheck(target, feedbackEl, tipEl, onStars){
@@ -1774,7 +1789,7 @@ function listenAndCheck(target, feedbackEl, tipEl, onStars){
     tipEl.textContent = '🎤 该你读啦，看着单词，大声读出来！';
     let dots = 0;
     const iv = setInterval(()=>{ dots=(dots+1)%4; feedbackEl.textContent = '🎧 认真听你读' + '.'.repeat(dots); }, 380);
-    setTimeout(()=>{ clearInterval(iv); tipEl.textContent=''; feedbackEl.textContent = '⭐ ' + rand(cheer); onStars(1); }, 3000);
+    setTimeout(()=>{ clearInterval(iv); tipEl.textContent=''; feedbackEl.textContent = '⭐ ' + rand(cheer); onStars(1, null); }, 3000);
   }
 
   // Real recognition only works in a served secure context (http/https), NOT file://
@@ -1789,7 +1804,7 @@ function listenAndCheck(target, feedbackEl, tipEl, onStars){
   feedbackEl.textContent = '👂';
   let handled = false;
   const t0 = Date.now();
-  const finish = (txt, stars)=>{ if(handled) return; handled=true; tipEl.textContent=''; feedbackEl.textContent=txt; onStars(stars); };
+  const finish = (txt, stars)=>{ if(handled) return; handled=true; tipEl.textContent=''; feedbackEl.textContent=txt; onStars(stars, null); };
 
   rec.onresult = (e)=>{
     let heard = '';
@@ -2139,12 +2154,12 @@ function playPhonics(item){
   step();
 }
 // A 🎤跟读 button whose result (score + ⏹️停止 + 🔁听自己读的) shows right beside/under it.
-function phPrac(refText){
+function phPrac(refText, onResult){
   const wrap=document.createElement('div');
   const prac=document.createElement('button'); prac.className='sp'; prac.textContent='🎤 跟读'; prac.style.marginLeft='6px';
   const fb=document.createElement('div'); fb.className='feedback'; fb.style.cssText='font-size:15px;min-height:0;text-align:left;margin-top:4px';
   const tp=document.createElement('div'); tp.className='listen-tip'; tp.style.textAlign='left';
-  prac.onclick=()=> listenAndCheck(refText, fb, tp, (st)=>{ addStars(st); popStars(st); });
+  prac.onclick=()=> listenAndCheck(refText, fb, tp, (st, acc)=>{ addStars(st); popStars(st); if(onResult) onResult(st, acc); });
   wrap.appendChild(fb); wrap.appendChild(tp);
   return { prac, results:wrap };
 }
@@ -2637,7 +2652,7 @@ const BOARDS=[
   {key:'dialogue', em:'💬', name:'情景对话'},
   {key:'situ', em:'🎮', name:'情景反应'},
   {key:'dub', em:'🎬', name:'配音秀'},
-  {key:'task', em:'🏆', name:'单元任务'},
+  {key:'task', em:'📚', name:'趣味故事挑战'},
 ];
 function uBoards(uid){ if(!S.unitBoards) S.unitBoards={}; if(!S.unitBoards[uid]) S.unitBoards[uid]={}; return S.unitBoards[uid]; }
 function boardDone(uid,key){ return !!uBoards(uid)[key]; }
@@ -2668,14 +2683,38 @@ function doneBtn(label,key){
   b.onclick=()=>{ markBoardDone(courseCtx.u.id,key); popStars(1); toast('✅ 完成！'); go('unitHub'); if(allBoardsDone(courseCtx.u.id)) setTimeout(()=>toast('🎓 全部完成！可以领毕业证啦'),700); };
   return b;
 }
-function convLineEl(ln){
+// A pass-gate: a big button that stays disabled until `need` items report done.
+function boardGate(key, need, label){
+  const passed=new Set();
+  const b=document.createElement('button'); b.className='btn big btn-ghost'; b.style.marginTop='12px';
+  function refresh(){ const ok=passed.size>=need; b.className='btn big '+(ok?'btn-green':'btn-ghost'); b.textContent= ok? label : label+'（还差 '+(need-passed.size)+' 个）'; }
+  refresh();
+  b.onclick=()=>{ if(passed.size<need){ toast('先把上面的都完成哦～'); return; } markBoardDone(courseCtx.u.id,key); popStars(1); toast('✅ 完成！'); go('unitHub'); if(allBoardsDone(courseCtx.u.id)) setTimeout(()=>toast('🎓 全部完成！可以领毕业证啦'),700); };
+  return { btn:b, tick(id){ passed.add(id); refresh(); } };
+}
+// Record controls: choose 跟读录制 / 自己录制, then 🎤录音 or 📹录视频. Sentence stays visible while recording.
+function recordRow(refText, onCap){
+  const wrap=document.createElement('div'); wrap.style.cssText='display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px';
+  let follow=false;
+  const tgl=document.createElement('button'); tgl.className='btn btn-ghost'; tgl.style.cssText='padding:8px 14px;font-size:14px';
+  const setMode=()=>{ tgl.textContent= follow?'🔁 跟读录制（先听老师读）':'🙋 自己录制'; };
+  setMode(); tgl.onclick=()=>{ follow=!follow; setMode(); };
+  const rv=document.createElement('button'); rv.className='btn btn-pink'; rv.style.cssText='padding:8px 14px;font-size:15px'; rv.textContent='🎤 录音';
+  rv.onclick=()=> recordAndSend('voice', refText, {follow, onCaptured:onCap});
+  const rvid=document.createElement('button'); rvid.className='btn btn-purple'; rvid.style.cssText='padding:8px 14px;font-size:15px'; rvid.textContent='📹 录视频';
+  rvid.onclick=()=> recordAndSend('video', refText, {follow, onCaptured:onCap});
+  wrap.appendChild(tgl); wrap.appendChild(rv); wrap.appendChild(rvid);
+  return wrap;
+}
+function convLineEl(ln, onRead){
   const row=document.createElement('div'); row.className='convline';
-  const who=document.createElement('div'); who.className='convwho '+(ln.who==='A'?'a':'b'); who.textContent=ln.who;
+  const who=document.createElement('div'); who.className='convwho '+(ln.who==='A'?'a':'b'); who.textContent=ln.who2||ln.who;
+  if(ln.who2){ who.style.width='auto'; who.style.padding='0 6px'; who.style.fontSize='13px'; }
   const bub=document.createElement('div'); bub.className='convbubble';
   const en=document.createElement('div'); en.className='en'; renderTappable(en,ln.en);
   const cn=document.createElement('div'); cn.className='cn'; cn.textContent=ln.cn;
   const sp=document.createElement('button'); sp.className='sp'; sp.textContent='🔊 听'; sp.onclick=()=> speak(ln.en);
-  const p=phPrac(ln.en);
+  const p=phPrac(ln.en, onRead);
   bub.appendChild(en); bub.appendChild(cn); bub.appendChild(sp); bub.appendChild(p.prac); bub.appendChild(p.results);
   row.appendChild(who); row.appendChild(bub); return row;
 }
@@ -2688,54 +2727,107 @@ function openBoard(idx){
 }
 function renderBoard(key, body, u){
   if(key==='words'){
-    const c=boardCard('🔑 核心单词（点单词听，🎤跟读给分）');
-    u.words.forEach(w=>{
-      const row=document.createElement('div'); row.className='listrow'; row.style.marginBottom='8px';
+    const c=boardCard('🔑 核心单词（点单词/句子听，🎤跟读，读准 60 分才过关）');
+    const gate=boardGate('words', u.words.length, '✅ 学完单词');
+    u.words.forEach((w,i)=>{
+      const row=document.createElement('div'); row.className='listrow'; row.style.marginBottom='4px';
       const em=document.createElement('div'); em.className='lem'; em.textContent=w.em;
       const lt=document.createElement('div'); lt.className='lt';
       const a=document.createElement('div'); a.className='a'; renderTappable(a,w.en);
-      const bcn=document.createElement('div'); bcn.className='b'; bcn.textContent=w.cn+(w.s?'　'+w.s.cn:'');
+      const bcn=document.createElement('div'); bcn.className='b'; bcn.textContent=w.cn;
       lt.appendChild(a); lt.appendChild(bcn);
-      const sp=document.createElement('button'); sp.className='sp'; sp.textContent='🔊'; sp.onclick=()=> speak(w.s?w.s.en:w.en);
-      const p=phPrac(w.en);
-      row.appendChild(em); row.appendChild(lt); row.appendChild(sp); row.appendChild(p.prac);
-      c.appendChild(row); c.appendChild(p.results);
+      const sp=document.createElement('button'); sp.className='sp'; sp.textContent='🔊'; sp.onclick=()=> speak(w.en);
+      const ok=document.createElement('span'); ok.style.cssText='font-size:18px;width:22px;text-align:center'; ok.textContent = boardDone(u.id,'words')?'✅':'';
+      const p=phPrac(w.en, (st,acc)=>{ if(acc===null || acc>=60){ ok.textContent='✅'; gate.tick('w'+i); } });
+      row.appendChild(em); row.appendChild(lt); row.appendChild(sp); row.appendChild(p.prac); row.appendChild(ok);
+      c.appendChild(row);
+      // English example sentence — tappable to pronounce
+      if(w.s){
+        const srow=document.createElement('div'); srow.style.cssText='display:flex;align-items:center;gap:8px;margin:0 0 8px 44px;flex-wrap:wrap';
+        const sen=document.createElement('div'); sen.style.cssText='flex:1;min-width:120px;font-weight:700;color:var(--purple-d)'; renderTappable(sen,w.s.en);
+        const scn=document.createElement('span'); scn.className='subtle'; scn.textContent=w.s.cn;
+        const ssp=document.createElement('button'); ssp.className='sp'; ssp.textContent='🔊 句'; ssp.onclick=()=> speak(w.s.en);
+        srow.appendChild(sen); srow.appendChild(scn); srow.appendChild(ssp); c.appendChild(srow);
+      }
+      c.appendChild(p.results);
     });
-    body.appendChild(c); body.appendChild(doneBtn('✅ 学完单词','words'));
+    body.appendChild(c); body.appendChild(gate.btn);
   } else if(key==='grammar'){
+    let total=0; u.grammar.forEach(pt=> total+=pt.examples.length);
+    const gate=boardGate('grammar', total, '✅ 学会啦');
+    const tip=boardCard('📖 每句都 🎤跟读 一次就能过关（重在开口，读了就算～）'); body.appendChild(tip);
+    let gi=0;
     u.grammar.forEach(pt=>{
       const c=boardCard('📖 '+pt.point);
       pt.examples.forEach(ex=>{
+        const id='g'+(gi++);
         const line=document.createElement('div'); line.style.cssText='display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap';
         const en=document.createElement('div'); en.style.cssText='flex:1;min-width:120px;font-weight:800'; renderTappable(en,ex.en);
         const cn=document.createElement('span'); cn.className='subtle'; cn.textContent=ex.cn;
         const sp=document.createElement('button'); sp.className='sp'; sp.textContent='🔊'; sp.onclick=()=> speak(ex.en);
-        const p=phPrac(ex.en);
-        line.appendChild(en); line.appendChild(cn); line.appendChild(sp); line.appendChild(p.prac);
+        const ok=document.createElement('span'); ok.style.cssText='font-size:18px;width:22px;text-align:center';
+        const p=phPrac(ex.en, ()=>{ ok.textContent='✅'; gate.tick(id); });
+        line.appendChild(en); line.appendChild(cn); line.appendChild(sp); line.appendChild(p.prac); line.appendChild(ok);
         c.appendChild(line); c.appendChild(p.results);
       });
       body.appendChild(c);
     });
-    body.appendChild(doneBtn('✅ 学会啦','grammar'));
+    body.appendChild(gate.btn);
   } else if(key==='dialogue'){
-    u.dialogues.forEach(d=>{ const c=boardCard('💬 '+d.title); d.lines.forEach(ln=> c.appendChild(convLineEl(ln))); body.appendChild(c); });
-    const send=document.createElement('button'); send.className='btn btn-pink'; send.style.cssText='width:100%;margin-top:6px'; send.textContent='🎤 录一段发给家长'; send.onclick=()=> recordAndSend('voice');
-    body.appendChild(send); body.appendChild(doneBtn('✅ 练完对话','dialogue'));
+    const gate=boardGate('dialogue', 1, '✅ 练完对话');
+    u.dialogues.forEach((d,di)=>{
+      const c=boardCard('💬 '+d.title);
+      const refText=d.lines.map(l=>l.en).join(' ');
+      d.lines.forEach(ln=> c.appendChild(convLineEl(ln)));
+      const hint=document.createElement('div'); hint.className='subtle'; hint.style.marginTop='6px'; hint.textContent='录一段（语音或视频）就能过关，录的时候屏幕上会显示句子：';
+      c.appendChild(hint);
+      c.appendChild(recordRow(refText, ()=> gate.tick('d'+di)));
+      body.appendChild(c);
+    });
+    body.appendChild(gate.btn);
   } else if(key==='situ'){
     courseCtx.si=0; const c=boardCard(''); c.id='situCard'; body.appendChild(c); renderSitu();
   } else if(key==='dub'){
-    const c=boardCard('🎬 给这段对话配音：一句一句念，读完能听自己的');
-    u.dub.lines.forEach(ln=> c.appendChild(convLineEl(ln))); body.appendChild(c);
-    const send=document.createElement('button'); send.className='btn btn-purple'; send.style.cssText='width:100%;margin-top:6px'; send.textContent='🎬 录整段配音发给家长'; send.onclick=()=> recordAndSend('voice');
-    body.appendChild(send); body.appendChild(doneBtn('✅ 配音完成','dub'));
+    const gate=boardGate('dub', 1, '✅ 配音完成');
+    const c=boardCard('🎬 给这段对话配音：先一句句念，再录整段（能选跟读或自己录）');
+    const refText=u.dub.lines.map(l=>l.en).join(' ');
+    u.dub.lines.forEach(ln=> c.appendChild(convLineEl(ln)));
+    const hint=document.createElement('div'); hint.className='subtle'; hint.style.marginTop='6px'; hint.textContent='录音或录视频都行，录的时候能看着句子：';
+    c.appendChild(hint);
+    c.appendChild(recordRow(refText, ()=> gate.tick('dub')));
+    body.appendChild(c); body.appendChild(gate.btn);
   } else if(key==='task'){
-    const c=boardCard('🏆 单元任务');
-    const t=document.createElement('div'); t.style.cssText='font-size:16px;line-height:1.6'; t.textContent=u.task.text; c.appendChild(t);
-    const hear=document.createElement('button'); hear.className='sp'; hear.textContent='🔊 听示范'; hear.style.marginTop='8px'; hear.onclick=()=> speak(u.task.say); c.appendChild(hear);
+    const st=u.story;
+    const c=boardCard('📚 '+st.title);
+    const intro=document.createElement('div'); intro.style.cssText='font-size:15px;line-height:1.6;margin-bottom:6px'; intro.textContent=st.intro; c.appendChild(intro);
+    const playAll=document.createElement('button'); playAll.className='btn btn-blue'; playAll.style.cssText='padding:8px 14px;font-size:15px;margin-bottom:6px'; playAll.textContent='▶️ 从头听故事';
+    playAll.onclick=async()=>{ for(const ln of st.lines){ speak(ln.en); await new Promise(r=> setTimeout(r, 1200+ln.en.split(/\s+/).length*360)); } };
+    c.appendChild(playAll);
+    st.lines.forEach(ln=> c.appendChild(convLineEl(ln)));
     body.appendChild(c);
-    const rec=document.createElement('button'); rec.className='btn big btn-pink'; rec.style.cssText='width:100%;margin-top:10px'; rec.textContent='🎤 录一句打招呼发给家长'; rec.onclick=()=> recordAndSend('voice');
-    body.appendChild(rec); body.appendChild(doneBtn('✅ 完成打卡','task'));
+    // Fun quiz — answer all to pass
+    const qc=boardCard('❓ 小问答（全答对就毕业啦）'); qc.id='taskQuizCard'; body.appendChild(qc);
+    courseCtx.qi=0; renderTaskQuiz();
   }
+}
+function renderTaskQuiz(){
+  const st=courseCtx.u.story, items=st.quiz, c=document.getElementById('taskQuizCard');
+  if(courseCtx.qi>=items.length){
+    c.innerHTML='<div style="font-weight:900;font-size:18px">🎉 全答对！太棒啦！</div>';
+    document.getElementById('unitBoardBody').appendChild(doneBtn('✅ 完成挑战','task')); return;
+  }
+  const it=items[courseCtx.qi];
+  c.innerHTML='<div class="subtle">第 '+(courseCtx.qi+1)+' / '+items.length+' 题</div>'+
+    '<div style="font-size:17px;font-weight:900;margin:6px 0">'+it.q+'</div>'+
+    '<div id="tqOpts" style="display:flex;flex-direction:column;gap:8px;margin-top:8px"></div><div class="feedback" id="tqMsg"></div>';
+  const box=document.getElementById('tqOpts');
+  shuffle(it.options.slice()).forEach(o=>{
+    const b=document.createElement('button'); b.className='btn btn-ghost'; b.style.textAlign='left'; b.textContent=o.en;
+    b.onclick=()=>{ if(/[a-zA-Z]/.test(o.en)) speak(o.en);
+      if(o.ok){ sfx('match'); b.style.background='var(--green-d)'; b.style.color='#fff'; document.getElementById('tqMsg').textContent='⭐ 答对啦！'; addStars(1); popStars(1); courseCtx.qi++; setTimeout(renderTaskQuiz,900); }
+      else { sfx('wrong'); b.style.background='#ffb4b4'; document.getElementById('tqMsg').textContent='💛 再想想～'; } };
+    box.appendChild(b);
+  });
 }
 function renderSitu(){
   const u=courseCtx.u, items=u.situ, c=document.getElementById('situCard');
@@ -3314,8 +3406,8 @@ async function famUpload(blob, ext){
 async function famTest(){ try{ await famFetch(); return {ok:true}; }catch(e){ return {ok:false, err:(e&&e.message)||String(e)}; } }
 
 /* ---------- Record voice/video, then upload + send ---------- */
-async function recordAndSend(kind){
-  if(!famConfigured()){ alert('这台设备还没连接「家庭消息」。\n请点右上角 ⚙️（密码 1234）→ 找到 📡家庭消息 → 连接后，再来录音。'); return; }
+async function recordAndSend(kind, refText, opts){
+  opts=opts||{};
   if(!navigator.mediaDevices || !window.MediaRecorder){ alert('这个浏览器不支持录音/录像，建议用 Chrome。'); return; }
   const wantVideo = kind==='video';
   let stream;
@@ -3324,9 +3416,15 @@ async function recordAndSend(kind){
 
   famRecChunks=[]; famSendFlag=true;
   const prev=document.getElementById('recPreview');
-  document.getElementById('recTitle').textContent = wantVideo ? '📹 录视频' : '🎤 录语音';
+  document.getElementById('recTitle').textContent = wantVideo ? '📹 录视频' : '🎤 录音';
+  const refEl=document.getElementById('recRef');
+  if(refText){ refEl.style.display='block'; refEl.textContent=refText; } else { refEl.style.display='none'; }
   if(wantVideo){ prev.style.display='block'; prev.srcObject=stream; prev.play().catch(()=>{}); }
   else { prev.style.display='none'; prev.srcObject=null; }
+  openMask('recMask');
+
+  // "跟读录制"：先听老师读一遍，再开始录
+  if(opts.follow && refText){ document.getElementById('recTimer').textContent='👂 先听…'; speak(refText); await new Promise(r=> setTimeout(r, 1000 + refText.split(/\s+/).length*380)); }
 
   const mime = pickRecMime(wantVideo);
   try{ famRec = mime ? new MediaRecorder(stream,{mimeType:mime}) : new MediaRecorder(stream); }
@@ -3334,26 +3432,26 @@ async function recordAndSend(kind){
   famRec.ondataavailable = e=>{ if(e.data.size>0) famRecChunks.push(e.data); };
   let t=0; document.getElementById('recTimer').textContent='0s';
   famRecTimer = setInterval(()=>{ t++; document.getElementById('recTimer').textContent=t+'s'; if(t>=15) stopRec(true); }, 1000);
-
   const stopped = new Promise(res=>{ famRec.onstop=res; });
-  famRec.start(); openMask('recMask');
+  famRec.start();
   await stopped;
   clearInterval(famRecTimer);
   stream.getTracks().forEach(x=>x.stop());
   closeMask('recMask');
   if(!famSendFlag) return;
-
-  if(!famRecChunks.length){ toast('没录到声音，再试一次～'); return; }
+  if(!famRecChunks.length){ toast('没录到，再试一次～'); return; }
   const type = famRec.mimeType || famRecChunks[0].type || (wantVideo?'video/webm':'audio/webm');
   const blob = new Blob(famRecChunks, { type });
+  lastRecBlob = blob;
   const ext = type.indexOf('mp4')>=0 ? 'mp4' : type.indexOf('webm')>=0 ? 'webm' : (wantVideo?'mp4':'m4a');
-  toast('上传中…');
-  try{
-    const url = await famUpload(blob, ext);
-    await famSend(kind, url);
-    toast('✅ 已发送！');
-    renderMailbox();
-  }catch(e){ toast('发送失败：'+((e&&e.message)||e)); }
+  if(opts.onCaptured) opts.onCaptured();
+  if(famConfigured()){
+    toast('上传中…');
+    try{ const url = await famUpload(blob, ext); await famSend(kind, url); toast('✅ 已发送给家长！'); renderMailbox(); }
+    catch(e){ toast('录好啦！发送失败：'+((e&&e.message)||e)); }
+  } else {
+    toast('✅ 录好啦！（连接家庭消息后可发给家长）');
+  }
 }
 function pickRecMime(video){
   const list = video ? ['video/webm;codecs=vp8,opus','video/webm','video/mp4']
