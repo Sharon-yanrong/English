@@ -751,12 +751,14 @@
     <input class="in" id="pAzureKey" placeholder="Azure 语音 KEY（一长串）" style="margin-bottom:6px">
     <input class="in" id="pAzureRegion" placeholder="区域，如 germanywestcentral">
     <div class="subtle" id="azureHint" style="margin-top:6px">填了之后，跟读会用微软发音评测给真实分数；不填就用普通鼓励模式。</div>
-    <label class="fld">🔈 朗读声音（更自然、更像小朋友）</label>
+    <label class="fld">🔈 朗读声音</label>
     <select class="in" id="pAzureVoice">
-      <option value="en-US-AnaNeural">小女孩 Ana（推荐 · 活泼可爱）</option>
-      <option value="en-GB-MaisieNeural">英式小女孩 Maisie</option>
-      <option value="en-US-JennyNeural">温柔姐姐 Jenny</option>
-      <option value="en-US-GuyNeural">大哥哥 Guy</option>
+      <option value="en-US-AriaNeural">自然姐姐 Aria（推荐 · 最像真人）</option>
+      <option value="en-US-JennyNeural">温柔姐姐 Jenny（自然）</option>
+      <option value="en-US-MichelleNeural">亲切姐姐 Michelle（自然）</option>
+      <option value="en-US-GuyNeural">大哥哥 Guy（自然）</option>
+      <option value="en-US-AnaNeural">小女孩 Ana（童声 · 略有机械感）</option>
+      <option value="en-GB-MaisieNeural">英式小女孩 Maisie（童声）</option>
       <option value="browser">浏览器默认（不用 Azure）</option>
     </select>
 
@@ -1415,7 +1417,7 @@ const COURSE = [
     ]},
     story:{ title:'🐶 小狗 Pup 交新朋友', intro:'小狗 Pup 在公园里遇到了小猫 Kit。听听它们怎么用英语打招呼，再自己读一读！',
       scene:'linear-gradient(#bfe3ff,#dff5d8)', charA:'🐶', charB:'🐱',
-      voices:{ A:{az:'en-US-GuyNeural', pitch:0.8}, B:{az:'en-US-AnaNeural', pitch:1.5} },
+      voices:{ A:{az:'en-US-GuyNeural', pitch:0.8}, B:{az:'en-US-JennyNeural', pitch:1.5} },
       lines:[
         {who:'A', who2:'🐶Pup', en:'Hi! I am Pup.', cn:'嗨！我是 Pup。'},
         {who:'B', who2:'🐱Kit', en:'Hello! My name is Kit.', cn:'你好！我叫 Kit。'},
@@ -1668,7 +1670,7 @@ function browserSpeak(text, opts){
 }
 // Azure Neural TTS = warm, natural, kid-friendly voice (uses the same Azure key). Cached per phrase.
 let ttsCache={}, curAudio=null;
-function azureVoiceName(){ return (S.azure && S.azure.voice) || 'en-US-AnaNeural'; }
+function azureVoiceName(){ return (S.azure && S.azure.voice) || 'en-US-AriaNeural'; }
 function playAudioUrl(url){ try{ if(curAudio) curAudio.pause(); curAudio=new Audio(url); curAudio.play().catch(()=>{}); }catch(e){} }
 // Send arbitrary inner-SSML to Azure with a chosen voice; cache by voice+ssml.
 async function azureTTS(innerSSML, voice){
@@ -2328,7 +2330,7 @@ function openParent(){
   document.getElementById('rewardHint').textContent = (S.reward&&S.reward.target>0) ? ('孩子现在有 '+S.stars+' 颗星，目标 '+S.reward.target+' 颗') : '';
   document.getElementById('pAzureKey').value = (S.azure&&S.azure.key)||'';
   document.getElementById('pAzureRegion').value = (S.azure&&S.azure.region)||'';
-  document.getElementById('pAzureVoice').value = (S.azure&&S.azure.voice)||'en-US-AnaNeural';
+  document.getElementById('pAzureVoice').value = (S.azure&&S.azure.voice)||'en-US-AriaNeural';
   document.getElementById('recStatus').textContent = S.voice ? '✅ 已有一段录音' : '还没有录音';
   const pick=document.getElementById('avatarPick'); pick.innerHTML='';
   AVATARS.forEach(a=>{
