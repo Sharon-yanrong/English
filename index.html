@@ -1367,7 +1367,8 @@ const COUNTRIES = [
 // COURSE — original lessons aligned to the grade-3 curriculum scope (same words &
 // language functions; original dialogues with our own characters, no textbook art/text).
 const COURSE = [
-  { id:'u1', title:'Unit 1 · Hello!', cn:'打招呼', ready:true,
+  { id:'u1', title:'Unit 1 · Hello!', cn:'打招呼', ready:true, storyline:true,
+    finale:'Pup 和 Kit 用集齐的 6 件宝物打开了「英语城堡」的大门，交到了好多新朋友，一起大声说：Hello! Nice to meet you! 🎉',
     words:[
       {en:'hello', cn:'你好', em:'👋', s:{en:'Hello! I am Tom.', cn:'你好！我是 Tom。'}},
       {en:'hi', cn:'嗨；你好', em:'🙋', s:{en:'Hi! Nice to meet you.', cn:'嗨！很高兴认识你。'}},
@@ -1430,6 +1431,336 @@ const COURSE = [
         {q:'Pup 说 “Hi! I am Pup.”，Kit 应该怎么回答？', options:[{en:'Hello! My name is Kit.',ok:true},{en:'Goodbye!'},{en:'Thank you.'}]},
         {q:'有人对你说 “Nice to meet you!”，你回什么？', options:[{en:'Nice to meet you, too!',ok:true},{en:'I am fine.'},{en:'Good morning.'}]},
         {q:'“How are you?” 是什么意思？', options:[{en:'你好吗？',ok:true},{en:'你叫什么名字？'},{en:'再见！'}]},
+      ]
+    },
+  },
+  { id:'u2', title:'Unit 2 · My School', cn:'我的学校', ready:true,
+    words:[
+      {en:'school', cn:'学校', em:'🏫', s:{en:'This is my school.', cn:'这是我的学校。'}},
+      {en:'classroom', cn:'教室', em:'🚪', s:{en:'This is our classroom.', cn:'这是我们的教室。'}},
+      {en:'teacher', cn:'老师', em:'👩‍🏫', s:{en:'She is my teacher.', cn:'她是我的老师。'}},
+      {en:'student', cn:'学生', em:'🧑‍🎓', s:{en:'I am a student.', cn:'我是一名学生。'}},
+      {en:'desk', cn:'课桌', em:'🗄️', s:{en:'This is my desk.', cn:'这是我的课桌。'}},
+      {en:'chair', cn:'椅子', em:'🪑', s:{en:'This is a chair.', cn:'这是一把椅子。'}},
+      {en:'blackboard', cn:'黑板', em:'🟩', s:{en:'Look at the blackboard.', cn:'看黑板。'}},
+      {en:'book', cn:'书', em:'📖', s:{en:'This is my book.', cn:'这是我的书。'}},
+      {en:'pen', cn:'钢笔', em:'🖊️', s:{en:'This is a pen.', cn:'这是一支钢笔。'}},
+      {en:'pencil', cn:'铅笔', em:'✏️', s:{en:'This is a pencil.', cn:'这是一支铅笔。'}},
+      {en:'bag', cn:'书包', em:'🎒', s:{en:'This is my bag.', cn:'这是我的书包。'}},
+      {en:'letter', cn:'字母', em:'🔤', s:{en:'What letter is this?', cn:'这是什么字母？'}},
+    ],
+    grammar:[
+      {point:'介绍“这是…”', examples:[{en:'This is my school.', cn:'这是我的学校。'},{en:'This is my teacher.', cn:'这是我的老师。'},{en:'This is a book.', cn:'这是一本书。'}]},
+      {point:'介绍教室里的东西', examples:[{en:'This is a desk.', cn:'这是一张课桌。'},{en:'This is a chair.', cn:'这是一把椅子。'}]},
+      {point:'问这是什么', examples:[{en:"What's this?", cn:'这是什么？'},{en:'It is a pen.', cn:'它是一支钢笔。'}]},
+      {point:'认字母（在教室里）', examples:[{en:'What letter is this?', cn:'这是什么字母？'},{en:"It's the letter A.", cn:'它是字母 A。'},{en:"It's the letter B.", cn:'它是字母 B。'}]},
+    ],
+    dialogues:[
+      { title:'参观我的学校', lines:[
+        {who:'A', en:'Hello! This is my school.', cn:'你好！这是我的学校。'},
+        {who:'B', en:'Wow! It is big and nice.', cn:'哇！它又大又漂亮。'},
+        {who:'A', en:'This is my classroom.', cn:'这是我的教室。'},
+        {who:'B', en:'I like it! Look, a teacher!', cn:'我喜欢！看，一位老师！'},
+      ]},
+      { title:'在教室里认字母', lines:[
+        {who:'A', en:'What letter is this?', cn:'这是什么字母？'},
+        {who:'B', en:"It's the letter A.", cn:'它是字母 A。'},
+        {who:'A', en:'And this one?', cn:'那这个呢？'},
+        {who:'B', en:"It's the letter B!", cn:'它是字母 B！'},
+      ]},
+    ],
+    situ:[
+      {prompt:'What letter is this?', cn:'老师指着字母 A 问你', options:[{en:'It is the letter A.', ok:true},{en:'I am fine.'},{en:'Goodbye!'}]},
+      {prompt:'This is my school.', cn:'同学带你参观学校', options:[{en:'Wow! It is nice!', ok:true},{en:'My name is Tom.'},{en:'How old are you?'}]},
+      {prompt:"What's this?", cn:'别人指着一支笔问你', options:[{en:'It is a pen.', ok:true},{en:'It is blue.'},{en:'See you!'}]},
+      {prompt:'This is my teacher.', cn:'同学介绍他的老师', options:[{en:'Hello, teacher!', ok:true},{en:'Goodbye!'},{en:'What colour is it?'}]},
+      {prompt:'Is this a book?', cn:'别人指着书问你', options:[{en:'Yes, it is a book.', ok:true},{en:'I am eight.'},{en:'Nice to meet you.'}]},
+    ],
+    dub:{ title:'Pup 带 Kit 看学校', lines:[
+      {who:'A', en:'Look, Kit! This is my school!', cn:'看，Kit！这是我的学校！'},
+      {who:'B', en:'Wow! It is big!', cn:'哇！它好大！'},
+      {who:'A', en:'This is my classroom.', cn:'这是我的教室。'},
+      {who:'B', en:'I like it very much!', cn:'我非常喜欢！'},
+    ]},
+    story:{ title:'🏫 Pup 带 Kit 去上学', intro:'Pup 带 Kit 参观自己的学校。他们看到了教室、课桌，还认了字母。听一听，再读一读！',
+      scene:'linear-gradient(#d6f0d0,#dbeeff)', charA:'🐶', charB:'🐱',
+      voices:{ A:{az:'en-US-GuyNeural', pitch:0.8}, B:{az:'en-US-JennyNeural', pitch:1.5} },
+      lines:[
+        {who:'A', who2:'🐶Pup', en:'Welcome, Kit! This is my school.', cn:'欢迎你，Kit！这是我的学校。'},
+        {who:'B', who2:'🐱Kit', en:'Wow! It is big and nice!', cn:'哇！它又大又漂亮！'},
+        {who:'A', who2:'🐶Pup', en:'This is our classroom.', cn:'这是我们的教室。'},
+        {who:'B', who2:'🐱Kit', en:"What's this? A book?", cn:'这是什么？一本书吗？'},
+        {who:'A', who2:'🐶Pup', en:'Yes! And what letter is this?', cn:'对！那这是什么字母？'},
+        {who:'B', who2:'🐱Kit', en:"It's the letter A! I love school!", cn:'是字母 A！我爱上学！'},
+      ],
+      quiz:[
+        {q:'故事里，Pup 的学校怎么样？', options:[{en:'It is big and nice.',ok:true},{en:'It is small.'},{en:'It is old.'}]},
+        {q:'“What letter is this?” 是什么意思？', options:[{en:'这是什么字母？',ok:true},{en:'这是什么颜色？'},{en:'你叫什么名字？'}]},
+        {q:'“This is my school.” 是什么意思？', options:[{en:'这是我的学校。',ok:true},{en:'那是你的学校。'},{en:'我喜欢学校。'}]},
+      ]
+    },
+  },
+  { id:'u3', title:'Unit 3 · Colours and Letters', cn:'五颜六色', ready:true,
+    words:[
+      {en:'colour', cn:'颜色', em:'🎨', s:{en:'What colour is this?', cn:'这是什么颜色？'}},
+      {en:'red', cn:'红色', em:'🔴', s:{en:'The apple is red.', cn:'苹果是红色的。'}},
+      {en:'orange', cn:'橙色', em:'🟠', s:{en:'The orange is orange.', cn:'橙子是橙色的。'}},
+      {en:'yellow', cn:'黄色', em:'🟡', s:{en:'The banana is yellow.', cn:'香蕉是黄色的。'}},
+      {en:'green', cn:'绿色', em:'🟢', s:{en:'The grass is green.', cn:'草是绿色的。'}},
+      {en:'blue', cn:'蓝色', em:'🔵', s:{en:'The sky is blue.', cn:'天空是蓝色的。'}},
+      {en:'purple', cn:'紫色', em:'🟣', s:{en:'The grapes are purple.', cn:'葡萄是紫色的。'}},
+      {en:'pink', cn:'粉色', em:'🌸', s:{en:'The flower is pink.', cn:'花是粉色的。'}},
+      {en:'black', cn:'黑色', em:'⚫', s:{en:'The cat is black.', cn:'猫是黑色的。'}},
+      {en:'white', cn:'白色', em:'⚪', s:{en:'The cloud is white.', cn:'云是白色的。'}},
+      {en:'brown', cn:'棕色', em:'🟤', s:{en:'The bear is brown.', cn:'熊是棕色的。'}},
+      {en:'rainbow', cn:'彩虹', em:'🌈', s:{en:'Look! A rainbow!', cn:'看！一道彩虹！'}},
+    ],
+    grammar:[
+      {point:'问这是什么颜色', examples:[{en:'What colour is this?', cn:'这是什么颜色？'},{en:"It's red.", cn:'它是红色的。'},{en:'It is blue.', cn:'它是蓝色的。'}]},
+      {point:'用 Is it…? 猜颜色', examples:[{en:'Is it yellow?', cn:'它是黄色的吗？'},{en:'Yes, it is.', cn:'是的。'},{en:"No, it isn't.", cn:'不，它不是。'}]},
+      {point:'用颜色描述东西', examples:[{en:'The banana is yellow.', cn:'香蕉是黄色的。'},{en:'The grass is green.', cn:'草是绿色的。'}]},
+      {point:'颜色 + 字母复习', examples:[{en:'What letter is this?', cn:'这是什么字母？'},{en:"It's the letter C.", cn:'它是字母 C。'}]},
+    ],
+    dialogues:[
+      { title:'好玩的颜色', lines:[
+        {who:'A', en:'What colour is this?', cn:'这是什么颜色？'},
+        {who:'B', en:"It's green.", cn:'它是绿色的。'},
+        {who:'A', en:'I like green!', cn:'我喜欢绿色！'},
+        {who:'B', en:'Me too! Green is nice.', cn:'我也是！绿色真好看。'},
+      ]},
+      { title:'猜猜什么颜色', lines:[
+        {who:'A', en:'Is it red?', cn:'它是红色的吗？'},
+        {who:'B', en:"No, it isn't.", cn:'不，它不是。'},
+        {who:'A', en:'Is it blue?', cn:'它是蓝色的吗？'},
+        {who:'B', en:'Yes, it is!', cn:'是的，它是！'},
+      ]},
+    ],
+    situ:[
+      {prompt:'What colour is this?', cn:'别人指着草问你颜色', options:[{en:"It's green.", ok:true},{en:'I am fine.'},{en:'Goodbye!'}]},
+      {prompt:'Is it yellow?', cn:'别人指着香蕉问', options:[{en:'Yes, it is.', ok:true},{en:'My name is Tom.'},{en:'Good morning.'}]},
+      {prompt:'Is it black?', cn:'别人指着红苹果问', options:[{en:"No, it isn't.", ok:true},{en:'Yes, I am.'},{en:'See you!'}]},
+      {prompt:'What colour is the sky?', cn:'别人问天空是什么颜色', options:[{en:'It is blue.', ok:true},{en:'It is a cat.'},{en:'Thank you.'}]},
+      {prompt:'Look! A rainbow!', cn:'天上出现彩虹啦', options:[{en:'Wow! It is beautiful!', ok:true},{en:"I'm sorry."},{en:'How are you?'}]},
+    ],
+    dub:{ title:'Pup 和 Kit 猜颜色', lines:[
+      {who:'A', en:'What colour is this?', cn:'这是什么颜色？'},
+      {who:'B', en:'Is it red?', cn:'它是红色的吗？'},
+      {who:'A', en:"No, it isn't. It's blue!", cn:'不，它不是。它是蓝色的！'},
+      {who:'B', en:'Blue! I like it!', cn:'蓝色！我喜欢！'},
+    ]},
+    story:{ title:'🌈 Pup 和 Kit 玩猜颜色', intro:'Pup 拿着一个神秘的东西，让 Kit 猜是什么颜色。听听他们怎么用 “Is it…?” 来猜！',
+      scene:'linear-gradient(#ffe3f1,#e5f0ff)', charA:'🐶', charB:'🐱',
+      voices:{ A:{az:'en-US-GuyNeural', pitch:0.8}, B:{az:'en-US-JennyNeural', pitch:1.5} },
+      lines:[
+        {who:'A', who2:'🐶Pup', en:'Look, Kit! What colour is this?', cn:'看，Kit！这是什么颜色？'},
+        {who:'B', who2:'🐱Kit', en:'Is it red?', cn:'它是红色的吗？'},
+        {who:'A', who2:'🐶Pup', en:"No, it isn't.", cn:'不，它不是。'},
+        {who:'B', who2:'🐱Kit', en:'Is it blue?', cn:'它是蓝色的吗？'},
+        {who:'A', who2:'🐶Pup', en:'Yes, it is!', cn:'是的，它是！'},
+        {who:'B', who2:'🐱Kit', en:'Blue is my favourite colour!', cn:'蓝色是我最喜欢的颜色！'},
+      ],
+      quiz:[
+        {q:'故事里那个东西是什么颜色？', options:[{en:'It is blue.',ok:true},{en:'It is red.'},{en:'It is green.'}]},
+        {q:'“Is it red?” 要说“不是”，怎么回答？', options:[{en:"No, it isn't.",ok:true},{en:'Yes, it is.'},{en:'It is red.'}]},
+        {q:'“What colour is this?” 是什么意思？', options:[{en:'这是什么颜色？',ok:true},{en:'这是什么字母？'},{en:'这是什么？'}]},
+      ]
+    },
+  },
+  { id:'u4', title:'Unit 4 · My Friends', cn:'我的朋友', ready:true,
+    words:[
+      {en:'friend', cn:'朋友', em:'👫', s:{en:'This is my friend.', cn:'这是我的朋友。'}},
+      {en:'boy', cn:'男孩', em:'👦', s:{en:'He is a boy.', cn:'他是一个男孩。'}},
+      {en:'girl', cn:'女孩', em:'👧', s:{en:'She is a girl.', cn:'她是一个女孩。'}},
+      {en:'he', cn:'他', em:'🧑', s:{en:'He is my friend.', cn:'他是我的朋友。'}},
+      {en:'she', cn:'她', em:'👩', s:{en:'She is my friend.', cn:'她是我的朋友。'}},
+      {en:'name', cn:'名字', em:'🏷️', s:{en:'His name is Tom.', cn:'他的名字叫 Tom。'}},
+      {en:'share', cn:'分享', em:'🤝', s:{en:"Let's share the toys.", cn:'我们一起分享玩具吧。'}},
+      {en:'one', cn:'一', em:'1️⃣', s:{en:'I have one pen.', cn:'我有一支笔。'}},
+      {en:'two', cn:'二', em:'2️⃣', s:{en:'I have two books.', cn:'我有两本书。'}},
+      {en:'three', cn:'三', em:'3️⃣', s:{en:'I see three cats.', cn:'我看见三只猫。'}},
+      {en:'four', cn:'四', em:'4️⃣', s:{en:'There are four apples.', cn:'有四个苹果。'}},
+      {en:'five', cn:'五', em:'5️⃣', s:{en:'I have five stars.', cn:'我有五颗星星。'}},
+    ],
+    grammar:[
+      {point:'介绍我的朋友', examples:[{en:'This is my friend.', cn:'这是我的朋友。'},{en:'He is a good boy.', cn:'他是个好男孩。'}]},
+      {point:'用 His / Her 介绍名字', examples:[{en:'His name is Tom.', cn:'他的名字叫 Tom。'},{en:'Her name is Mia.', cn:'她的名字叫 Mia。'}]},
+      {point:'说他是男孩 / 她是女孩', examples:[{en:'He is a boy.', cn:'他是一个男孩。'},{en:'She is a girl.', cn:'她是一个女孩。'}]},
+      {point:'问有多少（How many）', examples:[{en:'How many apples?', cn:'有多少个苹果？'},{en:'One, two, three. Three apples!', cn:'一、二、三。三个苹果！'}]},
+    ],
+    dialogues:[
+      { title:'介绍我的朋友', lines:[
+        {who:'A', en:'This is my friend. His name is Tom.', cn:'这是我的朋友。他的名字叫 Tom。'},
+        {who:'B', en:'Hi, Tom! Nice to meet you.', cn:'嗨，Tom！很高兴认识你。'},
+        {who:'A', en:'She is my friend, too. Her name is Mia.', cn:'她也是我的朋友。她的名字叫 Mia。'},
+        {who:'B', en:'Hello, Mia! Nice to meet you!', cn:'你好，Mia！很高兴认识你！'},
+      ]},
+      { title:'一起数一数、分一分', lines:[
+        {who:'A', en:'How many apples?', cn:'有多少个苹果？'},
+        {who:'B', en:'One, two, three. Three apples!', cn:'一、二、三。三个苹果！'},
+        {who:'A', en:"Let's share them!", cn:'我们一起分享吧！'},
+        {who:'B', en:'Thank you! You are a good friend.', cn:'谢谢你！你是个好朋友。'},
+      ]},
+    ],
+    situ:[
+      {prompt:'This is my friend.', cn:'同学介绍他的朋友给你', options:[{en:'Hi! Nice to meet you.', ok:true},{en:'It is yellow.'},{en:'Goodbye!'}]},
+      {prompt:"What's his name?", cn:'别人问那个男孩叫什么', options:[{en:'His name is Tom.', ok:true},{en:'I am fine.'},{en:'It is a pen.'}]},
+      {prompt:'How many pens?', cn:'桌上有两支笔，别人问数量', options:[{en:'Two pens.', ok:true},{en:'It is blue.'},{en:'See you!'}]},
+      {prompt:'Is she a girl?', cn:'别人指着一个女孩问你', options:[{en:'Yes, she is.', ok:true},{en:'He is a boy.'},{en:'Thank you.'}]},
+      {prompt:"Let's share!", cn:'朋友想和你一起分享', options:[{en:'OK! Thank you!', ok:true},{en:'What colour is it?'},{en:"I'm sorry."}]},
+    ],
+    dub:{ title:'Pup 给 Kit 介绍朋友', lines:[
+      {who:'A', en:'Kit, this is my friend.', cn:'Kit，这是我的朋友。'},
+      {who:'B', en:"Hi! What's his name?", cn:'嗨！他叫什么名字？'},
+      {who:'A', en:'His name is Ted. He is a boy.', cn:'他的名字叫 Ted。他是个男孩。'},
+      {who:'B', en:'Nice to meet you, Ted!', cn:'很高兴认识你，Ted！'},
+    ]},
+    story:{ title:'👫 Pup、Kit 和好朋友', intro:'Pup 给 Kit 看好朋友 Ted 的照片，还一起数苹果、分享。听一听，学学 “His name is…” 和 “How many…”！',
+      scene:'linear-gradient(#fff0cf,#ffe0e6)', charA:'🐶', charB:'🐱',
+      voices:{ A:{az:'en-US-GuyNeural', pitch:0.8}, B:{az:'en-US-JennyNeural', pitch:1.5} },
+      lines:[
+        {who:'A', who2:'🐶Pup', en:'Kit, this is my friend. His name is Ted.', cn:'Kit，这是我的朋友。他的名字叫 Ted。'},
+        {who:'B', who2:'🐱Kit', en:'Cool! He is a nice boy.', cn:'酷！他是个好男孩。'},
+        {who:'A', who2:'🐶Pup', en:'Look! How many apples?', cn:'看！有多少个苹果？'},
+        {who:'B', who2:'🐱Kit', en:'One, two, three. Three apples!', cn:'一、二、三。三个苹果！'},
+        {who:'A', who2:'🐶Pup', en:"Let's share them and play!", cn:'我们一起分享，一起玩吧！'},
+        {who:'B', who2:'🐱Kit', en:'Yes! Good friends share!', cn:'好呀！好朋友要分享！'},
+      ],
+      quiz:[
+        {q:'故事里一共有几个苹果？', options:[{en:'Three apples.',ok:true},{en:'Two apples.'},{en:'Five apples.'}]},
+        {q:'“His name is Ted.” 是什么意思？', options:[{en:'他的名字叫 Ted。',ok:true},{en:'她的名字叫 Ted。'},{en:'我的名字叫 Ted。'}]},
+        {q:'“How many apples?” 是什么意思？', options:[{en:'有多少个苹果？',ok:true},{en:'苹果是什么颜色？'},{en:'这是什么？'}]},
+      ]
+    },
+  },
+  { id:'u5', title:'Unit 5 · About Me', cn:'认识我自己', ready:true,
+    words:[
+      {en:'face', cn:'脸', em:'😊', s:{en:'Look at my face.', cn:'看我的脸。'}},
+      {en:'eye', cn:'眼睛', em:'👁️', s:{en:'I have two eyes.', cn:'我有两只眼睛。'}},
+      {en:'ear', cn:'耳朵', em:'👂', s:{en:'I have two ears.', cn:'我有两只耳朵。'}},
+      {en:'nose', cn:'鼻子', em:'👃', s:{en:'I have one nose.', cn:'我有一个鼻子。'}},
+      {en:'mouth', cn:'嘴巴', em:'👄', s:{en:'I have one mouth.', cn:'我有一张嘴。'}},
+      {en:'hand', cn:'手', em:'✋', s:{en:'I have two hands.', cn:'我有两只手。'}},
+      {en:'arm', cn:'胳膊', em:'💪', s:{en:'I have two arms.', cn:'我有两条胳膊。'}},
+      {en:'leg', cn:'腿', em:'🦵', s:{en:'I have two legs.', cn:'我有两条腿。'}},
+      {en:'foot', cn:'脚', em:'🦶', s:{en:'I have two feet.', cn:'我有两只脚。'}},
+      {en:'robot', cn:'机器人', em:'🤖', s:{en:"Let's make a robot!", cn:'我们来做个机器人吧！'}},
+      {en:'see', cn:'看见', em:'👀', s:{en:'I can see with my eyes.', cn:'我能用眼睛看。'}},
+      {en:'jump', cn:'跳', em:'🤸', s:{en:'I can jump high!', cn:'我能跳得很高！'}},
+    ],
+    grammar:[
+      {point:'提议一起做（Let’s…）', examples:[{en:"Let's make a robot!", cn:'我们来做个机器人吧！'},{en:"Let's play!", cn:'我们一起玩吧！'}]},
+      {point:'我有…（I have…）', examples:[{en:'I have two eyes.', cn:'我有两只眼睛。'},{en:'I have one nose.', cn:'我有一个鼻子。'}]},
+      {point:'我会…（I can…）', examples:[{en:'I can see.', cn:'我能看见。'},{en:'I can jump.', cn:'我会跳。'},{en:'I can run.', cn:'我会跑。'}]},
+      {point:'介绍我的脸', examples:[{en:'Look at my face.', cn:'看我的脸。'},{en:'This is my nose.', cn:'这是我的鼻子。'}]},
+    ],
+    dialogues:[
+      { title:'一起做个机器人', lines:[
+        {who:'A', en:"Let's make a robot!", cn:'我们来做个机器人吧！'},
+        {who:'B', en:'Great! It has two eyes.', cn:'太好了！它有两只眼睛。'},
+        {who:'A', en:'And one big mouth!', cn:'还有一张大嘴巴！'},
+        {who:'B', en:'Cool! Our robot can jump!', cn:'酷！我们的机器人会跳！'},
+      ]},
+      { title:'看我的脸，我会…', lines:[
+        {who:'A', en:'Look at my face. I have two eyes.', cn:'看我的脸。我有两只眼睛。'},
+        {who:'B', en:'I can see you! I can jump, too.', cn:'我能看见你！我也会跳。'},
+        {who:'A', en:'I can jump. Can you run?', cn:'我会跳。你会跑吗？'},
+        {who:'B', en:'Yes! I can run fast!', cn:'会！我能跑得很快！'},
+      ]},
+    ],
+    situ:[
+      {prompt:"Let's make a robot!", cn:'朋友邀你一起做机器人', options:[{en:'Great idea!', ok:true},{en:'It is yellow.'},{en:'Goodbye!'}]},
+      {prompt:'Look! I can jump!', cn:'朋友展示他会跳', options:[{en:'Wow! You are great!', ok:true},{en:'His name is Tom.'},{en:'It is a pen.'}]},
+      {prompt:'Can you see the cat?', cn:'别人问你能不能看见猫', options:[{en:'Yes, I can.', ok:true},{en:'I am eight.'},{en:'See you!'}]},
+      {prompt:'How many eyes do you have?', cn:'别人问你有几只眼睛', options:[{en:'I have two eyes.', ok:true},{en:'It is blue.'},{en:'Thank you.'}]},
+      {prompt:'Look at my face!', cn:'朋友让你看他的脸', options:[{en:'Wow! Nice!', ok:true},{en:"I'm sorry."},{en:'What colour is it?'}]},
+    ],
+    dub:{ title:'Pup 和 Kit 做机器人', lines:[
+      {who:'A', en:"Let's make a robot!", cn:'我们来做个机器人吧！'},
+      {who:'B', en:'It has two eyes and one nose.', cn:'它有两只眼睛和一个鼻子。'},
+      {who:'A', en:'Our robot can jump!', cn:'我们的机器人会跳！'},
+      {who:'B', en:'Wow! It is so cool!', cn:'哇！它太酷了！'},
+    ]},
+    story:{ title:'🤖 Pup 和 Kit 做机器人', intro:'Pup 和 Kit 一起动手做机器人！他们给它做了眼睛、鼻子，机器人还会跳。听一听，学学 “I have…” 和 “It can…”！',
+      scene:'linear-gradient(#dbe4ff,#ede0ff)', charA:'🐶', charB:'🐱',
+      voices:{ A:{az:'en-US-GuyNeural', pitch:0.8}, B:{az:'en-US-JennyNeural', pitch:1.5} },
+      lines:[
+        {who:'A', who2:'🐶Pup', en:"Kit, let's make a robot!", cn:'Kit，我们来做个机器人吧！'},
+        {who:'B', who2:'🐱Kit', en:'Great! It has two big eyes.', cn:'太好了！它有两只大眼睛。'},
+        {who:'A', who2:'🐶Pup', en:'And one round nose!', cn:'还有一个圆圆的鼻子！'},
+        {who:'B', who2:'🐱Kit', en:'Look! The robot can jump!', cn:'看！机器人会跳！'},
+        {who:'A', who2:'🐶Pup', en:'Wow! It can jump high!', cn:'哇！它能跳得很高！'},
+        {who:'B', who2:'🐱Kit', en:'Our robot is so cool!', cn:'我们的机器人太酷啦！'},
+      ],
+      quiz:[
+        {q:'故事里的机器人会做什么？', options:[{en:'It can jump.',ok:true},{en:'It can swim.'},{en:'It can sing.'}]},
+        {q:'“I have two eyes.” 是什么意思？', options:[{en:'我有两只眼睛。',ok:true},{en:'我有两只耳朵。'},{en:'我能看见。'}]},
+        {q:'“Let’s make a robot!” 是什么意思？', options:[{en:'我们来做个机器人吧！',ok:true},{en:'这是一个机器人。'},{en:'机器人在哪里？'}]},
+      ]
+    },
+  },
+  { id:'u6', title:'Unit 6 · My Family', cn:'我的家人', ready:true,
+    words:[
+      {en:'family', cn:'家人；家庭', em:'👨‍👩‍👧‍👦', s:{en:'This is my family.', cn:'这是我的家人。'}},
+      {en:'father', cn:'爸爸', em:'👨', s:{en:'This is my father.', cn:'这是我的爸爸。'}},
+      {en:'mother', cn:'妈妈', em:'👩', s:{en:'This is my mother.', cn:'这是我的妈妈。'}},
+      {en:'brother', cn:'哥哥；弟弟', em:'👦', s:{en:'He is my brother.', cn:'他是我的哥哥。'}},
+      {en:'sister', cn:'姐姐；妹妹', em:'👧', s:{en:'She is my sister.', cn:'她是我的姐姐。'}},
+      {en:'grandpa', cn:'爷爷；外公', em:'👴', s:{en:'He is my grandpa.', cn:'他是我的爷爷。'}},
+      {en:'grandma', cn:'奶奶；外婆', em:'👵', s:{en:'She is my grandma.', cn:'她是我的奶奶。'}},
+      {en:'baby', cn:'宝宝', em:'👶', s:{en:'This is the baby.', cn:'这是小宝宝。'}},
+      {en:'doctor', cn:'医生', em:'👨‍⚕️', s:{en:'My father is a doctor.', cn:'我爸爸是一名医生。'}},
+      {en:'teacher', cn:'老师', em:'👩‍🏫', s:{en:'My mother is a teacher.', cn:'我妈妈是一名老师。'}},
+      {en:'love', cn:'爱', em:'❤️', s:{en:'I love my family.', cn:'我爱我的家人。'}},
+      {en:'name', cn:'名字', em:'🏷️', s:{en:'His name is Ben.', cn:'他的名字叫 Ben。'}},
+    ],
+    grammar:[
+      {point:'介绍家人（This is my…）', examples:[{en:'This is my father.', cn:'这是我的爸爸。'},{en:'This is my mother.', cn:'这是我的妈妈。'}]},
+      {point:'说他 / 她做什么工作', examples:[{en:'My father is a doctor.', cn:'我爸爸是一名医生。'},{en:'My mother is a teacher.', cn:'我妈妈是一名老师。'}]},
+      {point:'用 His / Her name 介绍名字', examples:[{en:'His name is Ben.', cn:'他的名字叫 Ben。'},{en:'Her name is Amy.', cn:'她的名字叫 Amy。'}]},
+      {point:'表达爱', examples:[{en:'I love my family.', cn:'我爱我的家人。'},{en:'I love you!', cn:'我爱你！'}]},
+    ],
+    dialogues:[
+      { title:'介绍我的家人', lines:[
+        {who:'A', en:'Look! This is my family.', cn:'看！这是我的家人。'},
+        {who:'B', en:'Who is she?', cn:'她是谁？'},
+        {who:'A', en:'She is my mother. She is a teacher.', cn:'她是我的妈妈。她是一名老师。'},
+        {who:'B', en:'Your family is so nice!', cn:'你的家人真好！'},
+      ]},
+      { title:'他 / 她叫什么名字', lines:[
+        {who:'A', en:'This is my brother. His name is Ben.', cn:'这是我的哥哥。他的名字叫 Ben。'},
+        {who:'B', en:'Hi, Ben! Is she your sister?', cn:'嗨，Ben！她是你妹妹吗？'},
+        {who:'A', en:'Yes. Her name is Amy.', cn:'是的。她的名字叫 Amy。'},
+        {who:'B', en:'I love your family!', cn:'我很喜欢你的家人！'},
+      ]},
+    ],
+    situ:[
+      {prompt:'Who is he?', cn:'别人指着照片里的爸爸问', options:[{en:'He is my father.', ok:true},{en:'It is blue.'},{en:'Goodbye!'}]},
+      {prompt:'This is my mother.', cn:'同学介绍他的妈妈', options:[{en:'Hello! She is nice.', ok:true},{en:'I am eight.'},{en:'It is a pen.'}]},
+      {prompt:'Is he your brother?', cn:'别人问那是不是你哥哥', options:[{en:'Yes, he is.', ok:true},{en:'It is green.'},{en:'See you!'}]},
+      {prompt:"What's her name?", cn:'别人问你妹妹叫什么', options:[{en:'Her name is Amy.', ok:true},{en:'I am fine.'},{en:'Thank you.'}]},
+      {prompt:'I love my family!', cn:'朋友说他爱他的家人', options:[{en:'Me too! So sweet!', ok:true},{en:'What colour is it?'},{en:"I'm sorry."}]},
+    ],
+    dub:{ title:'Pup 介绍他的一家', lines:[
+      {who:'A', en:'Kit, this is my family.', cn:'Kit，这是我的家人。'},
+      {who:'B', en:'Who is he?', cn:'他是谁？'},
+      {who:'A', en:'He is my father. He is a doctor.', cn:'他是我的爸爸。他是一名医生。'},
+      {who:'B', en:'Your family is lovely!', cn:'你的家人真可爱！'},
+    ]},
+    story:{ title:'👨‍👩‍👧‍👦 Pup 介绍他的一家', intro:'Pup 拿出全家福，给 Kit 介绍爸爸妈妈。听一听，学学 “This is my…” 和 “He/She is a…”！',
+      scene:'linear-gradient(#ffe0e6,#fff3d6)', charA:'🐶', charB:'🐱',
+      voices:{ A:{az:'en-US-GuyNeural', pitch:0.8}, B:{az:'en-US-JennyNeural', pitch:1.5} },
+      lines:[
+        {who:'A', who2:'🐶Pup', en:'Kit, this is my family!', cn:'Kit，这是我的家人！'},
+        {who:'B', who2:'🐱Kit', en:'Wow! Who is he?', cn:'哇！他是谁？'},
+        {who:'A', who2:'🐶Pup', en:'He is my father. He is a doctor.', cn:'他是我的爸爸。他是一名医生。'},
+        {who:'B', who2:'🐱Kit', en:'And she is your mother?', cn:'那她是你的妈妈吗？'},
+        {who:'A', who2:'🐶Pup', en:'Yes! She is a teacher. Her name is Rosa.', cn:'对！她是一名老师。她的名字叫 Rosa。'},
+        {who:'B', who2:'🐱Kit', en:'I love your family, Pup!', cn:'我很喜欢你的家人，Pup！'},
+      ],
+      quiz:[
+        {q:'Pup 的爸爸是做什么的？', options:[{en:'He is a doctor.',ok:true},{en:'He is a teacher.'},{en:'He is a pilot.'}]},
+        {q:'“This is my mother.” 是什么意思？', options:[{en:'这是我的妈妈。',ok:true},{en:'这是我的爸爸。'},{en:'这是我的老师。'}]},
+        {q:'“Her name is Rosa.” 是什么意思？', options:[{en:'她的名字叫 Rosa。',ok:true},{en:'他的名字叫 Rosa。'},{en:'我叫 Rosa。'}]},
       ]
     },
   },
@@ -2689,16 +3020,16 @@ function renderCourseList(){
     b.onclick=()=> openUnitHub(i);
     box.appendChild(b);
   });
-  const more=document.createElement('div'); more.className='subtle'; more.style.cssText='text-align:center;margin-top:12px'; more.textContent='Unit 2、3… 陆续更新中';
+  const more=document.createElement('div'); more.className='subtle'; more.style.cssText='text-align:center;margin-top:12px'; more.textContent='🎉 三年级上册 6 个单元全部上线！';
   box.appendChild(more);
 }
 const BOARDS=[
-  {key:'words', em:'🔑', name:'核心单词'},
-  {key:'grammar', em:'📖', name:'语法小魔法'},
-  {key:'dialogue', em:'💬', name:'情景对话'},
-  {key:'situ', em:'🎮', name:'情景反应'},
-  {key:'dub', em:'🎬', name:'配音秀'},
-  {key:'task', em:'📚', name:'趣味故事挑战'},
+  {key:'words', em:'🔑', name:'核心单词', prop:'🔑', propName:'金钥匙'},
+  {key:'grammar', em:'📖', name:'语法小魔法', prop:'📜', propName:'魔法卷轴'},
+  {key:'dialogue', em:'💬', name:'情景对话', prop:'🧭', propName:'指南针'},
+  {key:'situ', em:'🎮', name:'情景反应', prop:'💎', propName:'闪亮宝石'},
+  {key:'dub', em:'🎬', name:'配音秀', prop:'🎫', propName:'金门票'},
+  {key:'task', em:'📚', name:'趣味故事挑战', prop:'🗺️', propName:'藏宝图'},
 ];
 function uBoards(uid){ if(!S.unitBoards) S.unitBoards={}; if(!S.unitBoards[uid]) S.unitBoards[uid]={}; return S.unitBoards[uid]; }
 function boardDone(uid,key){ return !!uBoards(uid)[key]; }
@@ -2706,14 +3037,37 @@ function markBoardDone(uid,key){ const m=uBoards(uid); if(!m[key]){ m[key]=true;
 function boardUnlocked(uid,idx){ return idx===0 || boardDone(uid, BOARDS[idx-1].key); }
 function allBoardsDone(uid){ return BOARDS.every(b=> boardDone(uid,b.key)); }
 function openUnitHub(i){ courseCtx={i, u:COURSE[i]}; go('unitHub'); markToday(); }
+// Shared board-completion: mark done, award a prop (storyline units), return to hub.
+function completeBoard(key){
+  const u=courseCtx.u; const wasNew=!boardDone(u.id,key);
+  markBoardDone(u.id,key); popStars(1);
+  if(u.storyline && wasNew){ const b=BOARDS.find(x=>x.key===key); toast('🎁 获得宝物 '+b.prop+' '+b.propName+'！'); sfx('match'); }
+  else toast('✅ 完成！');
+  go('unitHub');
+  if(allBoardsDone(u.id)) setTimeout(()=> toast(u.storyline?'🏆 六件宝物集齐！去领毕业证 + 看大结局！':'🎓 全部完成！可以领毕业证啦'), 900);
+}
 function renderUnitHub(){
   if(!courseCtx) return;
   const u=courseCtx.u; document.getElementById('unitHubTitle').textContent=u.title;
   const box=document.getElementById('unitHubBody'); box.innerHTML='';
+  // Storyline: show the collectible strip + a short quest intro
+  if(u.storyline){
+    const got=BOARDS.filter(b=>boardDone(u.id,b.key)).length;
+    const quest=document.createElement('div'); quest.className='card'; quest.style.background='linear-gradient(135deg,#fff3d6,#ffe0ea)';
+    quest.innerHTML='<div style="font-weight:900;font-size:16px">🗺️ 寻宝闯关</div>'+
+      '<div class="subtle" style="margin:4px 0 8px">每闯过一关就得到一件宝物，集齐 6 件就能解锁大结局！（已集 '+got+'/6）</div>';
+    const strip=document.createElement('div'); strip.style.cssText='display:flex;justify-content:space-between;gap:4px';
+    BOARDS.forEach(b=>{ const done=boardDone(u.id,b.key);
+      const slot=document.createElement('div'); slot.style.cssText='flex:1;text-align:center;padding:8px 2px;border-radius:12px;font-size:26px;'+(done?'background:#fff;box-shadow:0 2px 5px rgba(0,0,0,.12)':'background:rgba(0,0,0,.06);filter:grayscale(1);opacity:.5');
+      slot.textContent=done?b.prop:'❓'; slot.title=b.propName; strip.appendChild(slot);
+    });
+    quest.appendChild(strip); box.appendChild(quest);
+  }
   BOARDS.forEach((b,idx)=>{
     const done=boardDone(u.id,b.key), un=boardUnlocked(u.id,idx);
     const btn=document.createElement('button'); btn.className='listrow'+(un?'':' locked');
-    btn.innerHTML='<div class="lem">'+b.em+'</div><div class="lt"><div class="a">'+b.name+'</div><div class="b">'+(done?'✅ 完成':(un?'点开学习':'先完成上一个解锁'))+'</div></div><div class="lock">'+(un?(done?'✅':'▶️'):'🔒')+'</div>';
+    const rightIcon = un ? (done? (u.storyline?b.prop:'✅') : '▶️') : '🔒';
+    btn.innerHTML='<div class="lem">'+b.em+'</div><div class="lt"><div class="a">'+b.name+'</div><div class="b">'+(done?(u.storyline?('✅ 已得'+b.prop+b.propName):'✅ 完成'):(un?'点开学习':'先完成上一个解锁'))+'</div></div><div class="lock">'+rightIcon+'</div>';
     if(un) btn.onclick=()=> openBoard(idx);
     box.appendChild(btn);
   });
@@ -2726,7 +3080,7 @@ function renderUnitHub(){
 function boardCard(title){ const c=document.createElement('div'); c.className='card'; if(title) c.innerHTML='<div style="font-weight:900;font-size:17px;margin-bottom:6px">'+title+'</div>'; return c; }
 function doneBtn(label,key){
   const b=document.createElement('button'); b.className='btn big btn-green'; b.style.marginTop='12px'; b.textContent=label;
-  b.onclick=()=>{ markBoardDone(courseCtx.u.id,key); popStars(1); toast('✅ 完成！'); go('unitHub'); if(allBoardsDone(courseCtx.u.id)) setTimeout(()=>toast('🎓 全部完成！可以领毕业证啦'),700); };
+  b.onclick=()=> completeBoard(key);
   return b;
 }
 // A pass-gate: a big button that stays disabled until `need` items report done.
@@ -2735,7 +3089,7 @@ function boardGate(key, need, label){
   const b=document.createElement('button'); b.className='btn big btn-ghost'; b.style.marginTop='12px';
   function refresh(){ const ok=passed.size>=need; b.className='btn big '+(ok?'btn-green':'btn-ghost'); b.textContent= ok? label : label+'（还差 '+(need-passed.size)+' 个）'; }
   refresh();
-  b.onclick=()=>{ if(passed.size<need){ toast('先把上面的都完成哦～'); return; } markBoardDone(courseCtx.u.id,key); popStars(1); toast('✅ 完成！'); go('unitHub'); if(allBoardsDone(courseCtx.u.id)) setTimeout(()=>toast('🎓 全部完成！可以领毕业证啦'),700); };
+  b.onclick=()=>{ if(passed.size<need){ toast('先把上面的都完成哦～'); return; } completeBoard(key); };
   return { btn:b, tick(id){ passed.add(id); refresh(); } };
 }
 // Record controls: choose 跟读录制 / 自己录制, then 🎤录音 or 📹录视频. Sentence stays visible while recording.
@@ -2919,10 +3273,19 @@ function renderSitu(){
 }
 function showCertificate(){
   const u=courseCtx.u;
+  let extra='';
+  if(u.storyline){
+    const props=BOARDS.map(b=>b.prop).join(' ');
+    extra='<div style="margin:10px 0;padding:10px;border-radius:14px;background:#fff7d6">'+
+      '<div style="font-weight:900">🏆 你集齐了 6 件宝物！</div>'+
+      '<div style="font-size:26px;margin-top:4px">'+props+'</div>'+
+      (u.finale?'<div style="font-size:14px;color:var(--ink-soft);margin-top:8px;line-height:1.6">'+u.finale+'</div>':'')+'</div>';
+  }
   document.getElementById('certBody').innerHTML='<div style="font-size:60px">🎓</div>'+
     '<div style="font-size:24px;font-weight:900;margin:8px 0">毕业证书</div>'+
     '<div style="font-size:18px">恭喜 <b>'+(S.name||'小朋友')+'</b> 🎉</div>'+
     '<div style="margin:8px 0;font-size:16px">你完成了 <b>'+u.title+'</b>！</div>'+
+    extra+
     '<div class="subtle">'+new Date().toLocaleDateString()+'</div>'+
     '<div style="margin-top:10px;font-size:24px">⭐ ⭐ ⭐</div>';
   if(!S.unitsDone) S.unitsDone=[]; if(!S.unitsDone.includes(u.id)){ S.unitsDone.push(u.id); save(); addStars(3); }
