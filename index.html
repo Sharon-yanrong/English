@@ -372,6 +372,7 @@
       </div>
       <div class="feedback" id="storyFeedback"></div>
       <div class="listen-tip" id="storyTip"></div>
+      <div id="storyRecRow"></div>
     </div>
     <div class="storyctrl">
       <button class="btn btn-ghost" id="storyPrev">⬅️ 上一句</button>
@@ -1413,6 +1414,8 @@ const COURSE = [
       {who:'B', en:'Nice to meet you, too!', cn:'我也是！'},
     ]},
     story:{ title:'🐶 小狗 Pup 交新朋友', intro:'小狗 Pup 在公园里遇到了小猫 Kit。听听它们怎么用英语打招呼，再自己读一读！',
+      scene:'linear-gradient(#bfe3ff,#dff5d8)', charA:'🐶', charB:'🐱',
+      voices:{ A:{az:'en-US-GuyNeural', pitch:0.8}, B:{az:'en-US-AnaNeural', pitch:1.5} },
       lines:[
         {who:'A', who2:'🐶Pup', en:'Hi! I am Pup.', cn:'嗨！我是 Pup。'},
         {who:'B', who2:'🐱Kit', en:'Hello! My name is Kit.', cn:'你好！我叫 Kit。'},
@@ -1445,11 +1448,11 @@ const PHONICS = [
   { id:'p2', title:'第2课 · 5个元音·短音', emoji:'🔤',
     intro:'国王在短单词里读“短音”，又快又短（不是念字母的名字哦）。先听三遍短音，再读单词、找找那个音。',
     items:[
-      {key:'a', say:'ah', rep:3, ipa:'/æ/', hint:'嘴张大，短“ae”', words:[{w:'cat',em:'🐱',cn:'猫'},{w:'apple',em:'🍎',cn:'苹果'}]},
-      {key:'e', say:'eh', rep:3, ipa:'/e/', hint:'短短的“唉”', words:[{w:'hen',em:'🐔',cn:'母鸡'},{w:'bed',em:'🛏️',cn:'床'}]},
-      {key:'i', say:'ih', rep:3, ipa:'/ɪ/', hint:'短短的“衣”', words:[{w:'pig',em:'🐷',cn:'猪'},{w:'six',em:'6️⃣',cn:'六'}]},
-      {key:'o', say:'aw', rep:3, ipa:'/ɒ/', hint:'圆嘴短“喔”', words:[{w:'dog',em:'🐶',cn:'狗'},{w:'box',em:'📦',cn:'盒子'}]},
-      {key:'u', say:'uh', rep:3, ipa:'/ʌ/', hint:'短“啊”', words:[{w:'cup',em:'🥤',cn:'杯子'},{w:'bus',em:'🚌',cn:'公交车'}]},
+      {key:'a', say:'apple', rep:3, ipa:'/æ/', hint:'嘴咧大，像“ae”（cat 里的音）', words:[{w:'cat',em:'🐱',cn:'猫'},{w:'apple',em:'🍎',cn:'苹果'}]},
+      {key:'e', say:'egg', rep:3, ipa:'/ɛ/', hint:'嘴半开，短促“唉”（bed 里的音）', words:[{w:'hen',em:'🐔',cn:'母鸡'},{w:'bed',em:'🛏️',cn:'床'}]},
+      {key:'i', say:'igloo', rep:3, ipa:'/ɪ/', hint:'短短的“衣”（pig 里的音）', words:[{w:'pig',em:'🐷',cn:'猪'},{w:'six',em:'6️⃣',cn:'六'}]},
+      {key:'o', say:'octopus', rep:3, ipa:'/ɑ/', hint:'嘴张大“啊”（dog 里的音）', words:[{w:'dog',em:'🐶',cn:'狗'},{w:'box',em:'📦',cn:'盒子'}]},
+      {key:'u', say:'umbrella', rep:3, ipa:'/ʌ/', hint:'短促“啊/呃”（cup 里的音）', words:[{w:'cup',em:'🥤',cn:'杯子'},{w:'bus',em:'🚌',cn:'公交车'}]},
     ]},
   { id:'p3', title:'第3课 · 神奇的 e', emoji:'✨',
     intro:'单词结尾加一个不发音的 e，前面的元音就会“读自己的名字”（长音）。比如 cap→cape、hop→hope。',
@@ -1659,7 +1662,7 @@ function browserSpeak(text, opts){
   if(!('speechSynthesis' in window)) return;
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
-  u.lang='en-US'; u.rate = opts.rate!=null ? opts.rate : 0.8; u.pitch = 1.15;
+  u.lang='en-US'; u.rate = opts.rate!=null ? opts.rate : 0.8; u.pitch = opts.pitch!=null ? opts.pitch : 1.15;
   const v=pickVoice(); if(v) u.voice=v;
   speechSynthesis.speak(u);
 }
@@ -1667,20 +1670,42 @@ function browserSpeak(text, opts){
 let ttsCache={}, curAudio=null;
 function azureVoiceName(){ return (S.azure && S.azure.voice) || 'en-US-AnaNeural'; }
 function playAudioUrl(url){ try{ if(curAudio) curAudio.pause(); curAudio=new Audio(url); curAudio.play().catch(()=>{}); }catch(e){} }
-async function azureSpeak(text){
-  const ck=azureVoiceName()+'|'+text;
+// Send arbitrary inner-SSML to Azure with a chosen voice; cache by voice+ssml.
+async function azureTTS(innerSSML, voice){
+  voice = voice || azureVoiceName();
+  const ck=voice+'|'+innerSSML;
   if(ttsCache[ck]){ playAudioUrl(ttsCache[ck]); return; }
-  const ssml="<speak version='1.0' xml:lang='en-US'><voice name='"+azureVoiceName()+"'><prosody rate='-6%'>"+escapeHtml(text)+"</prosody></voice></speak>";
+  const ssml="<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='en-US'><voice name='"+voice+"'>"+innerSSML+"</voice></speak>";
   const r=await fetch('https://'+S.azure.region+'.tts.speech.microsoft.com/cognitiveservices/v1',{ method:'POST',
     headers:{ 'Ocp-Apim-Subscription-Key':S.azure.key, 'Content-Type':'application/ssml+xml', 'X-Microsoft-OutputFormat':'audio-24khz-48kbitrate-mono-mp3' }, body:ssml });
   if(!r.ok) throw new Error('tts '+r.status);
   const url=URL.createObjectURL(await r.blob()); ttsCache[ck]=url; playAudioUrl(url);
 }
+async function azureSpeak(text, opts){
+  opts=opts||{};
+  const inner="<prosody rate='-6%'>"+escapeHtml(text)+"</prosody>";
+  return azureTTS(inner, opts.voice);
+}
 function speak(text, opts){
+  opts=opts||{};
   if(!text) return;
-  if(typeof azureOn==='function' && azureOn() && azureVoiceName()!=='browser'){ azureSpeak(text).catch(()=>browserSpeak(text,opts)); return; }
+  if(typeof azureOn==='function' && azureOn() && azureVoiceName()!=='browser'){ azureSpeak(text,opts).catch(()=>browserSpeak(text,opts)); return; }
   browserSpeak(text,opts);
 }
+// Play ONE isolated phoneme (a vowel/consonant sound), N times, using Azure IPA — the reliable
+// way to get a correct short sound. Browser TTS can't do phonemes, so it falls back to a hint word.
+function ipaClean(ipa){ return String(ipa||'').replace(/[\/\[\]ˈˌ]/g,'').split(/[,;]/)[0].trim(); }
+function speakPhoneme(ipa, times, fallbackText){
+  const ph=ipaClean(ipa); times=Math.max(1, times||1);
+  if(typeof azureOn==='function' && azureOn() && azureVoiceName()!=='browser' && ph){
+    let inner=''; for(let i=0;i<times;i++){ inner+="<phoneme alphabet='ipa' ph='"+ph+"'>uh</phoneme>"; if(i<times-1) inner+="<break time='400ms'/>"; }
+    azureTTS(inner).catch(()=>{ if(fallbackText) browserSpeak(fallbackText); });
+  } else if(fallbackText){
+    let k=0; const step=()=>{ if(k>=times) return; browserSpeak(fallbackText,{rate:0.7}); k++; setTimeout(step,900); }; step();
+  }
+}
+// Speak a line as a specific character (distinct voice). vcfg={az:AzureVoiceName, pitch:browserPitch}.
+function speakAs(text, vcfg){ vcfg=vcfg||{}; speak(text, {voice:vcfg.az, pitch:vcfg.pitch}); }
 
 /* ---------------- Speech: recognition (我来读) ---------------- */
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -2175,7 +2200,7 @@ function openPhonicsLesson(idx){
     const head=document.createElement('div'); head.style.cssText='display:flex;align-items:center;gap:10px';
     head.innerHTML='<div style="font-size:30px;font-weight:900;color:var(--purple-d)">'+item.key+'</div>'+
       '<div style="flex:1"><div style="font-weight:800">'+item.ipa+'</div><div class="subtle">'+item.hint+'</div></div>';
-    const listen=document.createElement('button'); listen.className='btn btn-blue'; listen.style.cssText='padding:8px 14px;font-size:15px'; listen.textContent='🔊 听'; listen.onclick=()=> playPhonics(item);
+    const listen=document.createElement('button'); listen.className='btn btn-blue'; listen.style.cssText='padding:8px 14px;font-size:15px'; listen.textContent='🔊 听这个音'; listen.onclick=()=> speakPhoneme(item.ipa, item.rep||2, item.say||item.key);
     head.appendChild(listen); c.appendChild(head);
     if(item.words && item.words.length){
       item.words.forEach(w=>{
@@ -2418,6 +2443,9 @@ function renderStoryLine(){
   st.lines.forEach((_,j)=>{ const d=document.createElement('div'); d.className='dot'+(j<k?' on':'')+(j===k?' cur':''); dots.appendChild(d); });
   document.getElementById('storyNext').textContent=(k===st.lines.length-1)?'听懂啦 👂':'下一句 ➡️';
   document.getElementById('storyPrev').style.visibility=k===0?'hidden':'visible';
+  const rr=document.getElementById('storyRecRow'); rr.innerHTML='';
+  const lbl=document.createElement('div'); lbl.className='subtle'; lbl.style.cssText='margin-top:6px;font-size:13px'; lbl.textContent='录下你读的这一句，发给爸爸妈妈：';
+  rr.appendChild(lbl); rr.appendChild(recordRow(ln.en, ()=>{}));
   speak(ln.en);
 }
 document.getElementById('storyReplay').onclick=()=> speak(storyCtx.st.lines[storyCtx.k].en);
@@ -2481,6 +2509,22 @@ function answerStoryQuiz(btn, right, q){
 }
 
 /* ---------------- Countries (fun facts + guess) ---------------- */
+// Real flag emoji don't render on Windows/desktop Chrome (shows "CN" etc). Draw simple
+// inline SVG flags instead — works everywhere, offline, and looks consistent.
+const FLAGS = {
+  cn:'<rect width="60" height="40" fill="#de2910"/><text x="12" y="12" font-size="15" fill="#ffde00" text-anchor="middle" dominant-baseline="central">★</text><text x="24" y="5" font-size="6" fill="#ffde00" text-anchor="middle" dominant-baseline="central">★</text><text x="29" y="11" font-size="6" fill="#ffde00" text-anchor="middle" dominant-baseline="central">★</text><text x="29" y="19" font-size="6" fill="#ffde00" text-anchor="middle" dominant-baseline="central">★</text><text x="24" y="25" font-size="6" fill="#ffde00" text-anchor="middle" dominant-baseline="central">★</text>',
+  uk:'<rect width="60" height="40" fill="#012169"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#fff" stroke-width="8"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#C8102E" stroke-width="3"/><rect x="25" width="10" height="40" fill="#fff"/><rect y="15" width="60" height="10" fill="#fff"/><rect x="27" width="6" height="40" fill="#C8102E"/><rect y="17" width="60" height="6" fill="#C8102E"/>',
+  us:'<rect width="60" height="40" fill="#fff"/><g fill="#B22234"><rect y="0" width="60" height="3.1"/><rect y="6.2" width="60" height="3.1"/><rect y="12.3" width="60" height="3.1"/><rect y="18.5" width="60" height="3.1"/><rect y="24.6" width="60" height="3.1"/><rect y="30.8" width="60" height="3.1"/><rect y="36.9" width="60" height="3.1"/></g><rect width="26" height="21.5" fill="#3C3B6E"/><g fill="#fff"><circle cx="5" cy="4" r="1.1"/><circle cx="12" cy="4" r="1.1"/><circle cx="19" cy="4" r="1.1"/><circle cx="8.5" cy="8" r="1.1"/><circle cx="15.5" cy="8" r="1.1"/><circle cx="5" cy="12" r="1.1"/><circle cx="12" cy="12" r="1.1"/><circle cx="19" cy="12" r="1.1"/><circle cx="8.5" cy="16" r="1.1"/><circle cx="15.5" cy="16" r="1.1"/></g>',
+  fr:'<rect width="20" height="40" fill="#0055A4"/><rect x="20" width="20" height="40" fill="#fff"/><rect x="40" width="20" height="40" fill="#EF4135"/>',
+  jp:'<rect width="60" height="40" fill="#fff"/><circle cx="30" cy="20" r="11" fill="#BC002D"/>',
+  au:'<rect width="60" height="40" fill="#00247D"/><g><path d="M0,0 L30,20 M30,0 L0,20 M0,0 L0,20 L30,20 L30,0 Z" stroke="#fff" stroke-width="4" fill="none"/><rect x="12" width="6" height="20" fill="#fff"/><rect y="7" width="30" height="6" fill="#fff"/><rect x="13.5" width="3" height="20" fill="#C8102E"/><rect y="8.5" width="30" height="3" fill="#C8102E"/></g><text x="15" y="31" font-size="9" fill="#fff" text-anchor="middle" dominant-baseline="central">★</text><text x="45" y="10" font-size="7" fill="#fff" text-anchor="middle" dominant-baseline="central">★</text><text x="52" y="20" font-size="7" fill="#fff" text-anchor="middle" dominant-baseline="central">★</text><text x="45" y="30" font-size="7" fill="#fff" text-anchor="middle" dominant-baseline="central">★</text><text x="40" y="20" font-size="5" fill="#fff" text-anchor="middle" dominant-baseline="central">★</text>',
+  eg:'<rect width="60" height="13.3" fill="#CE1126"/><rect y="13.3" width="60" height="13.4" fill="#fff"/><rect y="26.7" width="60" height="13.3" fill="#000"/><text x="30" y="20" font-size="9" fill="#C09300" text-anchor="middle" dominant-baseline="central">🦅</text>',
+  br:'<rect width="60" height="40" fill="#009C3B"/><polygon points="30,4 55,20 30,36 5,20" fill="#FFDF00"/><circle cx="30" cy="20" r="8" fill="#002776"/><path d="M22,18 Q30,15 38,18" stroke="#fff" stroke-width="1.5" fill="none"/>',
+  ke:'<rect width="60" height="9" fill="#000"/><rect y="9" width="60" height="2" fill="#fff"/><rect y="11" width="60" height="9" fill="#BB0000"/><rect y="20" width="60" height="9" fill="#BB0000"/><rect y="29" width="60" height="2" fill="#fff"/><rect y="31" width="60" height="9" fill="#006600"/><g><line x1="24" y1="8" x2="36" y2="32" stroke="#fff" stroke-width="1.5"/><line x1="36" y1="8" x2="24" y2="32" stroke="#fff" stroke-width="1.5"/><ellipse cx="30" cy="20" rx="6" ry="10" fill="#BB0000" stroke="#000" stroke-width="1"/><ellipse cx="30" cy="20" rx="3" ry="6" fill="#fff"/></g>',
+  it:'<rect width="20" height="40" fill="#008C45"/><rect x="20" width="20" height="40" fill="#fff"/><rect x="40" width="20" height="40" fill="#CD212A"/>'
+};
+function flagSVG(id, w){ w=w||44; const inner=FLAGS[id]; const c=COUNTRIES.find(x=>x.id===id); if(!inner) return '<span style="font-size:'+Math.round(w*0.9)+'px">'+(c?c.flag:'🏳️')+'</span>';
+  return '<svg viewBox="0 0 60 40" width="'+w+'" height="'+Math.round(w*2/3)+'" style="border-radius:5px;box-shadow:0 1px 4px rgba(0,0,0,.28);vertical-align:middle;display:inline-block">'+inner+'</svg>'; }
 function renderCountryList(){
   const box=document.getElementById('countryListBody'); box.innerHTML='';
   const visited=(S.countriesVisited||[]).length;
@@ -2490,7 +2534,7 @@ function renderCountryList(){
   COUNTRIES.forEach((c,i)=>{
     const done=(S.countriesVisited||[]).includes(c.id);
     const b=document.createElement('button'); b.className='listrow'+(c.ready?'':' locked');
-    b.innerHTML='<div class="lem">'+c.flag+'</div><div class="lt"><div class="a">'+c.name+' · '+c.cn+'</div><div class="b">'+(c.ready?(done?'✅ 已盖章':'点开去探险'):'🔒 即将推出')+'</div></div><div class="lock">'+(c.ready?'▶️':'🔒')+'</div>';
+    b.innerHTML='<div class="lem" style="display:flex;align-items:center;justify-content:center">'+flagSVG(c.id,44)+'</div><div class="lt"><div class="a">'+c.name+' · '+c.cn+'</div><div class="b">'+(c.ready?(done?'✅ 已盖章':'点开去探险'):'🔒 即将推出')+'</div></div><div class="lock">'+(c.ready?'▶️':'🔒')+'</div>';
     if(c.ready) b.onclick=()=> openCountry(i);
     box.appendChild(b);
   });
@@ -2505,7 +2549,7 @@ function openCountry(i){
   if(c.guess) steps.push({type:'guess', g:c.guess, done:false});
   steps.push({type:'done'});
   countryCtx={ i, c, steps, k:0 };
-  document.getElementById('countryTitle').textContent=c.flag+' '+c.cn;
+  document.getElementById('countryTitle').innerHTML=flagSVG(c.id,30)+' '+c.cn;
   go('countryPlay'); renderCountryStep(); markToday();
 }
 function renderCountryStep(){
@@ -2519,7 +2563,7 @@ function renderCountryStep(){
   const card=document.getElementById('countryCard'); card.innerHTML='';
   if(step.type==='intro'){
     card.innerHTML='<div style="overflow:hidden;width:100%"><div class="flyrex">🦖✈️</div></div>'+
-      '<div class="cflag landflag">'+c.flag+'</div>'+
+      '<div class="cflag landflag" style="font-size:0">'+flagSVG(c.id,150)+'</div>'+
       '<div style="font-size:22px;font-weight:900;margin-top:6px">'+c.name+' · '+c.cn+'</div>'+
       '<div class="subtle" style="margin-top:8px">小恐龙 Rex 飞到'+c.cn+'啦！点“下一个”开始探险 🔍</div>';
   } else if(step.type==='fact'){
@@ -2566,7 +2610,7 @@ function renderCountryStep(){
     let firstTime=false;
     if(!S.countriesVisited.includes(c.id)){ S.countriesVisited.push(c.id); save(); firstTime=true; }
     card.innerHTML='<div style="font-size:40px">🎉</div><div style="font-weight:900;font-size:20px;margin-top:6px">'+c.cn+' 探索完成！</div>'+
-      '<div style="margin-top:16px"><span class="stamp">🛂 '+c.flag+' '+c.name+' ✓</span></div>'+
+      '<div style="margin-top:16px"><span class="stamp">🛂 '+flagSVG(c.id,26)+' '+c.name+' ✓</span></div>'+
       '<div class="subtle" style="margin-top:16px">护照又多了一个印章！快回列表看看攒了几个国家～</div>';
     if(firstTime){ addStars(2); confettiBurst(); sfx('match'); }
   }
@@ -2799,16 +2843,38 @@ function renderBoard(key, body, u){
   } else if(key==='task'){
     const st=u.story;
     const c=boardCard('📚 '+st.title);
-    const intro=document.createElement('div'); intro.style.cssText='font-size:15px;line-height:1.6;margin-bottom:6px'; intro.textContent=st.intro; c.appendChild(intro);
-    const playAll=document.createElement('button'); playAll.className='btn btn-blue'; playAll.style.cssText='padding:8px 14px;font-size:15px;margin-bottom:6px'; playAll.textContent='▶️ 从头听故事';
-    playAll.onclick=async()=>{ for(const ln of st.lines){ speak(ln.en); await new Promise(r=> setTimeout(r, 1200+ln.en.split(/\s+/).length*360)); } };
-    c.appendChild(playAll);
-    st.lines.forEach(ln=> c.appendChild(convLineEl(ln)));
+    const intro=document.createElement('div'); intro.style.cssText='font-size:15px;line-height:1.6;margin-bottom:8px'; intro.textContent=st.intro; c.appendChild(intro);
+    renderStoryScene(c, st);
     body.appendChild(c);
     // Fun quiz — answer all to pass
     const qc=boardCard('❓ 小问答（全答对就毕业啦）'); qc.id='taskQuizCard'; body.appendChild(qc);
     courseCtx.qi=0; renderTaskQuiz();
   }
+}
+// A comic "scene image": two characters + tappable speech bubbles, each read in that
+// character's own voice (点读). Also a ▶️ that plays the whole scene, alternating voices.
+function renderStoryScene(parent, st){
+  const voices=st.voices||{A:{},B:{}};
+  const wrap=document.createElement('div'); wrap.style.cssText='border-radius:16px;overflow:hidden;background:'+(st.scene||'#eef4ff')+';padding:10px;box-shadow:inset 0 0 0 2px rgba(255,255,255,.5)';
+  // stage with the two characters
+  const stage=document.createElement('div'); stage.style.cssText='display:flex;justify-content:space-between;align-items:flex-end;font-size:48px;line-height:1;padding:2px 6px 8px';
+  stage.innerHTML='<span>'+ (st.charA||'🐶') +'</span><span style="font-size:22px;align-self:center">☀️🌳</span><span>'+ (st.charB||'🐱') +'</span>';
+  wrap.appendChild(stage);
+  st.lines.forEach(ln=>{
+    const left = ln.who==='A';
+    const row=document.createElement('div'); row.style.cssText='display:flex;margin:6px 0;'+(left?'justify-content:flex-start':'justify-content:flex-end');
+    const bub=document.createElement('button'); bub.type='button';
+    bub.style.cssText='max-width:82%;text-align:left;border:none;cursor:pointer;padding:8px 12px;border-radius:14px;'+
+      (left?'background:#fff;border-bottom-left-radius:4px':'background:#fff3c4;border-bottom-right-radius:4px')+';box-shadow:0 2px 5px rgba(0,0,0,.12)';
+    bub.innerHTML='<div style="font-weight:800;font-size:16px">'+(left?(st.charA||'🐶'):(st.charB||'🐱'))+' '+escapeHtml(ln.en)+' 🔊</div>'+
+      '<div style="font-size:13px;color:var(--ink-soft);margin-top:2px">'+escapeHtml(ln.cn)+'</div>';
+    bub.onclick=()=> speakAs(ln.en, voices[ln.who]);
+    row.appendChild(bub); wrap.appendChild(row);
+  });
+  const play=document.createElement('button'); play.className='btn btn-blue'; play.style.cssText='width:100%;margin-top:8px;padding:8px;font-size:15px'; play.textContent='▶️ 播放整个故事（点气泡也能单句听）';
+  play.onclick=async()=>{ for(const ln of st.lines){ speakAs(ln.en, voices[ln.who]); await new Promise(r=> setTimeout(r, 1100+ln.en.split(/\s+/).length*360)); } };
+  wrap.appendChild(play);
+  parent.appendChild(wrap);
 }
 function renderTaskQuiz(){
   const st=courseCtx.u.story, items=st.quiz, c=document.getElementById('taskQuizCard');
