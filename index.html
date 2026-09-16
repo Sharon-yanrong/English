@@ -64,6 +64,7 @@
 
   h2.title{ font-size:24px; margin:6px 2px 12px; }
   .subtle{ color:var(--ink-soft); font-size:14px; }
+  .pill{ display:inline-block; background:var(--purple-d); color:#fff; font-size:13px; font-weight:800; padding:3px 12px; border-radius:999px; }
 
   /* ---------- Home menu tiles ---------- */
   .tiles{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
@@ -1389,10 +1390,10 @@ const COURSE = [
       {point:'问好 & 回答', examples:[{en:'How are you?', cn:'你好吗？'},{en:"I'm fine, thanks.", cn:'我很好，谢谢。'}]},
       {point:'问候 & 告别', examples:[{en:'Hello! / Good morning!', cn:'你好！/ 早上好！'},{en:'Nice to meet you!', cn:'很高兴认识你！'},{en:'Goodbye! / Bye!', cn:'再见！'}]},
     ],
-    gquiz:[
-      {q:'别人问 “What’s your name?”，你怎么回答？', options:[{en:'My name is Tom.',ok:true},{en:"I'm fine."},{en:'Goodbye!'}]},
-      {q:'“How are you?” 是什么意思？', options:[{en:'你好吗？',ok:true},{en:'你叫什么名字？'},{en:'早上好'}]},
-      {q:'早上见到老师，应该说？', options:[{en:'Good morning!',ok:true},{en:'Good night!'},{en:'Thank you!'}]},
+    gscenes:[
+      {who:'🐶', sit:'Pup 第一次遇见小猫 Kit，想介绍自己。', ask:'Pup 应该说什么？', options:[{en:'Hi! I am Pup.',ok:true},{en:'Goodbye!'},{en:'What colour is it?'}]},
+      {who:'🐱', sit:'Kit 早上到学校，看见了老师。', ask:'Kit 应该说什么？', options:[{en:'Good morning!',ok:true},{en:'Good night!'},{en:'Thank you!'}]},
+      {who:'🐶', sit:'有人问 Pup “How are you?”，Pup 今天很好。', ask:'Pup 怎么回答？', options:[{en:"I'm fine, thanks.",ok:true},{en:'My name is Pup.'},{en:'Goodbye!'}]},
     ],
     dialogues:[
       { title:'认识新朋友', lines:[
@@ -1461,10 +1462,10 @@ const COURSE = [
       {point:'问这是什么', examples:[{en:"What's this?", cn:'这是什么？'},{en:'It is a pen.', cn:'它是一支钢笔。'}]},
       {point:'认字母（在教室里）', examples:[{en:'What letter is this?', cn:'这是什么字母？'},{en:"It's the letter A.", cn:'它是字母 A。'},{en:"It's the letter B.", cn:'它是字母 B。'}]},
     ],
-    gquiz:[
-      {q:'介绍自己的学校，应该说？', options:[{en:'This is my school.',ok:true},{en:"What's this?"},{en:'I am fine.'}]},
-      {q:'老师指着字母 A 问 “What letter is this?”，答？', options:[{en:"It's the letter A.",ok:true},{en:'It is red.'},{en:'My name is A.'}]},
-      {q:'想问身边这个东西是什么，用哪句？', options:[{en:"What's this?",ok:true},{en:'How are you?'},{en:'Who is he?'}]},
+    gscenes:[
+      {who:'🐶', sit:'Pup 带 Kit 来到自己学校门口，想介绍。', ask:'Pup 应该说什么？', options:[{en:'This is my school.',ok:true},{en:'How are you?'},{en:'It is red.'}]},
+      {who:'🐱', sit:'老师在黑板上写了字母 A，问 Kit 这是什么字母。', ask:'Kit 应该回答？', options:[{en:"It's the letter A.",ok:true},{en:'It is a cat.'},{en:'My name is A.'}]},
+      {who:'🐶', sit:'Pup 指着桌上一样东西，想问那是什么。', ask:'Pup 应该问？', options:[{en:"What's this?",ok:true},{en:'How many?'},{en:'Goodbye!'}]},
     ],
     dialogues:[
       { title:'参观我的学校', lines:[
@@ -1533,10 +1534,10 @@ const COURSE = [
       {point:'用颜色描述东西', examples:[{en:'The banana is yellow.', cn:'香蕉是黄色的。'},{en:'The grass is green.', cn:'草是绿色的。'}]},
       {point:'颜色 + 字母复习', examples:[{en:'What letter is this?', cn:'这是什么字母？'},{en:"It's the letter C.", cn:'它是字母 C。'}]},
     ],
-    gquiz:[
-      {q:'想问“这是什么颜色”，用哪句？', options:[{en:'What colour is this?',ok:true},{en:"What's your name?"},{en:'How many?'}]},
-      {q:'“Is it red?” 如果不是，怎么回答？', options:[{en:"No, it isn't.",ok:true},{en:'Yes, it is.'},{en:'It is red.'}]},
-      {q:'“天空是蓝色的”用英文怎么说？', options:[{en:'The sky is blue.',ok:true},{en:'The sky is a cat.'},{en:'Blue is a name.'}]},
+    gscenes:[
+      {who:'🐱', sit:'Kit 举起一个红苹果，想问 Pup 它是什么颜色。', ask:'Kit 应该问？', options:[{en:'What colour is this?',ok:true},{en:"What's your name?"},{en:'How are you?'}]},
+      {who:'🐶', sit:'Kit 问 Pup “Is it blue?”，其实那是红色的。', ask:'Pup 应该回答？', options:[{en:"No, it isn't.",ok:true},{en:'Yes, it is.'},{en:'It is blue.'}]},
+      {who:'🐱', sit:'Kit 抬头看着蓝蓝的天空，想描述它。', ask:'Kit 应该说？', options:[{en:'The sky is blue.',ok:true},{en:'The sky is a cat.'},{en:'Blue is a name.'}]},
     ],
     dialogues:[
       { title:'好玩的颜色', lines:[
@@ -1605,10 +1606,10 @@ const COURSE = [
       {point:'说他是男孩 / 她是女孩', examples:[{en:'He is a boy.', cn:'他是一个男孩。'},{en:'She is a girl.', cn:'她是一个女孩。'}]},
       {point:'问有多少（How many）', examples:[{en:'How many apples?', cn:'有多少个苹果？'},{en:'One, two, three. Three apples!', cn:'一、二、三。三个苹果！'}]},
     ],
-    gquiz:[
-      {q:'介绍你的朋友，应该说？', options:[{en:'This is my friend.',ok:true},{en:'What colour is it?'},{en:'Good morning.'}]},
-      {q:'介绍一个男孩的名字，用哪句？', options:[{en:'His name is Ben.',ok:true},{en:'Her name is Ben.'},{en:'It is Ben.'}]},
-      {q:'想问“有多少个”，用哪句？', options:[{en:'How many?',ok:true},{en:'What colour?'},{en:'Who is he?'}]},
+    gscenes:[
+      {who:'🐶', sit:'Pup 把好朋友 Ted 介绍给 Kit。', ask:'Pup 应该说？', options:[{en:'This is my friend.',ok:true},{en:'What colour is it?'},{en:'Good night!'}]},
+      {who:'🐱', sit:'Kit 想告诉大家，那个男孩的名字叫 Ben。', ask:'Kit 应该说？', options:[{en:'His name is Ben.',ok:true},{en:'Her name is Ben.'},{en:'It is a book.'}]},
+      {who:'🐶', sit:'桌上有一些苹果，Pup 想数数看有几个。', ask:'Pup 应该问？', options:[{en:'How many apples?',ok:true},{en:'What colour?'},{en:'Who is he?'}]},
     ],
     dialogues:[
       { title:'介绍我的朋友', lines:[
@@ -1677,10 +1678,10 @@ const COURSE = [
       {point:'我会…（I can…）', examples:[{en:'I can see.', cn:'我能看见。'},{en:'I can jump.', cn:'我会跳。'},{en:'I can run.', cn:'我会跑。'}]},
       {point:'介绍我的脸', examples:[{en:'Look at my face.', cn:'看我的脸。'},{en:'This is my nose.', cn:'这是我的鼻子。'}]},
     ],
-    gquiz:[
-      {q:'邀请朋友一起做机器人，应该说？', options:[{en:"Let's make a robot!",ok:true},{en:'This is a robot.'},{en:'I am a robot.'}]},
-      {q:'“我有两只眼睛”用英文怎么说？', options:[{en:'I have two eyes.',ok:true},{en:'I can two eyes.'},{en:'I am two eyes.'}]},
-      {q:'“我会跳”用英文怎么说？', options:[{en:'I can jump.',ok:true},{en:'I have jump.'},{en:'I am jump.'}]},
+    gscenes:[
+      {who:'🐶', sit:'Pup 想邀请 Kit 一起动手做个机器人。', ask:'Pup 应该说？', options:[{en:"Let's make a robot!",ok:true},{en:'This is a robot.'},{en:'I am fine.'}]},
+      {who:'🐱', sit:'Kit 指着自己的脸，想说自己有两只眼睛。', ask:'Kit 应该说？', options:[{en:'I have two eyes.',ok:true},{en:'I can two eyes.'},{en:'I am two eyes.'}]},
+      {who:'🐶', sit:'Pup 很得意，想炫耀自己会跳得很高。', ask:'Pup 应该说？', options:[{en:'I can jump!',ok:true},{en:'I have jump.'},{en:'I am jump.'}]},
     ],
     dialogues:[
       { title:'一起做个机器人', lines:[
@@ -1749,10 +1750,10 @@ const COURSE = [
       {point:'用 His / Her name 介绍名字', examples:[{en:'His name is Ben.', cn:'他的名字叫 Ben。'},{en:'Her name is Amy.', cn:'她的名字叫 Amy。'}]},
       {point:'表达爱', examples:[{en:'I love my family.', cn:'我爱我的家人。'},{en:'I love you!', cn:'我爱你！'}]},
     ],
-    gquiz:[
-      {q:'介绍你的爸爸，应该说？', options:[{en:'This is my father.',ok:true},{en:'He is a colour.'},{en:'I am a father.'}]},
-      {q:'“我妈妈是一名老师”用英文怎么说？', options:[{en:'My mother is a teacher.',ok:true},{en:'My father is a teacher.'},{en:'My mother is red.'}]},
-      {q:'“I love my family.” 是什么意思？', options:[{en:'我爱我的家人。',ok:true},{en:'这是我的家人。'},{en:'我有一个家。'}]},
+    gscenes:[
+      {who:'🐶', sit:'Pup 拿出全家福，指着照片里的爸爸介绍。', ask:'Pup 应该说？', options:[{en:'This is my father.',ok:true},{en:'He is a colour.'},{en:'I am a father.'}]},
+      {who:'🐱', sit:'Kit 想告诉大家，她妈妈是一名老师。', ask:'Kit 应该说？', options:[{en:'My mother is a teacher.',ok:true},{en:'My father is a teacher.'},{en:'My mother is red.'}]},
+      {who:'🐶', sit:'一家人紧紧抱在一起，Pup 感到很幸福。', ask:'“I love my family.” 是什么意思？', options:[{en:'我爱我的家人。',ok:true},{en:'这是我的家人。'},{en:'我有一个家。'}]},
     ],
     dialogues:[
       { title:'介绍我的家人', lines:[
@@ -3196,8 +3197,8 @@ function stepView(body, steps){
   steps.forEach((s,i)=>{ const b=document.createElement('button'); b.textContent=s.name; b.style.cssText='flex:1;padding:9px 4px;font-size:14px'; b.onclick=()=>show(i); nav.appendChild(b); btns.push(b); });
   body.appendChild(nav); body.appendChild(host); show(0);
 }
-// ① 学单词 — one flashcard at a time (big picture, word, sentence, 🔊, 跟读, ◀▶).
-function renderWordFlashcards(host, u){
+// 学单词 — one flashcard at a time; after the last card, jump straight into the challenge.
+function renderWordFlashcards(host, u, onDone){
   const words=u.words; let k=0;
   const card=document.createElement('div'); host.appendChild(card);
   function show(){
@@ -3218,14 +3219,14 @@ function renderWordFlashcards(host, u){
     const dots=card.querySelector('#fcDots'); words.forEach((_,j)=>{ const d=document.createElement('div'); d.className='dot'+(j<k?' on':'')+(j===k?' cur':''); dots.appendChild(d); });
     card.querySelector('#fcPrev').style.visibility=k===0?'hidden':'visible';
     card.querySelector('#fcPrev').onclick=()=>{ if(k>0){k--; show();} };
-    const nx=card.querySelector('#fcNext'); nx.textContent = k===words.length-1?'学完啦 ✅':'下一个 ➡️';
-    nx.onclick=()=>{ if(k<words.length-1){k++; show();} else toast('单词学完啦！去玩「翻卡配对」和「闯关」吧～'); };
+    const nx=card.querySelector('#fcNext'); nx.textContent = k===words.length-1?'🎮 开始闯关':'下一个 ➡️';
+    nx.onclick=()=>{ if(k<words.length-1){k++; show();} else if(onDone) onDone(); };
     speak(w.en);
   }
   show();
 }
-// ① 学语法 — one grammar point at a time (its examples, 🔊, 跟读, ◀▶).
-function renderGrammarSteps(host, u){
+// 学语法 — one grammar point at a time; after the last, jump straight into the challenge.
+function renderGrammarSteps(host, u, onDone){
   const pts=u.grammar; let k=0;
   const card=document.createElement('div'); host.appendChild(card);
   function show(){
@@ -3245,50 +3246,71 @@ function renderGrammarSteps(host, u){
     const dots=card.querySelector('#gDots'); pts.forEach((_,j)=>{ const d=document.createElement('div'); d.className='dot'+(j<k?' on':'')+(j===k?' cur':''); dots.appendChild(d); });
     card.querySelector('#gPrev').style.visibility=k===0?'hidden':'visible';
     card.querySelector('#gPrev').onclick=()=>{ if(k>0){k--; show();} };
-    const nx=card.querySelector('#gNext'); nx.textContent=k===pts.length-1?'学完啦 ✅':'下一个 ➡️';
-    nx.onclick=()=>{ if(k<pts.length-1){k++; show();} else toast('语法学完啦！去「闯关问答」过关吧～'); };
+    const nx=card.querySelector('#gNext'); nx.textContent=k===pts.length-1?'🎮 开始闯关':'下一个 ➡️';
+    nx.onclick=()=>{ if(k<pts.length-1){k++; show();} else if(onDone) onDone(); };
   }
   show();
 }
-// 🃏 翻卡配对（Memory match）— flip two cards, match a word to its picture.
-function wordMemoryGame(host, words){
-  const sel=shuffle(words.slice()).slice(0, Math.min(6, words.length));
-  const cards=[]; sel.forEach(w=>{ cards.push({pair:w.en, face:w.en, w}); cards.push({pair:w.en, face:w.em, w}); }); shuffle(cards);
-  let first=null, lock=false, matched=0;
-  host.innerHTML='';
-  const tip=document.createElement('div'); tip.className='subtle'; tip.textContent='翻开两张卡片，把单词和图片配成一对！'; host.appendChild(tip);
-  const grid=document.createElement('div'); grid.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px'; host.appendChild(grid);
-  const msg=document.createElement('div'); msg.className='feedback'; host.appendChild(msg);
-  cards.forEach(cd=>{ const b=document.createElement('button'); b.className='btn btn-ghost'; b.style.cssText='height:60px;font-size:20px'; b.textContent='❓'; b.dataset.state='down';
-    b.onclick=()=>{ if(lock || b.dataset.state!=='down') return;
-      b.textContent=cd.face; b.dataset.state='up'; speak(cd.w.en);
-      if(!first){ first={b,cd}; return; }
-      if(first.cd.pair===cd.pair && first.b!==b){ sfx('match'); [b,first.b].forEach(x=>{x.style.background='var(--green-d)'; x.style.color='#fff'; x.dataset.state='done';}); matched++; first=null; addStars(1); popStars(1); msg.textContent='⭐ 配对成功！';
-        if(matched===sel.length){ msg.innerHTML='🎉 全部配对成功！<button class="btn btn-blue" id="mmAgain" style="margin-left:8px">再玩一次</button>'; confettiBurst(); addStars(2); const ag=document.getElementById('mmAgain'); if(ag) ag.onclick=()=>wordMemoryGame(host,words); } }
-      else { sfx('wrong'); lock=true; msg.textContent='💛 不是一对，记住位置再试～'; const f=first; first=null; setTimeout(()=>{ b.textContent='❓'; b.dataset.state='down'; f.b.textContent='❓'; f.b.dataset.state='down'; lock=false; },850); } };
-    grid.appendChild(b);
+// One multiple-choice round: renders prompt HTML + options, advances only on the correct pick.
+function mcRound(host, promptHTML, options, correctEn, onCorrect, autoPlay){
+  host.innerHTML=promptHTML+'<div id="mcOpts" style="display:flex;flex-direction:column;gap:8px;margin-top:8px"></div><div class="feedback" id="mcMsg"></div>';
+  const box=host.querySelector('#mcOpts');
+  shuffle(options.slice()).forEach(o=>{ const b=document.createElement('button'); b.className='btn btn-ghost'; b.style.textAlign='left'; b.textContent=o.en;
+    b.onclick=()=>{ if(/[a-zA-Z]/.test(o.en)) speak(o.en);
+      if(o.en===correctEn){ sfx('match'); b.style.background='var(--green-d)'; b.style.color='#fff'; host.querySelector('#mcMsg').textContent='⭐ 答对啦！'; addStars(1); popStars(1); setTimeout(onCorrect,800); }
+      else { sfx('wrong'); b.style.background='#ffb4b4'; host.querySelector('#mcMsg').textContent='💛 再想想～'; } };
+    box.appendChild(b);
   });
+  if(autoPlay) speak(autoPlay);
 }
-// 🐶 喂 Pup 吃单词（闯关）— pick the right word for the picture Pup wants; feed all to pass.
-function wordFeedGame(host, words, onComplete){
-  const pool=shuffle(words.slice()); let i=0;
-  host.innerHTML='';
-  const bar=document.createElement('div'); bar.style.cssText='height:10px;background:#eee;border-radius:6px;overflow:hidden;margin-bottom:8px'; const fill=document.createElement('div'); fill.style.cssText='height:100%;width:0;background:var(--green-d);transition:width .3s'; bar.appendChild(fill); host.appendChild(bar);
+// 🎮 单词闯关 — mixed modes: 看图选词 / 情景补全句子 / 听音选词. Finish all to pass.
+function runWordChallenge(host, words, onComplete){
+  const modes=['pick','fill','listen'];
+  const rounds=shuffle(words.slice()).map((w,idx)=> ({ w, mode: modes[idx%modes.length] }));
+  shuffle(rounds);
+  let i=0;
+  const bar=document.createElement('div'); bar.style.cssText='height:10px;background:#eee;border-radius:6px;overflow:hidden;margin-bottom:10px'; const fill=document.createElement('div'); fill.style.cssText='height:100%;width:0;background:var(--green-d);transition:width .3s'; bar.appendChild(fill); host.appendChild(bar);
   const stage=document.createElement('div'); host.appendChild(stage);
+  function next(){ i++; round(); }
   function round(){
-    fill.style.width=Math.round(i/pool.length*100)+'%';
-    if(i>=pool.length){ stage.innerHTML='<div style="text-align:center"><div style="font-size:60px">🐶🎉</div><div style="font-weight:900;font-size:18px">Pup 吃饱啦，全部答对！</div><button class="btn btn-blue" id="fdAgain" style="margin-top:8px">再玩一次</button></div>'; const ag=stage.querySelector('#fdAgain'); if(ag) ag.onclick=()=>wordFeedGame(host,words,onComplete); confettiBurst(); addStars(2); if(onComplete) onComplete(); return; }
-    const w=pool[i]; const others=shuffle(words.filter(x=>x.en!==w.en)).slice(0,2); const opts=shuffle([w,...others]);
-    stage.innerHTML='<div style="text-align:center"><div style="font-size:48px">🐶</div><div class="subtle">Pup 想吃这个，帮它选对英文单词！（'+(i+1)+'/'+pool.length+'）</div>'+
-      '<div style="font-size:54px;margin:6px 0">'+w.em+'</div><div style="font-weight:800;margin-bottom:8px">'+w.cn+'</div>'+
-      '<div id="fdOpts" style="display:flex;flex-direction:column;gap:8px"></div><div class="feedback" id="fdMsg"></div></div>';
-    const box=stage.querySelector('#fdOpts');
-    opts.forEach(o=>{ const b=document.createElement('button'); b.className='btn btn-ghost'; b.textContent=o.en;
-      b.onclick=()=>{ speak(o.en);
-        if(o.en===w.en){ sfx('match'); b.style.background='var(--green-d)'; b.style.color='#fff'; stage.querySelector('#fdMsg').textContent='😋 Pup：好吃！'; addStars(1); popStars(1); i++; setTimeout(round,850); }
-        else { sfx('wrong'); b.style.background='#ffb4b4'; stage.querySelector('#fdMsg').textContent='💛 不对哦，再选选～'; } };
-      box.appendChild(b);
-    });
+    fill.style.width=Math.round(i/rounds.length*100)+'%';
+    if(i>=rounds.length){ stage.innerHTML='<div style="text-align:center"><div style="font-size:56px">🏆</div><div style="font-weight:900;font-size:18px">闯关成功，全部答对！</div><button class="btn btn-blue" id="wcAgain" style="margin-top:8px">再玩一次</button></div>'; const ag=stage.querySelector('#wcAgain'); if(ag) ag.onclick=()=>runWordChallenge(host,words,onComplete); confettiBurst(); addStars(2); if(onComplete) onComplete(); return; }
+    let {w,mode}=rounds[i];
+    const canFill = w.s && new RegExp('\\b'+w.en.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','i').test(w.s.en);
+    if(mode==='fill' && !canFill) mode='pick';
+    const others=shuffle(words.filter(x=>x.en!==w.en)).slice(0,2); const opts=shuffle([w,...others]);
+    const head='<div class="subtle" style="text-align:center">第 '+(i+1)+' / '+rounds.length+' 关</div>';
+    let prompt, auto=null;
+    if(mode==='fill'){
+      const blank=w.s.en.replace(new RegExp('\\b'+w.en.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','i'),'＿＿＿');
+      prompt=head+'<div style="text-align:center;margin:4px 0"><span class="pill">🧩 选词填空</span></div><div style="font-size:20px;font-weight:900;text-align:center;margin:6px 0">'+blank+'</div><div class="subtle" style="text-align:center">'+w.s.cn+'</div>';
+    } else if(mode==='listen'){
+      prompt=head+'<div style="text-align:center;margin:4px 0"><span class="pill">👂 听音选词</span></div><div style="text-align:center;margin:8px 0"><button class="btn btn-blue" id="lsHear">🔊 再听一次</button></div><div class="subtle" style="text-align:center">听一听，选出你听到的单词</div>';
+      auto=w.en;
+    } else {
+      prompt=head+'<div style="text-align:center;margin:4px 0"><span class="pill">🖼️ 看图选词</span></div><div style="font-size:54px;text-align:center;margin:6px 0">'+w.em+'</div><div style="font-weight:800;text-align:center">'+w.cn+'</div>';
+    }
+    mcRound(stage, prompt, opts, w.en, next, auto);
+    if(mode==='listen'){ const h=stage.querySelector('#lsHear'); if(h) h.onclick=()=> speak(w.en); }
+  }
+  round();
+}
+// 🎭 语法故事闯关 — scenario cards: a character meets a situation, pick what to say/what it means.
+function runGrammarChallenge(host, scenes, onComplete){
+  let i=0;
+  const bar=document.createElement('div'); bar.style.cssText='height:10px;background:#eee;border-radius:6px;overflow:hidden;margin-bottom:10px'; const fill=document.createElement('div'); fill.style.cssText='height:100%;width:0;background:var(--green-d);transition:width .3s'; bar.appendChild(fill); host.appendChild(bar);
+  const stage=document.createElement('div'); host.appendChild(stage);
+  function next(){ i++; round(); }
+  function round(){
+    fill.style.width=Math.round(i/scenes.length*100)+'%';
+    if(i>=scenes.length){ stage.innerHTML='<div style="text-align:center"><div style="font-size:56px">🏆</div><div style="font-weight:900;font-size:18px">闯关成功！你真棒！</div><button class="btn btn-blue" id="gcAgain" style="margin-top:8px">再玩一次</button></div>'; const ag=stage.querySelector('#gcAgain'); if(ag) ag.onclick=()=>runGrammarChallenge(host,scenes,onComplete); confettiBurst(); addStars(2); if(onComplete) onComplete(); return; }
+    const s=scenes[i];
+    const correct=s.options.find(o=>o.ok).en;
+    const prompt='<div class="subtle" style="text-align:center">第 '+(i+1)+' / '+scenes.length+' 关</div>'+
+      '<div style="background:#fff7ef;border-radius:14px;padding:12px;margin:8px 0">'+
+      '<div style="font-size:15px;line-height:1.6">'+(s.who?'<span style="font-size:26px">'+s.who+'</span> ':'')+s.sit+'</div>'+
+      '<div style="font-weight:900;margin-top:8px">'+s.ask+'</div></div>';
+    mcRound(stage, prompt, s.options, correct, next);
   }
   round();
 }
@@ -3313,20 +3335,23 @@ function openBoard(idx){
 }
 function renderBoard(key, body, u){
   if(key==='words'){
-    let wDone=false;
-    stepView(body, [
-      { name:'① 学单词', render:(h)=> renderWordFlashcards(h, u) },
-      { name:'② 翻卡配对', render:(h)=> wordMemoryGame(h, u.words) },
-      { name:'③ 闯关', render:(h)=>{ const qh=document.createElement('div'); h.appendChild(qh);
-          wordFeedGame(qh, u.words, ()=>{ if(!wDone){ wDone=true; const db=doneBtn('✅ 过关','words'); db.id='wordsDone'; if(!document.getElementById('wordsDone')) h.appendChild(db); } }); } }
-    ]);
+    const host=document.createElement('div'); body.appendChild(host); let wDone=false;
+    function learn(){ host.innerHTML=''; renderWordFlashcards(host, u, challenge); }
+    function challenge(){ host.innerHTML='';
+      const back=document.createElement('button'); back.className='btn btn-ghost'; back.style.cssText='font-size:13px;padding:6px 12px;margin-bottom:8px'; back.textContent='↩️ 回看单词'; back.onclick=learn; host.appendChild(back);
+      const qh=document.createElement('div'); host.appendChild(qh);
+      runWordChallenge(qh, u.words, ()=>{ if(!wDone){ wDone=true; host.appendChild(doneBtn('✅ 过关','words')); } });
+    }
+    learn();
   } else if(key==='grammar'){
-    let gDone=false;
-    stepView(body, [
-      { name:'① 学语法', render:(h)=> renderGrammarSteps(h, u) },
-      { name:'② 闯关问答', render:(h)=>{ const qh=document.createElement('div'); h.appendChild(qh);
-          runQuiz(qh, u.gquiz||[], ()=>{ if(!gDone){ gDone=true; const db=doneBtn('✅ 过关','grammar'); db.id='grammarDone'; if(!document.getElementById('grammarDone')) h.appendChild(db); } }); } }
-    ]);
+    const host=document.createElement('div'); body.appendChild(host); let gDone=false;
+    function learn(){ host.innerHTML=''; renderGrammarSteps(host, u, challenge); }
+    function challenge(){ host.innerHTML='';
+      const back=document.createElement('button'); back.className='btn btn-ghost'; back.style.cssText='font-size:13px;padding:6px 12px;margin-bottom:8px'; back.textContent='↩️ 回看语法'; back.onclick=learn; host.appendChild(back);
+      const qh=document.createElement('div'); host.appendChild(qh);
+      runGrammarChallenge(qh, u.gscenes||[], ()=>{ if(!gDone){ gDone=true; host.appendChild(doneBtn('✅ 过关','grammar')); } });
+    }
+    learn();
   } else if(key==='dialogue'){
     const gate=boardGate('dialogue', 1, '✅ 练完对话');
     u.dialogues.forEach((d,di)=>{
