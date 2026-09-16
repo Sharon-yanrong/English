@@ -1389,6 +1389,11 @@ const COURSE = [
       {point:'问好 & 回答', examples:[{en:'How are you?', cn:'你好吗？'},{en:"I'm fine, thanks.", cn:'我很好，谢谢。'}]},
       {point:'问候 & 告别', examples:[{en:'Hello! / Good morning!', cn:'你好！/ 早上好！'},{en:'Nice to meet you!', cn:'很高兴认识你！'},{en:'Goodbye! / Bye!', cn:'再见！'}]},
     ],
+    gquiz:[
+      {q:'别人问 “What’s your name?”，你怎么回答？', options:[{en:'My name is Tom.',ok:true},{en:"I'm fine."},{en:'Goodbye!'}]},
+      {q:'“How are you?” 是什么意思？', options:[{en:'你好吗？',ok:true},{en:'你叫什么名字？'},{en:'早上好'}]},
+      {q:'早上见到老师，应该说？', options:[{en:'Good morning!',ok:true},{en:'Good night!'},{en:'Thank you!'}]},
+    ],
     dialogues:[
       { title:'认识新朋友', lines:[
         {who:'A', en:"Hello! I'm Tom. What's your name?", cn:'你好！我是 Tom。你叫什么名字？'},
@@ -1455,6 +1460,11 @@ const COURSE = [
       {point:'介绍教室里的东西', examples:[{en:'This is a desk.', cn:'这是一张课桌。'},{en:'This is a chair.', cn:'这是一把椅子。'}]},
       {point:'问这是什么', examples:[{en:"What's this?", cn:'这是什么？'},{en:'It is a pen.', cn:'它是一支钢笔。'}]},
       {point:'认字母（在教室里）', examples:[{en:'What letter is this?', cn:'这是什么字母？'},{en:"It's the letter A.", cn:'它是字母 A。'},{en:"It's the letter B.", cn:'它是字母 B。'}]},
+    ],
+    gquiz:[
+      {q:'介绍自己的学校，应该说？', options:[{en:'This is my school.',ok:true},{en:"What's this?"},{en:'I am fine.'}]},
+      {q:'老师指着字母 A 问 “What letter is this?”，答？', options:[{en:"It's the letter A.",ok:true},{en:'It is red.'},{en:'My name is A.'}]},
+      {q:'想问身边这个东西是什么，用哪句？', options:[{en:"What's this?",ok:true},{en:'How are you?'},{en:'Who is he?'}]},
     ],
     dialogues:[
       { title:'参观我的学校', lines:[
@@ -1523,6 +1533,11 @@ const COURSE = [
       {point:'用颜色描述东西', examples:[{en:'The banana is yellow.', cn:'香蕉是黄色的。'},{en:'The grass is green.', cn:'草是绿色的。'}]},
       {point:'颜色 + 字母复习', examples:[{en:'What letter is this?', cn:'这是什么字母？'},{en:"It's the letter C.", cn:'它是字母 C。'}]},
     ],
+    gquiz:[
+      {q:'想问“这是什么颜色”，用哪句？', options:[{en:'What colour is this?',ok:true},{en:"What's your name?"},{en:'How many?'}]},
+      {q:'“Is it red?” 如果不是，怎么回答？', options:[{en:"No, it isn't.",ok:true},{en:'Yes, it is.'},{en:'It is red.'}]},
+      {q:'“天空是蓝色的”用英文怎么说？', options:[{en:'The sky is blue.',ok:true},{en:'The sky is a cat.'},{en:'Blue is a name.'}]},
+    ],
     dialogues:[
       { title:'好玩的颜色', lines:[
         {who:'A', en:'What colour is this?', cn:'这是什么颜色？'},
@@ -1589,6 +1604,11 @@ const COURSE = [
       {point:'用 His / Her 介绍名字', examples:[{en:'His name is Tom.', cn:'他的名字叫 Tom。'},{en:'Her name is Mia.', cn:'她的名字叫 Mia。'}]},
       {point:'说他是男孩 / 她是女孩', examples:[{en:'He is a boy.', cn:'他是一个男孩。'},{en:'She is a girl.', cn:'她是一个女孩。'}]},
       {point:'问有多少（How many）', examples:[{en:'How many apples?', cn:'有多少个苹果？'},{en:'One, two, three. Three apples!', cn:'一、二、三。三个苹果！'}]},
+    ],
+    gquiz:[
+      {q:'介绍你的朋友，应该说？', options:[{en:'This is my friend.',ok:true},{en:'What colour is it?'},{en:'Good morning.'}]},
+      {q:'介绍一个男孩的名字，用哪句？', options:[{en:'His name is Ben.',ok:true},{en:'Her name is Ben.'},{en:'It is Ben.'}]},
+      {q:'想问“有多少个”，用哪句？', options:[{en:'How many?',ok:true},{en:'What colour?'},{en:'Who is he?'}]},
     ],
     dialogues:[
       { title:'介绍我的朋友', lines:[
@@ -1657,6 +1677,11 @@ const COURSE = [
       {point:'我会…（I can…）', examples:[{en:'I can see.', cn:'我能看见。'},{en:'I can jump.', cn:'我会跳。'},{en:'I can run.', cn:'我会跑。'}]},
       {point:'介绍我的脸', examples:[{en:'Look at my face.', cn:'看我的脸。'},{en:'This is my nose.', cn:'这是我的鼻子。'}]},
     ],
+    gquiz:[
+      {q:'邀请朋友一起做机器人，应该说？', options:[{en:"Let's make a robot!",ok:true},{en:'This is a robot.'},{en:'I am a robot.'}]},
+      {q:'“我有两只眼睛”用英文怎么说？', options:[{en:'I have two eyes.',ok:true},{en:'I can two eyes.'},{en:'I am two eyes.'}]},
+      {q:'“我会跳”用英文怎么说？', options:[{en:'I can jump.',ok:true},{en:'I have jump.'},{en:'I am jump.'}]},
+    ],
     dialogues:[
       { title:'一起做个机器人', lines:[
         {who:'A', en:"Let's make a robot!", cn:'我们来做个机器人吧！'},
@@ -1723,6 +1748,11 @@ const COURSE = [
       {point:'说他 / 她做什么工作', examples:[{en:'My father is a doctor.', cn:'我爸爸是一名医生。'},{en:'My mother is a teacher.', cn:'我妈妈是一名老师。'}]},
       {point:'用 His / Her name 介绍名字', examples:[{en:'His name is Ben.', cn:'他的名字叫 Ben。'},{en:'Her name is Amy.', cn:'她的名字叫 Amy。'}]},
       {point:'表达爱', examples:[{en:'I love my family.', cn:'我爱我的家人。'},{en:'I love you!', cn:'我爱你！'}]},
+    ],
+    gquiz:[
+      {q:'介绍你的爸爸，应该说？', options:[{en:'This is my father.',ok:true},{en:'He is a colour.'},{en:'I am a father.'}]},
+      {q:'“我妈妈是一名老师”用英文怎么说？', options:[{en:'My mother is a teacher.',ok:true},{en:'My father is a teacher.'},{en:'My mother is red.'}]},
+      {q:'“I love my family.” 是什么意思？', options:[{en:'我爱我的家人。',ok:true},{en:'这是我的家人。'},{en:'我有一个家。'}]},
     ],
     dialogues:[
       { title:'介绍我的家人', lines:[
@@ -2032,10 +2062,15 @@ async function azureTTS(innerSSML, voice){
   if(!r.ok) throw new Error('tts '+r.status);
   const url=URL.createObjectURL(await r.blob()); ttsCache[ck]=url; playAudioUrl(url, gen);
 }
+// Azure Neural sometimes mispronounces a few isolated words (e.g. says "Kate" for "cat").
+// Pin those with an IPA override. Add more here if the child spots another wrong one.
+const PRON_IPA = { cat:'kæt', hat:'hæt', bat:'bæt', mat:'mæt', map:'mæp', cap:'kæp', bag:'bæɡ' };
 async function azureSpeak(text, opts){
   opts=opts||{};
   const rate = opts.rate!=null ? opts.rate : '-6%';
-  const inner="<prosody rate='"+rate+"'>"+escapeHtml(text)+"</prosody>";
+  const key = text.trim().toLowerCase();
+  const body = PRON_IPA[key] ? "<phoneme alphabet='ipa' ph='"+PRON_IPA[key]+"'>"+escapeHtml(text)+"</phoneme>" : escapeHtml(text);
+  const inner="<prosody rate='"+rate+"'>"+body+"</prosody>";
   return azureTTS(inner, opts.voice);
 }
 function speak(text, opts){
@@ -3133,54 +3168,129 @@ function recordRow(refText, onCap){
   wrap.appendChild(tgl); wrap.appendChild(rv); wrap.appendChild(rvid);
   return wrap;
 }
-// 🎯 看图选词：show emoji + Chinese, pick the right English word (multiple choice).
-function wordChoiceGame(host, words){
-  const pool=shuffle(words.slice());
-  let i=0, correct=0;
-  const card=document.createElement('div'); card.style.cssText='background:#f4f8ff;border-radius:14px;padding:12px';
-  host.innerHTML=''; host.appendChild(card);
+// A generic multiple-choice quiz: renders items one by one, must answer each correctly to advance;
+// calls onComplete() when all are answered right. item = {q, options:[{en, ok?}]}.
+function runQuiz(host, items, onComplete){
+  let i=0;
   function round(){
-    if(i>=pool.length){ card.innerHTML='<div style="font-weight:900;font-size:18px;text-align:center">🎉 完成！答对 '+correct+'/'+pool.length+'</div><div style="text-align:center;margin-top:8px"><button class="btn btn-blue" id="wcAgain">再玩一次</button></div>'; card.querySelector('#wcAgain').onclick=()=> wordChoiceGame(host,words); confettiBurst(); addStars(2); popStars(2); return; }
-    const w=pool[i];
-    const others=shuffle(words.filter(x=>x.en!==w.en)).slice(0,2);
-    const opts=shuffle([w,...others]);
-    card.innerHTML='<div class="subtle" style="text-align:center">看图选出对的单词（'+(i+1)+'/'+pool.length+'）</div>'+
-      '<div style="font-size:56px;text-align:center;margin:6px 0">'+w.em+'</div>'+
-      '<div style="text-align:center;font-weight:800;margin-bottom:10px">'+w.cn+'</div>'+
-      '<div id="wcOpts" style="display:flex;flex-direction:column;gap:8px"></div><div class="feedback" id="wcMsg"></div>';
-    const box=card.querySelector('#wcOpts');
-    opts.forEach(o=>{ const b=document.createElement('button'); b.className='btn btn-ghost'; b.textContent=o.en;
-      b.onclick=()=>{ speak(o.en);
-        if(o.en===w.en){ sfx('match'); b.style.background='var(--green-d)'; b.style.color='#fff'; correct++; card.querySelector('#wcMsg').textContent='⭐ 答对啦！'; i++; setTimeout(round,900); }
-        else { sfx('wrong'); b.style.background='#ffb4b4'; card.querySelector('#wcMsg').textContent='💛 再试试～'; } };
+    if(i>=items.length){ host.innerHTML='<div style="font-weight:900;font-size:18px;text-align:center;color:var(--green-d)">🎉 全部答对！</div>'; if(onComplete) onComplete(); return; }
+    const it=items[i];
+    host.innerHTML='<div class="subtle">第 '+(i+1)+' / '+items.length+' 题</div>'+
+      '<div style="font-size:17px;font-weight:900;margin:6px 0">'+it.q+'</div>'+
+      '<div id="rqOpts" style="display:flex;flex-direction:column;gap:8px"></div><div class="feedback" id="rqMsg"></div>';
+    const box=host.querySelector('#rqOpts');
+    shuffle(it.options.slice()).forEach(o=>{ const b=document.createElement('button'); b.className='btn btn-ghost'; b.style.textAlign='left'; b.textContent=o.en;
+      b.onclick=()=>{ if(/[a-zA-Z]/.test(o.en)) speak(o.en);
+        if(o.ok){ sfx('match'); b.style.background='var(--green-d)'; b.style.color='#fff'; host.querySelector('#rqMsg').textContent='⭐ 答对啦！'; addStars(1); popStars(1); i++; setTimeout(round,850); }
+        else { sfx('wrong'); b.style.background='#ffb4b4'; host.querySelector('#rqMsg').textContent='💛 再想想～'; } };
       box.appendChild(b);
     });
   }
   round();
 }
-// 🔗 连一连：tap a word on the left, then its picture on the right, to match pairs.
-function wordMatchGame(host, words){
+// Step view: a segmented control that shows ONE section at a time (so a board isn't one long dump).
+function stepView(body, steps){
+  const nav=document.createElement('div'); nav.style.cssText='display:flex;gap:6px;margin-bottom:10px';
+  const host=document.createElement('div'); const btns=[];
+  function show(k){ steps.forEach((s,i)=>{ btns[i].className='btn '+(i===k?'btn-blue':'btn-ghost'); }); host.innerHTML=''; steps[k].render(host); }
+  steps.forEach((s,i)=>{ const b=document.createElement('button'); b.textContent=s.name; b.style.cssText='flex:1;padding:9px 4px;font-size:14px'; b.onclick=()=>show(i); nav.appendChild(b); btns.push(b); });
+  body.appendChild(nav); body.appendChild(host); show(0);
+}
+// ① 学单词 — one flashcard at a time (big picture, word, sentence, 🔊, 跟读, ◀▶).
+function renderWordFlashcards(host, u){
+  const words=u.words; let k=0;
+  const card=document.createElement('div'); host.appendChild(card);
+  function show(){
+    const w=words[k];
+    card.innerHTML='<div class="card" style="text-align:center">'+
+      '<div style="font-size:72px;line-height:1">'+w.em+'</div>'+
+      '<div id="fcEn" style="font-size:32px;font-weight:900;margin:6px 0"></div>'+
+      '<div style="font-size:17px;color:var(--ink-soft)">'+w.cn+'</div>'+
+      (w.s?'<div id="fcSen" style="margin-top:12px;font-weight:700;color:var(--purple-d)"></div><div class="subtle">'+w.s.cn+'</div>':'')+
+      '<div style="margin-top:10px"><button class="btn btn-blue" id="fcHear">🔊 再听一次</button></div>'+
+      '<div id="fcPrac" style="margin-top:8px"></div>'+
+      '<div class="progressdots" id="fcDots" style="margin-top:10px"></div>'+
+      '<div style="display:flex;gap:8px;margin-top:8px"><button class="btn btn-ghost" id="fcPrev" style="flex:1">⬅️ 上一个</button><button class="btn btn-green" id="fcNext" style="flex:1"></button></div></div>';
+    renderTappable(card.querySelector('#fcEn'), w.en);
+    if(w.s) renderTappable(card.querySelector('#fcSen'), w.s.en);
+    const prac=phPrac(w.en); const ph=card.querySelector('#fcPrac'); ph.appendChild(prac.prac); ph.appendChild(prac.results);
+    card.querySelector('#fcHear').onclick=()=> speak(w.en);
+    const dots=card.querySelector('#fcDots'); words.forEach((_,j)=>{ const d=document.createElement('div'); d.className='dot'+(j<k?' on':'')+(j===k?' cur':''); dots.appendChild(d); });
+    card.querySelector('#fcPrev').style.visibility=k===0?'hidden':'visible';
+    card.querySelector('#fcPrev').onclick=()=>{ if(k>0){k--; show();} };
+    const nx=card.querySelector('#fcNext'); nx.textContent = k===words.length-1?'学完啦 ✅':'下一个 ➡️';
+    nx.onclick=()=>{ if(k<words.length-1){k++; show();} else toast('单词学完啦！去玩「翻卡配对」和「闯关」吧～'); };
+    speak(w.en);
+  }
+  show();
+}
+// ① 学语法 — one grammar point at a time (its examples, 🔊, 跟读, ◀▶).
+function renderGrammarSteps(host, u){
+  const pts=u.grammar; let k=0;
+  const card=document.createElement('div'); host.appendChild(card);
+  function show(){
+    const pt=pts[k];
+    card.innerHTML='<div class="card"><div style="font-weight:900;font-size:18px;margin-bottom:8px">📖 '+pt.point+'</div><div id="gExs"></div>'+
+      '<div class="progressdots" id="gDots" style="margin-top:10px"></div>'+
+      '<div style="display:flex;gap:8px;margin-top:8px"><button class="btn btn-ghost" id="gPrev" style="flex:1">⬅️ 上一个</button><button class="btn btn-green" id="gNext" style="flex:1"></button></div></div>';
+    const exBox=card.querySelector('#gExs');
+    pt.examples.forEach(ex=>{ const line=document.createElement('div'); line.style.cssText='display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap';
+      const en=document.createElement('div'); en.style.cssText='flex:1;min-width:120px;font-weight:800'; renderTappable(en,ex.en);
+      const cn=document.createElement('span'); cn.className='subtle'; cn.textContent=ex.cn;
+      const sp=document.createElement('button'); sp.className='sp'; sp.textContent='🔊'; sp.onclick=()=>speak(ex.en);
+      const p=phPrac(ex.en);
+      line.appendChild(en); line.appendChild(cn); line.appendChild(sp); line.appendChild(p.prac);
+      exBox.appendChild(line); exBox.appendChild(p.results);
+    });
+    const dots=card.querySelector('#gDots'); pts.forEach((_,j)=>{ const d=document.createElement('div'); d.className='dot'+(j<k?' on':'')+(j===k?' cur':''); dots.appendChild(d); });
+    card.querySelector('#gPrev').style.visibility=k===0?'hidden':'visible';
+    card.querySelector('#gPrev').onclick=()=>{ if(k>0){k--; show();} };
+    const nx=card.querySelector('#gNext'); nx.textContent=k===pts.length-1?'学完啦 ✅':'下一个 ➡️';
+    nx.onclick=()=>{ if(k<pts.length-1){k++; show();} else toast('语法学完啦！去「闯关问答」过关吧～'); };
+  }
+  show();
+}
+// 🃏 翻卡配对（Memory match）— flip two cards, match a word to its picture.
+function wordMemoryGame(host, words){
   const sel=shuffle(words.slice()).slice(0, Math.min(6, words.length));
-  const left=shuffle(sel.slice()), right=shuffle(sel.slice());
-  let picked=null, pickedBtn=null, done=0;
+  const cards=[]; sel.forEach(w=>{ cards.push({pair:w.en, face:w.en, w}); cards.push({pair:w.en, face:w.em, w}); }); shuffle(cards);
+  let first=null, lock=false, matched=0;
   host.innerHTML='';
-  const tip=document.createElement('div'); tip.className='subtle'; tip.textContent='先点左边的单词，再点右边对应的图片～'; host.appendChild(tip);
-  const wrap=document.createElement('div'); wrap.style.cssText='display:flex;gap:10px;margin-top:8px'; host.appendChild(wrap);
-  const colL=document.createElement('div'); colL.style.cssText='flex:1;display:flex;flex-direction:column;gap:8px';
-  const colR=document.createElement('div'); colR.style.cssText='flex:1;display:flex;flex-direction:column;gap:8px';
-  wrap.appendChild(colL); wrap.appendChild(colR);
+  const tip=document.createElement('div'); tip.className='subtle'; tip.textContent='翻开两张卡片，把单词和图片配成一对！'; host.appendChild(tip);
+  const grid=document.createElement('div'); grid.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px'; host.appendChild(grid);
   const msg=document.createElement('div'); msg.className='feedback'; host.appendChild(msg);
-  const lbtns={};
-  left.forEach(w=>{ const b=document.createElement('button'); b.className='btn btn-ghost'; b.textContent=w.en;
-    b.onclick=()=>{ if(b.disabled) return; speak(w.en); picked=w.en; if(pickedBtn) pickedBtn.style.outline=''; pickedBtn=b; b.style.outline='3px solid #5b9bff'; msg.textContent='再点右边对应的图片 👉'; };
-    colL.appendChild(b); lbtns[w.en]=b; });
-  right.forEach(w=>{ const b=document.createElement('button'); b.className='btn btn-ghost'; b.style.fontSize='30px'; b.textContent=w.em;
-    b.onclick=()=>{ if(b.disabled) return;
-      if(!picked){ msg.textContent='先点左边的单词哦～'; return; }
-      if(w.en===picked){ sfx('match'); const lb=lbtns[picked]; lb.disabled=true; b.disabled=true; lb.style.outline=''; lb.style.background='var(--green-d)'; lb.style.color='#fff'; b.style.background='var(--green-d)'; done++; picked=null; pickedBtn=null; addStars(1); popStars(1); msg.textContent='⭐ 连对啦！';
-        if(done===sel.length){ msg.innerHTML='🎉 全部连对！<button class="btn btn-blue" id="wmAgain" style="margin-left:8px">再玩一次</button>'; confettiBurst(); addStars(2); const ag=document.getElementById('wmAgain'); if(ag) ag.onclick=()=> wordMatchGame(host,words); } }
-      else { sfx('wrong'); const old=b.style.background; b.style.background='#ffb4b4'; setTimeout(()=>b.style.background=old,400); msg.textContent='💛 不是这个，再看看～'; } };
-    colR.appendChild(b); });
+  cards.forEach(cd=>{ const b=document.createElement('button'); b.className='btn btn-ghost'; b.style.cssText='height:60px;font-size:20px'; b.textContent='❓'; b.dataset.state='down';
+    b.onclick=()=>{ if(lock || b.dataset.state!=='down') return;
+      b.textContent=cd.face; b.dataset.state='up'; speak(cd.w.en);
+      if(!first){ first={b,cd}; return; }
+      if(first.cd.pair===cd.pair && first.b!==b){ sfx('match'); [b,first.b].forEach(x=>{x.style.background='var(--green-d)'; x.style.color='#fff'; x.dataset.state='done';}); matched++; first=null; addStars(1); popStars(1); msg.textContent='⭐ 配对成功！';
+        if(matched===sel.length){ msg.innerHTML='🎉 全部配对成功！<button class="btn btn-blue" id="mmAgain" style="margin-left:8px">再玩一次</button>'; confettiBurst(); addStars(2); const ag=document.getElementById('mmAgain'); if(ag) ag.onclick=()=>wordMemoryGame(host,words); } }
+      else { sfx('wrong'); lock=true; msg.textContent='💛 不是一对，记住位置再试～'; const f=first; first=null; setTimeout(()=>{ b.textContent='❓'; b.dataset.state='down'; f.b.textContent='❓'; f.b.dataset.state='down'; lock=false; },850); } };
+    grid.appendChild(b);
+  });
+}
+// 🐶 喂 Pup 吃单词（闯关）— pick the right word for the picture Pup wants; feed all to pass.
+function wordFeedGame(host, words, onComplete){
+  const pool=shuffle(words.slice()); let i=0;
+  host.innerHTML='';
+  const bar=document.createElement('div'); bar.style.cssText='height:10px;background:#eee;border-radius:6px;overflow:hidden;margin-bottom:8px'; const fill=document.createElement('div'); fill.style.cssText='height:100%;width:0;background:var(--green-d);transition:width .3s'; bar.appendChild(fill); host.appendChild(bar);
+  const stage=document.createElement('div'); host.appendChild(stage);
+  function round(){
+    fill.style.width=Math.round(i/pool.length*100)+'%';
+    if(i>=pool.length){ stage.innerHTML='<div style="text-align:center"><div style="font-size:60px">🐶🎉</div><div style="font-weight:900;font-size:18px">Pup 吃饱啦，全部答对！</div><button class="btn btn-blue" id="fdAgain" style="margin-top:8px">再玩一次</button></div>'; const ag=stage.querySelector('#fdAgain'); if(ag) ag.onclick=()=>wordFeedGame(host,words,onComplete); confettiBurst(); addStars(2); if(onComplete) onComplete(); return; }
+    const w=pool[i]; const others=shuffle(words.filter(x=>x.en!==w.en)).slice(0,2); const opts=shuffle([w,...others]);
+    stage.innerHTML='<div style="text-align:center"><div style="font-size:48px">🐶</div><div class="subtle">Pup 想吃这个，帮它选对英文单词！（'+(i+1)+'/'+pool.length+'）</div>'+
+      '<div style="font-size:54px;margin:6px 0">'+w.em+'</div><div style="font-weight:800;margin-bottom:8px">'+w.cn+'</div>'+
+      '<div id="fdOpts" style="display:flex;flex-direction:column;gap:8px"></div><div class="feedback" id="fdMsg"></div></div>';
+    const box=stage.querySelector('#fdOpts');
+    opts.forEach(o=>{ const b=document.createElement('button'); b.className='btn btn-ghost'; b.textContent=o.en;
+      b.onclick=()=>{ speak(o.en);
+        if(o.en===w.en){ sfx('match'); b.style.background='var(--green-d)'; b.style.color='#fff'; stage.querySelector('#fdMsg').textContent='😋 Pup：好吃！'; addStars(1); popStars(1); i++; setTimeout(round,850); }
+        else { sfx('wrong'); b.style.background='#ffb4b4'; stage.querySelector('#fdMsg').textContent='💛 不对哦，再选选～'; } };
+      box.appendChild(b);
+    });
+  }
+  round();
 }
 function convLineEl(ln, onRead){
   const row=document.createElement('div'); row.className='convline';
@@ -3203,62 +3313,20 @@ function openBoard(idx){
 }
 function renderBoard(key, body, u){
   if(key==='words'){
-    const c=boardCard('🔑 核心单词（点单词/句子听，🎤跟读，读准 60 分才过关）');
-    const gate=boardGate('words', u.words.length, '✅ 学完单词');
-    u.words.forEach((w,i)=>{
-      const row=document.createElement('div'); row.className='listrow'; row.style.marginBottom='4px';
-      const em=document.createElement('div'); em.className='lem'; em.textContent=w.em;
-      const lt=document.createElement('div'); lt.className='lt';
-      const a=document.createElement('div'); a.className='a'; renderTappable(a,w.en);
-      const bcn=document.createElement('div'); bcn.className='b'; bcn.textContent=w.cn;
-      lt.appendChild(a); lt.appendChild(bcn);
-      const sp=document.createElement('button'); sp.className='sp'; sp.textContent='🔊'; sp.onclick=()=> speak(w.en);
-      const ok=document.createElement('span'); ok.style.cssText='font-size:18px;width:22px;text-align:center'; ok.textContent = boardDone(u.id,'words')?'✅':'';
-      const p=phPrac(w.en, (st,acc)=>{ if(acc===null || acc>=60){ ok.textContent='✅'; gate.tick('w'+i); } });
-      row.appendChild(em); row.appendChild(lt); row.appendChild(sp); row.appendChild(p.prac); row.appendChild(ok);
-      c.appendChild(row);
-      // English example sentence — tappable to pronounce
-      if(w.s){
-        const srow=document.createElement('div'); srow.style.cssText='display:flex;align-items:center;gap:8px;margin:0 0 8px 44px;flex-wrap:wrap';
-        const sen=document.createElement('div'); sen.style.cssText='flex:1;min-width:120px;font-weight:700;color:var(--purple-d)'; renderTappable(sen,w.s.en);
-        const scn=document.createElement('span'); scn.className='subtle'; scn.textContent=w.s.cn;
-        const ssp=document.createElement('button'); ssp.className='sp'; ssp.textContent='🔊 句'; ssp.onclick=()=> speak(w.s.en);
-        srow.appendChild(sen); srow.appendChild(scn); srow.appendChild(ssp); c.appendChild(srow);
-      }
-      c.appendChild(p.results);
-    });
-    body.appendChild(c); body.appendChild(gate.btn);
-    // Extra practice games (fun, not required to pass): 看图选词 + 连一连
-    const gcard=boardCard('🎮 单词小游戏（练一练，记得更牢）');
-    const brow=document.createElement('div'); brow.style.cssText='display:flex;gap:8px;flex-wrap:wrap';
-    const bChoice=document.createElement('button'); bChoice.className='btn btn-blue'; bChoice.style.cssText='flex:1;min-width:130px'; bChoice.textContent='🎯 看图选词';
-    const bMatch=document.createElement('button'); bMatch.className='btn btn-purple'; bMatch.style.cssText='flex:1;min-width:130px'; bMatch.textContent='🔗 连一连';
-    const area=document.createElement('div'); area.style.marginTop='10px';
-    bChoice.onclick=()=>{ bChoice.classList.remove('btn-ghost'); wordChoiceGame(area, u.words); };
-    bMatch.onclick=()=>{ wordMatchGame(area, u.words); };
-    brow.appendChild(bChoice); brow.appendChild(bMatch); gcard.appendChild(brow); gcard.appendChild(area);
-    body.appendChild(gcard);
+    let wDone=false;
+    stepView(body, [
+      { name:'① 学单词', render:(h)=> renderWordFlashcards(h, u) },
+      { name:'② 翻卡配对', render:(h)=> wordMemoryGame(h, u.words) },
+      { name:'③ 闯关', render:(h)=>{ const qh=document.createElement('div'); h.appendChild(qh);
+          wordFeedGame(qh, u.words, ()=>{ if(!wDone){ wDone=true; const db=doneBtn('✅ 过关','words'); db.id='wordsDone'; if(!document.getElementById('wordsDone')) h.appendChild(db); } }); } }
+    ]);
   } else if(key==='grammar'){
-    let total=0; u.grammar.forEach(pt=> total+=pt.examples.length);
-    const gate=boardGate('grammar', total, '✅ 学会啦');
-    const tip=boardCard('📖 每句都 🎤跟读 一次就能过关（重在开口，读了就算～）'); body.appendChild(tip);
-    let gi=0;
-    u.grammar.forEach(pt=>{
-      const c=boardCard('📖 '+pt.point);
-      pt.examples.forEach(ex=>{
-        const id='g'+(gi++);
-        const line=document.createElement('div'); line.style.cssText='display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap';
-        const en=document.createElement('div'); en.style.cssText='flex:1;min-width:120px;font-weight:800'; renderTappable(en,ex.en);
-        const cn=document.createElement('span'); cn.className='subtle'; cn.textContent=ex.cn;
-        const sp=document.createElement('button'); sp.className='sp'; sp.textContent='🔊'; sp.onclick=()=> speak(ex.en);
-        const ok=document.createElement('span'); ok.style.cssText='font-size:18px;width:22px;text-align:center';
-        const p=phPrac(ex.en, ()=>{ ok.textContent='✅'; gate.tick(id); });
-        line.appendChild(en); line.appendChild(cn); line.appendChild(sp); line.appendChild(p.prac); line.appendChild(ok);
-        c.appendChild(line); c.appendChild(p.results);
-      });
-      body.appendChild(c);
-    });
-    body.appendChild(gate.btn);
+    let gDone=false;
+    stepView(body, [
+      { name:'① 学语法', render:(h)=> renderGrammarSteps(h, u) },
+      { name:'② 闯关问答', render:(h)=>{ const qh=document.createElement('div'); h.appendChild(qh);
+          runQuiz(qh, u.gquiz||[], ()=>{ if(!gDone){ gDone=true; const db=doneBtn('✅ 过关','grammar'); db.id='grammarDone'; if(!document.getElementById('grammarDone')) h.appendChild(db); } }); } }
+    ]);
   } else if(key==='dialogue'){
     const gate=boardGate('dialogue', 1, '✅ 练完对话');
     u.dialogues.forEach((d,di)=>{
