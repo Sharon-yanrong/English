@@ -1817,7 +1817,7 @@ const PHONICS = [
   { id:'p2', title:'第2课 · 5个元音·短音', emoji:'🔤',
     intro:'国王在短单词里读“短音”，又快又短（不是念字母的名字哦）。先听三遍短音，再读单词、找找那个音。',
     items:[
-      {key:'a', say:'apple', rep:3, ipa:'/æ/', hint:'嘴咧大，像“ae”（cat 里的音）', words:[{w:'cat',em:'🐱',cn:'猫'},{w:'apple',em:'🍎',cn:'苹果'}]},
+      {key:'a', say:'apple', rep:3, ipa:'/æ/', hint:'嘴咧大，像“ae”（hat 里的音）', words:[{w:'hat',em:'🎩',cn:'帽子'},{w:'apple',em:'🍎',cn:'苹果'}]},
       {key:'e', say:'egg', rep:3, ipa:'/ɛ/', hint:'嘴半开，短促“唉”（bed 里的音）', words:[{w:'hen',em:'🐔',cn:'母鸡'},{w:'bed',em:'🛏️',cn:'床'}]},
       {key:'i', say:'igloo', rep:3, ipa:'/ɪ/', hint:'短短的“衣”（pig 里的音）', words:[{w:'pig',em:'🐷',cn:'猪'},{w:'six',em:'6️⃣',cn:'六'}]},
       {key:'o', say:'octopus', rep:3, ipa:'/ɑ/', hint:'嘴张大“啊”（dog 里的音）', words:[{w:'dog',em:'🐶',cn:'狗'},{w:'box',em:'📦',cn:'盒子'}]},
@@ -1845,7 +1845,7 @@ const PHONICS = [
     intro:'平民辅音的音。听单词，找出开头那个音。',
     items:[
       {key:'B b', ipa:'/b/', hint:'双唇一碰', words:[{w:'ball',em:'⚽',cn:'球'}]},
-      {key:'C c', ipa:'/k/', hint:'喉咙“可”', words:[{w:'cat',em:'🐱',cn:'猫'}]},
+      {key:'C c', ipa:'/k/', hint:'喉咙“可”', words:[{w:'car',em:'🚗',cn:'汽车'}]},
       {key:'D d', ipa:'/d/', hint:'舌尖顶上牙', words:[{w:'dog',em:'🐶',cn:'狗'}]},
       {key:'F f', ipa:'/f/', hint:'上牙咬下唇吹气', words:[{w:'fish',em:'🐟',cn:'鱼'}]},
       {key:'G g', ipa:'/ɡ/', hint:'喉咙“个”', words:[{w:'goat',em:'🐐',cn:'山羊'}]},
@@ -3207,13 +3207,13 @@ function renderWordFlashcards(host, u, onDone){
       '<div style="font-size:72px;line-height:1">'+w.em+'</div>'+
       '<div id="fcEn" style="font-size:32px;font-weight:900;margin:6px 0"></div>'+
       '<div style="font-size:17px;color:var(--ink-soft)">'+w.cn+'</div>'+
-      (w.s?'<div id="fcSen" style="margin-top:12px;font-weight:700;color:var(--purple-d)"></div><div class="subtle">'+w.s.cn+'</div>':'')+
-      '<div style="margin-top:10px"><button class="btn btn-blue" id="fcHear">🔊 再听一次</button></div>'+
+      (w.s?'<div id="fcSen" style="margin-top:12px;font-weight:700;color:var(--purple-d)"></div><div class="subtle">'+w.s.cn+'</div><div style="margin-top:6px"><button class="btn btn-blue" id="fcHearSen" style="padding:6px 14px;font-size:14px">🔊 听整句</button></div>':'')+
+      '<div style="margin-top:10px"><button class="btn btn-blue" id="fcHear">🔊 听单词</button></div>'+
       '<div id="fcPrac" style="margin-top:8px"></div>'+
       '<div class="progressdots" id="fcDots" style="margin-top:10px"></div>'+
       '<div style="display:flex;gap:8px;margin-top:8px"><button class="btn btn-ghost" id="fcPrev" style="flex:1">⬅️ 上一个</button><button class="btn btn-green" id="fcNext" style="flex:1"></button></div></div>';
     renderTappable(card.querySelector('#fcEn'), w.en);
-    if(w.s) renderTappable(card.querySelector('#fcSen'), w.s.en);
+    if(w.s){ renderTappable(card.querySelector('#fcSen'), w.s.en); const hs=card.querySelector('#fcHearSen'); if(hs) hs.onclick=()=> speak(w.s.en); }
     const prac=phPrac(w.en); const ph=card.querySelector('#fcPrac'); ph.appendChild(prac.prac); ph.appendChild(prac.results);
     card.querySelector('#fcHear').onclick=()=> speak(w.en);
     const dots=card.querySelector('#fcDots'); words.forEach((_,j)=>{ const d=document.createElement('div'); d.className='dot'+(j<k?' on':'')+(j===k?' cur':''); dots.appendChild(d); });
