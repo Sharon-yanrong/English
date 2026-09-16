@@ -4075,21 +4075,33 @@ function renderRooms(){
   const hd=document.createElement('div'); hd.style.cssText='font-weight:900;margin:6px 4px'; hd.textContent='🔒 班级 / 家庭房间'; body.appendChild(hd);
   ROOM_IDS.forEach(id=>{
     const def=roomDefs[id], em=ROOM_EMOJIS[id]||'🚪', named=!!(def&&def.name);
-    const row=document.createElement('button'); row.className='listrow';
-    const sub = named ? (def.pass?'🔒 需要密码':'可进入') : (adminUnlocked?'点这里命名 + 设密码':'（老师还没开放）');
-    const icon = named ? '▶️' : (adminUnlocked?'⚙️':'🔒');
-    row.innerHTML='<div class="lem">'+em+'</div><div class="lt"><div class="a">'+(named?escapeHtml(def.name):'空房间')+'</div><div class="b">'+sub+'</div></div><div class="lock">'+icon+'</div>';
-    row.onclick=()=>{ if(adminUnlocked){ configRoom(id); return; } if(!named){ toast('这个房间老师还没开放～'); return; } enterPrivate(id,def); };
+    const row=document.createElement('div'); row.className='listrow'; row.style.cursor='pointer';
+    const sub = named ? (def.pass?'🔒 有密码 · 点进入':'点进入') : (adminUnlocked?'点这里命名 + 设密码':'（老师还没开放）');
+    row.innerHTML='<div class="lem">'+em+'</div><div class="lt"><div class="a">'+(named?escapeHtml(def.name):'空房间')+'</div><div class="b">'+sub+'</div></div>';
+    const right=document.createElement('div'); right.className='lock';
+    if(named){
+      // Everyone (incl. teacher) ENTERS by tapping the row.
+      row.onclick=()=> enterPrivate(id,def);
+      if(adminUnlocked){
+        const edit=document.createElement('button'); edit.className='btn btn-ghost'; edit.style.cssText='padding:4px 9px;font-size:13px'; edit.textContent='⚙️ 设置';
+        edit.onclick=(e)=>{ e.stopPropagation(); configRoom(id); };
+        right.appendChild(edit);
+      } else { right.textContent='▶️'; }
+    } else {
+      right.textContent = adminUnlocked?'⚙️':'🔒';
+      row.onclick=()=>{ if(adminUnlocked) configRoom(id); else toast('这个房间老师还没开放～'); };
+    }
+    row.appendChild(right);
     body.appendChild(row);
   });
-  if(adminUnlocked){ const t=document.createElement('div'); t.className='subtle'; t.style.cssText='margin:10px 4px 0'; t.textContent='👩‍🏫 你是老师：点任意房间可命名 / 设密码。学生只能进你开放并告诉了密码的房间。'; body.appendChild(t); }
+  if(adminUnlocked){ const t=document.createElement('div'); t.className='subtle'; t.style.cssText='margin:10px 4px 0'; t.textContent='👩‍🏫 你是老师：点房间名字直接进入；点右边「⚙️设置」可改名字/密码；空房间点一下就能新建。'; body.appendChild(t); }
 }
 function enterPublic(){
   if(!confirm('进入「公共大厅」？\n\n这里发的语音、视频、文字，所有进来的人都能看到哦，注意别发隐私内容。')) return;
   joinRoom(PUBLIC_ROOM); closeMask('roomsMask'); toast('已进入公共大厅 🌍'); renderMailbox();
 }
 function enterPrivate(id, def){
-  if(def.pass){ const p=prompt('请输入「'+def.name+'」的密码：'); if(p===null) return; if((p||'').trim()!==def.pass){ toast('密码不对哦～'); return; } }
+  if(def.pass && !adminUnlocked){ const p=prompt('请输入「'+def.name+'」的密码：'); if(p===null) return; if((p||'').trim()!==def.pass){ toast('密码不对哦～'); return; } }
   joinRoom(id); closeMask('roomsMask'); toast('已进入「'+def.name+'」'); renderMailbox();
 }
 function configRoom(id){
