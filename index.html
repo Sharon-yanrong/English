@@ -2034,15 +2034,22 @@ async function azureTTS(innerSSML, voice){
 }
 async function azureSpeak(text, opts){
   opts=opts||{};
-  const inner="<prosody rate='-6%'>"+escapeHtml(text)+"</prosody>";
+  const rate = opts.rate!=null ? opts.rate : '-6%';
+  const inner="<prosody rate='"+rate+"'>"+escapeHtml(text)+"</prosody>";
   return azureTTS(inner, opts.voice);
 }
 function speak(text, opts){
   opts=opts||{};
   if(!text) return;
   stopSpeaking(); // tapping a new word/sentence stops whatever was playing
-  if(typeof azureOn==='function' && azureOn() && azureVoiceName()!=='browser'){ azureSpeak(text,opts).catch(()=>browserSpeak(text,opts)); return; }
-  browserSpeak(text,opts);
+  // A single short word reads clearer at normal speed; slow only for longer phrases.
+  const single = !/\s/.test(text.trim());
+  if(typeof azureOn==='function' && azureOn() && azureVoiceName()!=='browser'){
+    const az = Object.assign({}, opts); if(az.rate==null) az.rate = single ? '0%' : '-6%';
+    azureSpeak(text, az).catch(()=> browserSpeak(text, {pitch:opts.pitch, rate: single?0.95:0.8}));
+    return;
+  }
+  browserSpeak(text, {pitch:opts.pitch, rate: (typeof opts.rate==='number'?opts.rate : (single?0.95:0.8))});
 }
 // Play ONE isolated phoneme (a vowel/consonant sound), N times, using Azure IPA — the reliable
 // way to get a correct short sound. Browser TTS can't do phonemes, so it falls back to a hint word.
@@ -3126,6 +3133,55 @@ function recordRow(refText, onCap){
   wrap.appendChild(tgl); wrap.appendChild(rv); wrap.appendChild(rvid);
   return wrap;
 }
+// 🎯 看图选词：show emoji + Chinese, pick the right English word (multiple choice).
+function wordChoiceGame(host, words){
+  const pool=shuffle(words.slice());
+  let i=0, correct=0;
+  const card=document.createElement('div'); card.style.cssText='background:#f4f8ff;border-radius:14px;padding:12px';
+  host.innerHTML=''; host.appendChild(card);
+  function round(){
+    if(i>=pool.length){ card.innerHTML='<div style="font-weight:900;font-size:18px;text-align:center">🎉 完成！答对 '+correct+'/'+pool.length+'</div><div style="text-align:center;margin-top:8px"><button class="btn btn-blue" id="wcAgain">再玩一次</button></div>'; card.querySelector('#wcAgain').onclick=()=> wordChoiceGame(host,words); confettiBurst(); addStars(2); popStars(2); return; }
+    const w=pool[i];
+    const others=shuffle(words.filter(x=>x.en!==w.en)).slice(0,2);
+    const opts=shuffle([w,...others]);
+    card.innerHTML='<div class="subtle" style="text-align:center">看图选出对的单词（'+(i+1)+'/'+pool.length+'）</div>'+
+      '<div style="font-size:56px;text-align:center;margin:6px 0">'+w.em+'</div>'+
+      '<div style="text-align:center;font-weight:800;margin-bottom:10px">'+w.cn+'</div>'+
+      '<div id="wcOpts" style="display:flex;flex-direction:column;gap:8px"></div><div class="feedback" id="wcMsg"></div>';
+    const box=card.querySelector('#wcOpts');
+    opts.forEach(o=>{ const b=document.createElement('button'); b.className='btn btn-ghost'; b.textContent=o.en;
+      b.onclick=()=>{ speak(o.en);
+        if(o.en===w.en){ sfx('match'); b.style.background='var(--green-d)'; b.style.color='#fff'; correct++; card.querySelector('#wcMsg').textContent='⭐ 答对啦！'; i++; setTimeout(round,900); }
+        else { sfx('wrong'); b.style.background='#ffb4b4'; card.querySelector('#wcMsg').textContent='💛 再试试～'; } };
+      box.appendChild(b);
+    });
+  }
+  round();
+}
+// 🔗 连一连：tap a word on the left, then its picture on the right, to match pairs.
+function wordMatchGame(host, words){
+  const sel=shuffle(words.slice()).slice(0, Math.min(6, words.length));
+  const left=shuffle(sel.slice()), right=shuffle(sel.slice());
+  let picked=null, pickedBtn=null, done=0;
+  host.innerHTML='';
+  const tip=document.createElement('div'); tip.className='subtle'; tip.textContent='先点左边的单词，再点右边对应的图片～'; host.appendChild(tip);
+  const wrap=document.createElement('div'); wrap.style.cssText='display:flex;gap:10px;margin-top:8px'; host.appendChild(wrap);
+  const colL=document.createElement('div'); colL.style.cssText='flex:1;display:flex;flex-direction:column;gap:8px';
+  const colR=document.createElement('div'); colR.style.cssText='flex:1;display:flex;flex-direction:column;gap:8px';
+  wrap.appendChild(colL); wrap.appendChild(colR);
+  const msg=document.createElement('div'); msg.className='feedback'; host.appendChild(msg);
+  const lbtns={};
+  left.forEach(w=>{ const b=document.createElement('button'); b.className='btn btn-ghost'; b.textContent=w.en;
+    b.onclick=()=>{ if(b.disabled) return; speak(w.en); picked=w.en; if(pickedBtn) pickedBtn.style.outline=''; pickedBtn=b; b.style.outline='3px solid #5b9bff'; msg.textContent='再点右边对应的图片 👉'; };
+    colL.appendChild(b); lbtns[w.en]=b; });
+  right.forEach(w=>{ const b=document.createElement('button'); b.className='btn btn-ghost'; b.style.fontSize='30px'; b.textContent=w.em;
+    b.onclick=()=>{ if(b.disabled) return;
+      if(!picked){ msg.textContent='先点左边的单词哦～'; return; }
+      if(w.en===picked){ sfx('match'); const lb=lbtns[picked]; lb.disabled=true; b.disabled=true; lb.style.outline=''; lb.style.background='var(--green-d)'; lb.style.color='#fff'; b.style.background='var(--green-d)'; done++; picked=null; pickedBtn=null; addStars(1); popStars(1); msg.textContent='⭐ 连对啦！';
+        if(done===sel.length){ msg.innerHTML='🎉 全部连对！<button class="btn btn-blue" id="wmAgain" style="margin-left:8px">再玩一次</button>'; confettiBurst(); addStars(2); const ag=document.getElementById('wmAgain'); if(ag) ag.onclick=()=> wordMatchGame(host,words); } }
+      else { sfx('wrong'); const old=b.style.background; b.style.background='#ffb4b4'; setTimeout(()=>b.style.background=old,400); msg.textContent='💛 不是这个，再看看～'; } };
+    colR.appendChild(b); });
+}
 function convLineEl(ln, onRead){
   const row=document.createElement('div'); row.className='convline';
   const who=document.createElement('div'); who.className='convwho '+(ln.who==='A'?'a':'b'); who.textContent=ln.who2||ln.who;
@@ -3172,6 +3228,16 @@ function renderBoard(key, body, u){
       c.appendChild(p.results);
     });
     body.appendChild(c); body.appendChild(gate.btn);
+    // Extra practice games (fun, not required to pass): 看图选词 + 连一连
+    const gcard=boardCard('🎮 单词小游戏（练一练，记得更牢）');
+    const brow=document.createElement('div'); brow.style.cssText='display:flex;gap:8px;flex-wrap:wrap';
+    const bChoice=document.createElement('button'); bChoice.className='btn btn-blue'; bChoice.style.cssText='flex:1;min-width:130px'; bChoice.textContent='🎯 看图选词';
+    const bMatch=document.createElement('button'); bMatch.className='btn btn-purple'; bMatch.style.cssText='flex:1;min-width:130px'; bMatch.textContent='🔗 连一连';
+    const area=document.createElement('div'); area.style.marginTop='10px';
+    bChoice.onclick=()=>{ bChoice.classList.remove('btn-ghost'); wordChoiceGame(area, u.words); };
+    bMatch.onclick=()=>{ wordMatchGame(area, u.words); };
+    brow.appendChild(bChoice); brow.appendChild(bMatch); gcard.appendChild(brow); gcard.appendChild(area);
+    body.appendChild(gcard);
   } else if(key==='grammar'){
     let total=0; u.grammar.forEach(pt=> total+=pt.examples.length);
     const gate=boardGate('grammar', total, '✅ 学会啦');
