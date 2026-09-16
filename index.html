@@ -273,9 +273,11 @@
       <button id="playSecretVoice" class="btn btn-pink play" style="display:none">▶️ 听爸爸妈妈的语音</button>
     </div>
 
+    <button class="btn btn-blue" style="width:100%;margin-bottom:10px" onclick="openRooms()">🚪 进入房间 · 和大家收发消息</button>
+
     <div id="mailboxCard" class="card mailbox" style="display:none">
       <div class="mbhead">
-        <div class="mbtitle">📬 家庭消息</div>
+        <div class="mbtitle" id="mailboxTitle">📬 消息</div>
         <div class="mbbadge" id="mailboxBadge"></div>
       </div>
       <div id="mailboxList"></div>
@@ -687,14 +689,35 @@
 
 <!-- ===== Who is using this device? ===== -->
 <div class="mask" id="roleMask">
-  <div class="modal" style="text-align:center">
-    <div style="font-size:56px">🦁</div>
-    <h3 style="font-size:24px;margin:6px 0 4px">你好呀！请问谁在用这台？</h3>
-    <p class="subtle" style="margin:0 0 6px">选一次就记住啦，之后也能改。</p>
-    <div style="display:flex;flex-direction:column;gap:12px;margin-top:12px">
+  <div class="modal" style="text-align:center;background:linear-gradient(160deg,#fff,#eef6ff)">
+    <div id="roleBigAva" style="font-size:64px;animation:landflag .6s ease both">🦁</div>
+    <h3 style="font-size:23px;margin:6px 0 2px">欢迎来到快乐英语岛！🏝️</h3>
+    <p class="subtle" style="margin:0 0 10px">先给自己起个名字、挑个头像吧～</p>
+    <div style="text-align:left">
+      <label class="fld" style="font-size:14px">✏️ 我叫</label>
+      <input class="in" id="roleName" placeholder="例如 老师 / 姐姐 / 外甥" style="text-align:center;font-size:18px;font-weight:800">
+      <label class="fld" style="font-size:14px;margin-top:8px">🎨 我的头像</label>
+      <div id="roleAvatarPick" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center"></div>
+    </div>
+    <p class="subtle" style="margin:14px 0 6px;font-weight:800;color:var(--ink)">谁在用这台设备？👇</p>
+    <div style="display:flex;flex-direction:column;gap:12px">
       <button class="btn big btn-green" id="roleKid">👶 我是小朋友</button>
       <button class="btn big btn-blue" id="roleParent">👨‍👩‍👧 我是家长 / 老师</button>
     </div>
+    <p class="subtle" style="margin:10px 0 0;font-size:12px">名字和头像之后都能改。进「🚪 房间」就能和大家收发消息啦。</p>
+  </div>
+</div>
+
+<!-- ===== Rooms (public lobby + teacher-managed private rooms) ===== -->
+<div class="mask" id="roomsMask">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h3 style="margin:0">🚪 房间</h3>
+      <button class="btn btn-ghost" style="padding:6px 10px;font-size:13px" id="roomsRename">✏️ 改名字</button>
+    </div>
+    <div class="subtle" id="roomsWho" style="margin:2px 0 10px"></div>
+    <div id="roomsBody"></div>
+    <button class="btn btn-ghost" style="width:100%;margin-top:12px" onclick="closeMask('roomsMask')">关闭</button>
   </div>
 </div>
 
@@ -2689,10 +2712,24 @@ document.getElementById('gearBtn').onclick=()=>{ pinBuffer=''; renderPin(); open
 function applyRole(){
   const gear=document.getElementById('gearBtn');
   gear.style.display = (S.role==='kid') ? 'none' : '';   // hide settings on the kid's device
+  if(typeof autoFam==='function') autoFam();   // auto-connect family messaging (baked-in config)
 }
-document.getElementById('roleKid').onclick=()=>{ S.role='kid'; save(); closeMask('roleMask'); applyRole(); renderHome(); };
-document.getElementById('roleParent').onclick=()=>{ S.role='parent'; save(); closeMask('roleMask'); applyRole(); renderHome(); toast('点右上角 ⚙️ 进入后台，密码 1234'); };
-document.getElementById('switchRoleBtn').onclick=()=>{ closeMask('parentMask'); S.role=''; save(); openMask('roleMask'); };
+function renderRoleAvatars(){
+  const box=document.getElementById('roleAvatarPick'); if(!box) return; box.innerHTML='';
+  if(!S.famAvatar) S.famAvatar=S.avatar||'🦁';
+  AVATARS.forEach(a=>{ const b=document.createElement('button'); b.textContent=a;
+    b.style.cssText='font-size:24px;border:3px solid '+(a===S.famAvatar?'#22c55e':'#e5eef7')+';border-radius:12px;background:#fff;padding:4px 8px;cursor:pointer';
+    b.onclick=()=>{ S.famAvatar=a; const big=document.getElementById('roleBigAva'); if(big) big.textContent=a; renderRoleAvatars(); };
+    box.appendChild(b);
+  });
+  const big=document.getElementById('roleBigAva'); if(big) big.textContent=S.famAvatar;
+}
+function readEntry(){ const n=document.getElementById('roleName'); if(n) S.famName=(n.value||'').trim(); }
+function openRoleMask(){ const n=document.getElementById('roleName'); if(n) n.value=S.famName||S.name||''; renderRoleAvatars(); openMask('roleMask'); }
+document.getElementById('roleKid').onclick=()=>{ readEntry(); S.role='kid'; save(); closeMask('roleMask'); applyRole(); renderHome(); };
+document.getElementById('roleParent').onclick=()=>{ readEntry(); S.role='parent'; save(); closeMask('roleMask'); applyRole(); renderHome(); toast('点右上角 ⚙️ 进入后台，密码 1234'); };
+document.getElementById('switchRoleBtn').onclick=()=>{ closeMask('parentMask'); S.role=''; save(); openRoleMask(); };
+document.getElementById('roomsRename').onclick=()=>{ const nm=prompt('改个名字（发消息时显示）：', (S.famName||'').trim()); if(nm===null) return; S.famName=nm.trim(); save(); if(fam) setFamName(); const w=document.getElementById('roomsWho'); if(w) w.textContent='你现在是：'+myDisplay()+(adminUnlocked?'（老师·可管理房间）':''); toast('名字改好啦～'); };
 // Parent gate on the kid's device: tap the star box 5x quickly to reach settings.
 let starTaps=0, starTapTimer=null;
 document.getElementById('starBox').addEventListener('click', ()=>{
@@ -2705,7 +2742,7 @@ function pinPress(n){
   pinBuffer+=n; renderPin();
   if(pinBuffer.length===4){
     setTimeout(()=>{
-      if(pinBuffer===S.pin){ closeMask('pinMask'); openParent(); }
+      if(pinBuffer===S.pin){ adminUnlocked=true; closeMask('pinMask'); openParent(); }
       else { toast('密码不对哦～'); pinBuffer=''; renderPin(); }
     },150);
   }
@@ -3962,6 +3999,15 @@ function checkReward(){
      - RLS policies allowing anon select/insert/update + storage upload/read
      - realtime enabled on messages
    ============================================================ */
+// Baked-in family connection so the two devices connect automatically — no typing.
+// The anon key is a PUBLIC Supabase key (safe in client code; data is protected by RLS).
+// Fill `key` once and both devices just work: they only pick 家长 / 小朋友 at startup.
+const FAMILY_DEFAULT = {
+  url:'https://khlosikjgpuvogpuypiw.supabase.co',
+  key:'sb_publishable_w2zHRb3129pFknkLQx0AJQ_aEnZFicF'   // Supabase publishable key (safe in browser, RLS-protected)
+};
+// The room = a short "family code" the user sets (same code on every family device → same room;
+// strangers who don't know the code can't join). Keeps it private without typing the long key.
 const FAM_KEY='kidsFamily';
 let fam = loadFam();     // {url,key,room,role} | null
 let sb = null;           // cached supabase client
@@ -3972,6 +4018,87 @@ let famRec=null, famRecChunks=[], famRecTimer=null;
 function loadFam(){ try{ const r=localStorage.getItem(FAM_KEY); if(!r) return null; const o=JSON.parse(r); if(o && o.role && !o.name){ o.name=(o.role==='parent'?'家长':'孩子'); } return o; }catch(e){ return null; } }
 function saveFam(){ localStorage.setItem(FAM_KEY, JSON.stringify(fam)); }
 function famConfigured(){ return !!(fam && fam.url && fam.key && fam.room); }
+// Display name shown on your messages: avatar + custom name (else a role default).
+function setFamName(){ if(fam){ const nm=(S.famName||'').trim() || (S.role==='parent'?'老师':(S.name||'小朋友')); fam.name=((S.famAvatar||'')+' '+nm).trim(); saveFam(); } }
+// Reconnect to a previously-joined room on load (config is baked in; room was saved on join).
+function autoFam(){
+  if(!FAMILY_DEFAULT.key) return;              // not baked in yet
+  if(fam && fam.room){ fam.url=FAMILY_DEFAULT.url; fam.key=FAMILY_DEFAULT.key; setFamName(); }
+}
+
+/* ---------- Rooms: a public lobby + teacher-managed private rooms ---------- */
+const PUBLIC_ROOM = 'public-lobby';
+const ROOM_IDS = ['room-1','room-2','room-3','room-4','room-5','room-6','room-7','room-8'];
+const ROOM_EMOJIS = { 'room-1':'🚀','room-2':'🌈','room-3':'🦖','room-4':'🐧','room-5':'🍭','room-6':'⚽','room-7':'🎨','room-8':'🐬' };
+const ROOM_REG = '__rooms__';
+let roomDefs = {};            // {roomId:{id,name,pass}} — teacher-set names/passwords
+let adminUnlocked = false;    // teacher admin, unlocked by the ⚙️ PIN this session
+function regHeaders(extra){ return Object.assign({ apikey:FAMILY_DEFAULT.key, Authorization:'Bearer '+FAMILY_DEFAULT.key }, extra||{}); }
+async function loadRoomDefs(){
+  if(!FAMILY_DEFAULT.key){ roomDefs={}; return roomDefs; }
+  const res = await fetch(FAMILY_DEFAULT.url+'/rest/v1/messages?select=content,created_at&room=eq.'+ROOM_REG+'&order=created_at.asc', { headers:regHeaders() });
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  const rows = await res.json(); const map={};
+  rows.forEach(r=>{ try{ const o=JSON.parse(r.content); if(o&&o.id) map[o.id]=o; }catch(e){} });
+  roomDefs=map; return map;
+}
+async function saveRoomDef(id, name, pass){
+  const res = await fetch(FAMILY_DEFAULT.url+'/rest/v1/messages', { method:'POST',
+    headers:regHeaders({'Content-Type':'application/json','Prefer':'return=minimal'}),
+    body:JSON.stringify({ room:ROOM_REG, sender:'teacher', kind:'roomdef', content:JSON.stringify({id,name,pass}), seen:true }) });
+  if(!res.ok){ const t=await res.text().catch(()=>''); throw new Error('HTTP '+res.status+' '+t.slice(0,120)); }
+  roomDefs[id]={id,name,pass};
+}
+function joinRoom(roomId){
+  fam = { url:FAMILY_DEFAULT.url, key:FAMILY_DEFAULT.key, room:roomId, name:'' };
+  setFamName(); saveFam();
+  if(typeof initFamily==='function') initFamily();
+}
+function myDisplay(){ return (S.famAvatar||'🙂')+' '+((S.famName||'').trim() || (S.role==='parent'?'老师':(S.name||'小朋友'))); }
+async function openRooms(){
+  document.getElementById('roomsWho').textContent = '你现在是：'+myDisplay()+(adminUnlocked?'（老师·可管理房间）':'');
+  openMask('roomsMask');
+  const body=document.getElementById('roomsBody');
+  if(!FAMILY_DEFAULT.key){ body.innerHTML='<div class="subtle" style="text-align:center;padding:16px">📭 消息功能还没开通。<br>需要老师先在代码里配置一次连接。</div>'; return; }
+  body.innerHTML='<div class="subtle" style="text-align:center;padding:16px">正在加载房间…</div>';
+  try{ await loadRoomDefs(); }catch(e){ body.innerHTML='<div class="subtle" style="text-align:center;padding:16px;color:#c00">连接失败：'+((e&&e.message)||e)+'</div>'; return; }
+  renderRooms();
+}
+function renderRooms(){
+  const body=document.getElementById('roomsBody'); body.innerHTML='';
+  // Public lobby — anyone can enter
+  const pub=document.createElement('button'); pub.className='listrow';
+  pub.innerHTML='<div class="lem">🌍</div><div class="lt"><div class="a">公共大厅</div><div class="b">所有人都能进，随便逛逛、试一试</div></div><div class="lock">▶️</div>';
+  pub.onclick=enterPublic; body.appendChild(pub);
+  const warn=document.createElement('div'); warn.className='subtle'; warn.style.cssText='margin:2px 4px 12px;color:#c2185b'; warn.textContent='⚠️ 公共大厅里发的语音 / 视频 / 文字，所有进来的人都能看到，别发隐私内容哦。';
+  body.appendChild(warn);
+  const hd=document.createElement('div'); hd.style.cssText='font-weight:900;margin:6px 4px'; hd.textContent='🔒 班级 / 家庭房间'; body.appendChild(hd);
+  ROOM_IDS.forEach(id=>{
+    const def=roomDefs[id], em=ROOM_EMOJIS[id]||'🚪', named=!!(def&&def.name);
+    const row=document.createElement('button'); row.className='listrow';
+    const sub = named ? (def.pass?'🔒 需要密码':'可进入') : (adminUnlocked?'点这里命名 + 设密码':'（老师还没开放）');
+    const icon = named ? '▶️' : (adminUnlocked?'⚙️':'🔒');
+    row.innerHTML='<div class="lem">'+em+'</div><div class="lt"><div class="a">'+(named?escapeHtml(def.name):'空房间')+'</div><div class="b">'+sub+'</div></div><div class="lock">'+icon+'</div>';
+    row.onclick=()=>{ if(adminUnlocked){ configRoom(id); return; } if(!named){ toast('这个房间老师还没开放～'); return; } enterPrivate(id,def); };
+    body.appendChild(row);
+  });
+  if(adminUnlocked){ const t=document.createElement('div'); t.className='subtle'; t.style.cssText='margin:10px 4px 0'; t.textContent='👩‍🏫 你是老师：点任意房间可命名 / 设密码。学生只能进你开放并告诉了密码的房间。'; body.appendChild(t); }
+}
+function enterPublic(){
+  if(!confirm('进入「公共大厅」？\n\n这里发的语音、视频、文字，所有进来的人都能看到哦，注意别发隐私内容。')) return;
+  joinRoom(PUBLIC_ROOM); closeMask('roomsMask'); toast('已进入公共大厅 🌍'); renderMailbox();
+}
+function enterPrivate(id, def){
+  if(def.pass){ const p=prompt('请输入「'+def.name+'」的密码：'); if(p===null) return; if((p||'').trim()!==def.pass){ toast('密码不对哦～'); return; } }
+  joinRoom(id); closeMask('roomsMask'); toast('已进入「'+def.name+'」'); renderMailbox();
+}
+function configRoom(id){
+  const def=roomDefs[id]||{};
+  const name=prompt('房间名字（例如：三年级二班 / 我们一家）：', def.name||''); if(name===null) return;
+  if(!name.trim()){ toast('名字不能为空'); return; }
+  const pass=prompt('进入密码（留空 = 不需要密码）：', def.pass||''); if(pass===null) return;
+  saveRoomDef(id, name.trim(), (pass||'').trim()).then(()=>{ toast('✅ 房间已保存'); renderRooms(); }).catch(e=> toast('保存失败：'+((e&&e.message)||e)));
+}
 function myName(){ return (fam && fam.name) ? fam.name : '家人'; }
 function randRoom(){ return 'fam-'+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2)+Date.now().toString(36); }
 function escapeHtml(s){ return (s||'').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
@@ -4088,6 +4215,8 @@ async function renderMailbox(){
   const card=document.getElementById('mailboxCard');
   if(!famConfigured()){ card.style.display='none'; return; }
   card.style.display='block';
+  const titleEl=document.getElementById('mailboxTitle');
+  if(titleEl){ const rid=fam&&fam.room; const nm = rid===PUBLIC_ROOM ? '🌍 公共大厅' : (roomDefs[rid]&&roomDefs[rid].name ? ('🔒 '+roomDefs[rid].name) : '📬 消息'); titleEl.textContent=nm; }
   const list=document.getElementById('mailboxList');
   const badge=document.getElementById('mailboxBadge');
   if(!list.innerHTML) list.innerHTML='<div class="subtle">加载中…</div>';
@@ -4198,7 +4327,7 @@ markToday();
 renderHome();
 checkBadges();
 initFamily();
-if(!S.role){ openMask('roleMask'); } else { applyRole(); }
+if(!S.role){ openRoleMask(); } else { applyRole(); }
 // warm up voices
 if('speechSynthesis' in window){ speechSynthesis.getVoices(); }
 </script>
