@@ -1434,7 +1434,8 @@ const COURSE = [
       ]
     },
   },
-  { id:'u2', title:'Unit 2 · My School', cn:'我的学校', ready:true,
+  { id:'u2', title:'Unit 2 · My School', cn:'我的学校', ready:true, storyline:true,
+    finale:'Pup 和 Kit 用 6 件宝物点亮了整座学校！他们在教室里大声念出所有字母，还认识了新同学。上学真开心！🏫🎉',
     words:[
       {en:'school', cn:'学校', em:'🏫', s:{en:'This is my school.', cn:'这是我的学校。'}},
       {en:'classroom', cn:'教室', em:'🚪', s:{en:'This is our classroom.', cn:'这是我们的教室。'}},
@@ -1500,7 +1501,8 @@ const COURSE = [
       ]
     },
   },
-  { id:'u3', title:'Unit 3 · Colours and Letters', cn:'五颜六色', ready:true,
+  { id:'u3', title:'Unit 3 · Colours and Letters', cn:'五颜六色', ready:true, storyline:true,
+    finale:'集齐 6 件宝物，Pup 和 Kit 在天上画出了一道超级大彩虹！红、橙、黄、绿、蓝、紫……全世界都变得五颜六色啦！🌈🎉',
     words:[
       {en:'colour', cn:'颜色', em:'🎨', s:{en:'What colour is this?', cn:'这是什么颜色？'}},
       {en:'red', cn:'红色', em:'🔴', s:{en:'The apple is red.', cn:'苹果是红色的。'}},
@@ -1566,7 +1568,8 @@ const COURSE = [
       ]
     },
   },
-  { id:'u4', title:'Unit 4 · My Friends', cn:'我的朋友', ready:true,
+  { id:'u4', title:'Unit 4 · My Friends', cn:'我的朋友', ready:true, storyline:true,
+    finale:'6 件宝物变成了一场大派对！Pup、Kit 和好朋友 Ted 一起分享零食、一起玩，好朋友越来越多。友谊万岁！👫🎉',
     words:[
       {en:'friend', cn:'朋友', em:'👫', s:{en:'This is my friend.', cn:'这是我的朋友。'}},
       {en:'boy', cn:'男孩', em:'👦', s:{en:'He is a boy.', cn:'他是一个男孩。'}},
@@ -1632,7 +1635,8 @@ const COURSE = [
       ]
     },
   },
-  { id:'u5', title:'Unit 5 · About Me', cn:'认识我自己', ready:true,
+  { id:'u5', title:'Unit 5 · About Me', cn:'认识我自己', ready:true, storyline:true,
+    finale:'用 6 件宝物，Pup 和 Kit 造出了一个超级机器人！它有大眼睛、会跳会跑，还会说 Hello。太厉害啦！🤖🎉',
     words:[
       {en:'face', cn:'脸', em:'😊', s:{en:'Look at my face.', cn:'看我的脸。'}},
       {en:'eye', cn:'眼睛', em:'👁️', s:{en:'I have two eyes.', cn:'我有两只眼睛。'}},
@@ -1698,7 +1702,8 @@ const COURSE = [
       ]
     },
   },
-  { id:'u6', title:'Unit 6 · My Family', cn:'我的家人', ready:true,
+  { id:'u6', title:'Unit 6 · My Family', cn:'我的家人', ready:true, storyline:true,
+    finale:'6 件宝物把全家人聚到了一起！Pup 给大家介绍爸爸、妈妈、爷爷奶奶，大家抱在一起说：I love my family! ❤️🎉',
     words:[
       {en:'family', cn:'家人；家庭', em:'👨‍👩‍👧‍👦', s:{en:'This is my family.', cn:'这是我的家人。'}},
       {en:'father', cn:'爸爸', em:'👨', s:{en:'This is my father.', cn:'这是我的爸爸。'}},
@@ -2001,18 +2006,31 @@ function browserSpeak(text, opts){
 }
 // Azure Neural TTS = warm, natural, kid-friendly voice (uses the same Azure key). Cached per phrase.
 let ttsCache={}, curAudio=null;
+// Every playback belongs to a "generation". Starting new speech bumps the generation, so any
+// audio still playing — or any Azure fetch still in flight — is superseded and won't be heard.
+let speakGen=0;
+function stopSpeaking(){
+  speakGen++;
+  try{ if('speechSynthesis' in window) speechSynthesis.cancel(); }catch(e){}
+  try{ if(curAudio){ curAudio.pause(); curAudio.currentTime=0; } }catch(e){}
+  curAudio=null;
+}
 function azureVoiceName(){ return (S.azure && S.azure.voice) || 'en-US-AriaNeural'; }
-function playAudioUrl(url){ try{ if(curAudio) curAudio.pause(); curAudio=new Audio(url); curAudio.play().catch(()=>{}); }catch(e){} }
+function playAudioUrl(url, gen){
+  if(gen!==undefined && gen!==speakGen) return; // superseded by a newer tap → don't play
+  try{ if(curAudio) curAudio.pause(); curAudio=new Audio(url); curAudio.play().catch(()=>{}); }catch(e){}
+}
 // Send arbitrary inner-SSML to Azure with a chosen voice; cache by voice+ssml.
 async function azureTTS(innerSSML, voice){
+  const gen=speakGen;
   voice = voice || azureVoiceName();
   const ck=voice+'|'+innerSSML;
-  if(ttsCache[ck]){ playAudioUrl(ttsCache[ck]); return; }
+  if(ttsCache[ck]){ playAudioUrl(ttsCache[ck], gen); return; }
   const ssml="<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='en-US'><voice name='"+voice+"'>"+innerSSML+"</voice></speak>";
   const r=await fetch('https://'+S.azure.region+'.tts.speech.microsoft.com/cognitiveservices/v1',{ method:'POST',
     headers:{ 'Ocp-Apim-Subscription-Key':S.azure.key, 'Content-Type':'application/ssml+xml', 'X-Microsoft-OutputFormat':'audio-24khz-48kbitrate-mono-mp3' }, body:ssml });
   if(!r.ok) throw new Error('tts '+r.status);
-  const url=URL.createObjectURL(await r.blob()); ttsCache[ck]=url; playAudioUrl(url);
+  const url=URL.createObjectURL(await r.blob()); ttsCache[ck]=url; playAudioUrl(url, gen);
 }
 async function azureSpeak(text, opts){
   opts=opts||{};
@@ -2022,6 +2040,7 @@ async function azureSpeak(text, opts){
 function speak(text, opts){
   opts=opts||{};
   if(!text) return;
+  stopSpeaking(); // tapping a new word/sentence stops whatever was playing
   if(typeof azureOn==='function' && azureOn() && azureVoiceName()!=='browser'){ azureSpeak(text,opts).catch(()=>browserSpeak(text,opts)); return; }
   browserSpeak(text,opts);
 }
@@ -2030,11 +2049,12 @@ function speak(text, opts){
 function ipaClean(ipa){ return String(ipa||'').replace(/[\/\[\]ˈˌ]/g,'').split(/[,;]/)[0].trim(); }
 function speakPhoneme(ipa, times, fallbackText){
   const ph=ipaClean(ipa); times=Math.max(1, times||1);
+  stopSpeaking(); const gen=speakGen;
   if(typeof azureOn==='function' && azureOn() && azureVoiceName()!=='browser' && ph){
     let inner=''; for(let i=0;i<times;i++){ inner+="<phoneme alphabet='ipa' ph='"+ph+"'>uh</phoneme>"; if(i<times-1) inner+="<break time='400ms'/>"; }
-    azureTTS(inner).catch(()=>{ if(fallbackText) browserSpeak(fallbackText); });
+    azureTTS(inner).catch(()=>{ if(fallbackText && gen===speakGen) browserSpeak(fallbackText); });
   } else if(fallbackText){
-    let k=0; const step=()=>{ if(k>=times) return; browserSpeak(fallbackText,{rate:0.7}); k++; setTimeout(step,900); }; step();
+    let k=0; const step=()=>{ if(gen!==speakGen || k>=times) return; browserSpeak(fallbackText,{rate:0.7}); k++; setTimeout(step,900); }; step();
   }
 }
 // Speak a line as a specific character (distinct voice). vcfg={az:AzureVoiceName, pitch:browserPitch}.
