@@ -273,7 +273,7 @@
       <button id="playSecretVoice" class="btn btn-pink play" style="display:none">▶️ 听爸爸妈妈的语音</button>
     </div>
 
-    <button class="btn btn-blue" style="width:100%;margin-bottom:8px" onclick="openRooms()">🚪 进入房间 · 收发消息</button>
+    <button class="btn btn-blue" id="homeRoomsBtn" style="width:100%;margin-bottom:8px" onclick="openRooms()">🚪 选择房间 / 开始学习</button>
     <button class="btn btn-green" id="homeChatBtn" style="width:100%;margin-bottom:10px;display:none" onclick="enterChat()"></button>
 
     <div class="tiles">
@@ -2728,8 +2728,9 @@ function renderRoleAvatars(){
 }
 function readEntry(){ const n=document.getElementById('roleName'); if(n) S.famName=(n.value||'').trim(); }
 function openRoleMask(){ const n=document.getElementById('roleName'); if(n) n.value=S.famName||S.name||''; renderRoleAvatars(); openMask('roleMask'); }
-document.getElementById('roleKid').onclick=()=>{ readEntry(); S.role='kid'; save(); closeMask('roleMask'); applyRole(); renderHome(); };
-document.getElementById('roleParent').onclick=()=>{ readEntry(); S.role='parent'; save(); closeMask('roleMask'); applyRole(); renderHome(); toast('点右上角 ⚙️ 进入后台，密码 1234'); };
+function maybePickRoom(){ if(FAMILY_DEFAULT.key && !famConfigured() && !S.soloMode){ setTimeout(openRooms, 300); } }
+document.getElementById('roleKid').onclick=()=>{ readEntry(); S.role='kid'; save(); closeMask('roleMask'); applyRole(); renderHome(); maybePickRoom(); };
+document.getElementById('roleParent').onclick=()=>{ readEntry(); S.role='parent'; save(); closeMask('roleMask'); applyRole(); renderHome(); toast('点右上角 ⚙️ 进入后台，密码 1234'); maybePickRoom(); };
 document.getElementById('switchRoleBtn').onclick=()=>{ closeMask('parentMask'); S.role=''; save(); openRoleMask(); };
 document.getElementById('roomsRename').onclick=()=>{ const nm=prompt('改个名字（发消息时显示）：', (S.famName||'').trim()); if(nm===null) return; S.famName=nm.trim(); save(); if(fam) setFamName(); const w=document.getElementById('roomsWho'); if(w) w.textContent='你现在是：'+myDisplay()+(adminUnlocked?'（老师·可管理房间）':''); toast('名字改好啦～'); };
 // Parent gate on the kid's device: tap the star box 5x quickly to reach settings.
@@ -4052,6 +4053,7 @@ async function saveRoomDef(id, name, pass){
   roomDefs[id]={id,name,pass};
 }
 function joinRoom(roomId){
+  S.soloMode=false; save();
   fam = { url:FAMILY_DEFAULT.url, key:FAMILY_DEFAULT.key, room:roomId, name:'' };
   setFamName(); saveFam();
   if(typeof initFamily==='function') initFamily();
@@ -4074,6 +4076,11 @@ function renderRooms(){
   pub.onclick=enterPublic; body.appendChild(pub);
   const warn=document.createElement('div'); warn.className='subtle'; warn.style.cssText='margin:2px 4px 12px;color:#c2185b'; warn.textContent='⚠️ 公共大厅里发的语音 / 视频 / 文字，所有进来的人都能看到，别发隐私内容哦。';
   body.appendChild(warn);
+  // Solo learning — no room; practice recordings just play locally.
+  const solo=document.createElement('button'); solo.className='listrow';
+  solo.innerHTML='<div class="lem">📖</div><div class="lt"><div class="a">只自己学习</div><div class="b">先不进房间，练习录音只自己听</div></div><div class="lock">▶️</div>';
+  solo.onclick=()=>{ S.soloMode=true; fam=null; localStorage.removeItem('kidsFamily'); save(); closeMask('roomsMask'); toast('好的，自己学习模式 📖'); updateHomeRoomsUI(); };
+  body.appendChild(solo);
   const hd=document.createElement('div'); hd.style.cssText='font-weight:900;margin:6px 4px'; hd.textContent='🔒 班级 / 家庭房间'; body.appendChild(hd);
   ROOM_IDS.forEach(id=>{
     const def=roomDefs[id], em=ROOM_EMOJIS[id]||'🚪', named=!!(def&&def.name);
@@ -4204,10 +4211,13 @@ async function recordAndSend(kind, refText, opts){
   if(opts.onCaptured) opts.onCaptured();
   if(famConfigured()){
     toast('上传中…');
-    try{ const url = await famUpload(blob, ext); await famSend(kind, url); toast('✅ 已发送！'); renderChat(); }
-    catch(e){ toast('录好啦！发送失败：'+((e&&e.message)||e)); }
+    try{ const url = await famUpload(blob, ext); await famSend(kind, url);
+      const rid=fam.room; const nm = rid===PUBLIC_ROOM?'公共大厅':(roomDefs[rid]&&roomDefs[rid].name?roomDefs[rid].name:'房间');
+      toast('✅ 已发到「'+nm+'」房间');
+      if(document.querySelector('.screen.active').id==='chatScreen') renderChat(); else updateHomeRoomsUI();
+    }catch(e){ toast('录好啦！发送失败：'+((e&&e.message)||e)); }
   } else {
-    toast('✅ 录好啦！（连接家庭消息后可发给家长）');
+    toast('✅ 录好啦！（自己学习模式，只有你自己能听）');
   }
 }
 function pickRecMime(video){
@@ -4241,12 +4251,51 @@ function canDelete(m){ return adminUnlocked || m.sender===myName(); }   // own, 
 function roomTitle(){ const rid=fam&&fam.room; return rid===PUBLIC_ROOM ? '🌍 公共大厅' : (roomDefs[rid]&&roomDefs[rid].name ? ('🔒 '+roomDefs[rid].name) : '💬 聊天'); }
 function enterChat(){ if(!famConfigured()){ toast('先进一个房间吧～'); return; } go('chatScreen'); renderChat(); }
 function updateHomeRoomsUI(msgs){
-  const btn=document.getElementById('homeChatBtn'); if(!btn) return;
-  if(!famConfigured()){ btn.style.display='none'; return; }
-  const rid=fam&&fam.room; const nm = rid===PUBLIC_ROOM ? '公共大厅' : (roomDefs[rid]&&roomDefs[rid].name ? roomDefs[rid].name : '房间');
-  const unseen = msgs ? msgs.filter(m=> m.kind!=='deleted' && m.sender!==myName() && !m.seen).length : 0;
-  btn.style.display='block';
-  btn.textContent='💬 回到「'+nm+'」'+(unseen>0?('（📬 '+unseen+' 条新）'):'');
+  const roomsBtn=document.getElementById('homeRoomsBtn'); const chatBtn=document.getElementById('homeChatBtn');
+  if(!roomsBtn||!chatBtn) return;
+  if(famConfigured()){
+    const rid=fam&&fam.room; const nm = rid===PUBLIC_ROOM ? '公共大厅' : (roomDefs[rid]&&roomDefs[rid].name ? roomDefs[rid].name : '房间');
+    const unseen = msgs ? msgs.filter(m=> m.kind!=='deleted' && m.sender!==myName() && !m.seen).length : 0;
+    roomsBtn.textContent='📍 当前房间：'+nm+'（点这里换房间）';
+    chatBtn.style.display='block';
+    chatBtn.textContent='💬 消息'+(unseen>0?('（📬 '+unseen+' 条新）'):'（点进去看）');
+  } else if(S.soloMode){
+    roomsBtn.textContent='📖 自己学习中 · 点这里进房间';
+    chatBtn.style.display='none';
+  } else {
+    roomsBtn.textContent='🚪 选择房间 / 开始学习';
+    chatBtn.style.display='none';
+  }
+}
+let chatExpandedMonths = new Set();
+function fmtDay(d){ return d.getFullYear()+'.'+('0'+(d.getMonth()+1)).slice(-2)+'.'+('0'+d.getDate()).slice(-2); }
+function fmtTime(d){ return ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2); }
+function fmtMonth(d){ return d.getFullYear()+'年'+(d.getMonth()+1)+'月'; }
+function makeMsgRow(m){
+  const mine = m.sender===myName();
+  const row=document.createElement('div'); row.className='msgrow'+(mine?' mine':'')+((!mine && !m.seen)?' unseen':'');
+  const d=new Date(m.created_at); const hm=fmtTime(d);
+  const who = mine ? '我' : escapeHtml(m.sender||'家人');
+  if(m.kind==='text'){
+    row.innerHTML='<div class="mt"><b>'+who+'：</b>'+escapeHtml(m.content)+'</div><span class="mtime">'+hm+'</span>';
+    if(!mine && !m.seen) famMarkSeen(m.id);
+  }else{
+    row.innerHTML='<div class="mt"><b>'+who+'</b> '+(m.kind==='video'?'📹 视频':'🎧 语音')+'</div><button class="btn btn-blue msplay">▶️ 播放</button><span class="mtime">'+hm+'</span>';
+    row.querySelector('.msplay').onclick=()=> playMedia(m);
+  }
+  if(canDelete(m)){
+    const del=document.createElement('button'); del.className='btn btn-ghost'; del.style.cssText='padding:2px 8px;font-size:13px;margin-left:6px'; del.textContent='🗑️';
+    del.onclick=()=>{ if(confirm('删除这条消息？'+(adminUnlocked&&!mine?'（老师删除别人的消息）':''))){ famDelete(m).then(()=>{ toast('已删除'); renderChat(); }).catch(e=> toast('删除失败：'+((e&&e.message)||e))); } };
+    row.appendChild(del);
+  }
+  return row;
+}
+function appendWithDayHeaders(list, msgs){
+  let lastDay='';
+  msgs.forEach(m=>{ const d=new Date(m.created_at); const day=fmtDay(d);
+    if(day!==lastDay){ lastDay=day; const sep=document.createElement('div'); sep.style.cssText='text-align:center;margin:10px 0 4px;font-size:12px;color:var(--ink-soft)'; sep.textContent='— '+day+' —'; list.appendChild(sep); }
+    list.appendChild(makeMsgRow(m));
+  });
 }
 async function renderChat(){
   if(!famConfigured()){ go('home'); return; }
@@ -4257,28 +4306,27 @@ async function renderChat(){
   try{ msgs = await famFetch(); }
   catch(e){ list.innerHTML='<div class="subtle">暂时连不上，检查网络～</div>'; return; }
   updateHomeRoomsUI(msgs);
-  const visible = msgs.filter(m=> m.kind!=='deleted');
+  const visible = msgs.filter(m=> m.kind!=='deleted');   // already ascending by time (先来后到)
   if(visible.length===0){ list.innerHTML='<div class="subtle">还没有消息，发一条打个招呼吧～</div>'; return; }
   list.innerHTML='';
-  visible.slice(-50).forEach(m=>{
-    const mine = m.sender===myName();
-    const row=document.createElement('div'); row.className='msgrow'+(mine?' mine':'')+((!mine && !m.seen)?' unseen':'');
-    const d=new Date(m.created_at); const hm=d.getHours()+':'+('0'+d.getMinutes()).slice(-2);
-    const who = mine ? '我' : escapeHtml(m.sender||'家人');
-    if(m.kind==='text'){
-      row.innerHTML='<div class="mt"><b>'+who+'：</b>'+escapeHtml(m.content)+'</div><span class="mtime">'+hm+'</span>';
-      if(!mine && !m.seen) famMarkSeen(m.id);
-    }else{
-      row.innerHTML='<div class="mt"><b>'+who+'</b> '+(m.kind==='video'?'📹 视频':'🎧 语音')+'</div><button class="btn btn-blue msplay">▶️ 播放</button><span class="mtime">'+hm+'</span>';
-      row.querySelector('.msplay').onclick=()=> playMedia(m);
-    }
-    if(canDelete(m)){
-      const del=document.createElement('button'); del.className='btn btn-ghost'; del.style.cssText='padding:2px 8px;font-size:13px;margin-left:6px'; del.textContent='🗑️';
-      del.onclick=()=>{ if(confirm('删除这条消息？'+(adminUnlocked&&!mine?'（老师删除别人的消息）':''))){ famDelete(m).then(()=>{ toast('已删除'); renderChat(); }).catch(e=> toast('删除失败：'+((e&&e.message)||e))); } };
-      row.appendChild(del);
-    }
-    list.appendChild(row);
-  });
+  // Recent = last 7 days shown in full with day headers; older = collapsed per month (like WeChat).
+  const weekAgo = Date.now()-7*864e5;
+  const older = visible.filter(m=> new Date(m.created_at).getTime() < weekAgo);
+  const recent = visible.filter(m=> new Date(m.created_at).getTime() >= weekAgo);
+  if(older.length){
+    const byMonth={}; const order=[];
+    older.forEach(m=>{ const k=fmtMonth(new Date(m.created_at)); if(!byMonth[k]){ byMonth[k]=[]; order.push(k); } byMonth[k].push(m); });
+    order.forEach(mon=>{
+      const expanded=chatExpandedMonths.has(mon);
+      const hd=document.createElement('button'); hd.className='btn btn-ghost'; hd.style.cssText='width:100%;text-align:left;margin:4px 0;font-size:13px';
+      hd.textContent=(expanded?'▼ ':'▶ ')+'📅 '+mon+'（'+byMonth[mon].length+' 条）';
+      hd.onclick=()=>{ if(expanded) chatExpandedMonths.delete(mon); else chatExpandedMonths.add(mon); renderChat(); };
+      list.appendChild(hd);
+      if(expanded) appendWithDayHeaders(list, byMonth[mon]);
+    });
+    const tip=document.createElement('div'); tip.style.cssText='text-align:center;font-size:12px;color:var(--ink-soft);margin:6px 0'; tip.textContent='——— 最近 7 天 ———'; list.appendChild(tip);
+  }
+  appendWithDayHeaders(list, recent);
   list.scrollTop = list.scrollHeight;
 }
 function playMedia(m){
