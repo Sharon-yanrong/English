@@ -249,10 +249,11 @@
   <div class="topbar">
     <div class="avatar" id="avatar">🦁</div>
     <div class="hello">
-      <div class="hi">你好呀，小英雄！</div>
+      <div class="hi" id="helloHi">你好呀，小英雄！</div>
       <div class="name" id="kidName">小朋友</div>
     </div>
     <div class="starbox" id="starBox">⭐ <span id="starCount">0</span></div>
+    <button class="gear" id="switchBtn" title="换角色 / 改名字" onclick="openRoleMask()">🔄</button>
     <button class="gear" id="gearBtn" title="家长入口">⚙️</button>
   </div>
 
@@ -2327,8 +2328,11 @@ function go(id){
 
 /* ---------------- Home ---------------- */
 function renderHome(){
-  document.getElementById('kidName').textContent = S.name;
-  document.getElementById('avatar').textContent = S.avatar;
+  // Topbar reflects THIS device's chosen identity (name/avatar/role picked at entry).
+  const dispName = (S.famName||'').trim() || S.name || (S.role==='parent'?'老师':'小朋友');
+  document.getElementById('kidName').textContent = dispName;
+  document.getElementById('avatar').textContent = S.famAvatar || S.avatar || '🦁';
+  document.getElementById('helloHi').textContent = (S.role==='parent') ? '欢迎回来，老师！' : '你好呀，小英雄！';
   document.getElementById('starCount').textContent = S.stars;
   renderRewardBanner();
 
@@ -4107,7 +4111,7 @@ function renderRooms(){
 }
 function enterPublic(){
   if(!confirm('进入「公共大厅」？\n\n这里发的语音、视频、文字，所有进来的人都能看到哦，注意别发隐私内容。')) return;
-  joinRoom(PUBLIC_ROOM); closeMask('roomsMask'); toast('已进入公共大厅 🌍'); enterChat();
+  joinRoom(PUBLIC_ROOM); closeMask('roomsMask'); toast('已进入公共大厅 🌍'); go('home'); renderHome();
 }
 function enterPrivate(id, def){
   if(!S.roomsUnlocked) S.roomsUnlocked={};
@@ -4117,7 +4121,7 @@ function enterPrivate(id, def){
     if((p||'').trim()!==def.pass){ toast('密码不对哦～'); return; }
   }
   S.roomsUnlocked[id]=def.pass; save();   // remember so no re-typing next time (until password changes)
-  joinRoom(id); closeMask('roomsMask'); toast('已进入「'+def.name+'」'); enterChat();
+  joinRoom(id); closeMask('roomsMask'); toast('已进入「'+def.name+'」'); go('home'); renderHome();
 }
 function configRoom(id){
   const def=roomDefs[id]||{};
@@ -4217,7 +4221,8 @@ async function recordAndSend(kind, refText, opts){
       if(document.querySelector('.screen.active').id==='chatScreen') renderChat(); else updateHomeRoomsUI();
     }catch(e){ toast('录好啦！发送失败：'+((e&&e.message)||e)); }
   } else {
-    toast('✅ 录好啦！（自己学习模式，只有你自己能听）');
+    if(lastRecBlob){ try{ const u=URL.createObjectURL(lastRecBlob); const el = kind==='video'?document.createElement('video'):new Audio(); el.src=u; if(kind==='video'){ el.controls=true; } el.play().catch(()=>{}); }catch(e){} }
+    toast('录好啦，放给你听～（自己练习模式不保存；想保存就进一个房间再录）');
   }
 }
 function pickRecMime(video){
