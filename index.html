@@ -273,21 +273,8 @@
       <button id="playSecretVoice" class="btn btn-pink play" style="display:none">▶️ 听爸爸妈妈的语音</button>
     </div>
 
-    <button class="btn btn-blue" style="width:100%;margin-bottom:10px" onclick="openRooms()">🚪 进入房间 · 和大家收发消息</button>
-
-    <div id="mailboxCard" class="card mailbox" style="display:none">
-      <div class="mbhead">
-        <div class="mbtitle" id="mailboxTitle">📬 消息</div>
-        <div class="mbbadge" id="mailboxBadge"></div>
-      </div>
-      <div id="mailboxList"></div>
-      <div class="replybtns">
-        <button class="btn btn-pink" onclick="recordAndSend('voice')">🎤 语音</button>
-        <button class="btn btn-purple" onclick="recordAndSend('video')">📹 视频</button>
-        <button class="btn btn-ghost" onclick="sendTextReply()">💬 打字</button>
-        <button class="btn btn-ghost" onclick="renderMailbox()">🔄</button>
-      </div>
-    </div>
+    <button class="btn btn-blue" style="width:100%;margin-bottom:8px" onclick="openRooms()">🚪 进入房间 · 收发消息</button>
+    <button class="btn btn-green" id="homeChatBtn" style="width:100%;margin-bottom:10px;display:none" onclick="enterChat()"></button>
 
     <div class="tiles">
       <button class="tile full" style="background:linear-gradient(145deg,#f6a5ff,#a06bff)" onclick="go('storyList')">
@@ -351,6 +338,21 @@
     <div class="rowbtns">
       <button class="btn btn-ghost" id="talkPrev">⬅️ 上一句</button>
       <button class="btn btn-green" id="talkNext">下一句 ➡️</button>
+    </div>
+  </div>
+
+  <!-- ===== Room chat ===== -->
+  <div id="chatScreen" class="screen">
+    <div class="backrow"><button class="backbtn" onclick="go('home')">⬅️ 回家</button><h2 class="title" id="chatTitle" style="margin:0">💬 聊天</h2></div>
+    <div class="card">
+      <div id="chatList" style="max-height:58vh;overflow-y:auto"></div>
+      <div class="replybtns" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px">
+        <button class="btn btn-pink" onclick="recordAndSend('voice')">🎤 语音</button>
+        <button class="btn btn-purple" onclick="recordAndSend('video')">📹 视频</button>
+        <button class="btn btn-ghost" onclick="sendTextReply()">💬 打字</button>
+        <button class="btn btn-ghost" onclick="renderChat()">🔄 刷新</button>
+        <button class="btn btn-ghost" onclick="openRooms()">🚪 换房间</button>
+      </div>
     </div>
   </div>
 
@@ -2344,7 +2346,7 @@ function renderHome(){
     pv.style.display = hasVoice ? 'block' : 'none';
   }else secretNote.style.display='none';
 
-  if(typeof renderMailbox==='function') renderMailbox();
+  if(typeof updateHomeRoomsUI==='function') updateHomeRoomsUI();
 }
 document.getElementById('playSecretVoice').onclick = ()=>{
   if(S.voice){ const a=new Audio(S.voice); a.play(); }
@@ -4098,11 +4100,17 @@ function renderRooms(){
 }
 function enterPublic(){
   if(!confirm('进入「公共大厅」？\n\n这里发的语音、视频、文字，所有进来的人都能看到哦，注意别发隐私内容。')) return;
-  joinRoom(PUBLIC_ROOM); closeMask('roomsMask'); toast('已进入公共大厅 🌍'); renderMailbox();
+  joinRoom(PUBLIC_ROOM); closeMask('roomsMask'); toast('已进入公共大厅 🌍'); enterChat();
 }
 function enterPrivate(id, def){
-  if(def.pass && !adminUnlocked){ const p=prompt('请输入「'+def.name+'」的密码：'); if(p===null) return; if((p||'').trim()!==def.pass){ toast('密码不对哦～'); return; } }
-  joinRoom(id); closeMask('roomsMask'); toast('已进入「'+def.name+'」'); renderMailbox();
+  if(!S.roomsUnlocked) S.roomsUnlocked={};
+  const remembered = S.roomsUnlocked[id]===def.pass;   // already entered this exact password before
+  if(def.pass && !adminUnlocked && !remembered){
+    const p=prompt('请输入「'+def.name+'」的密码：'); if(p===null) return;
+    if((p||'').trim()!==def.pass){ toast('密码不对哦～'); return; }
+  }
+  S.roomsUnlocked[id]=def.pass; save();   // remember so no re-typing next time (until password changes)
+  joinRoom(id); closeMask('roomsMask'); toast('已进入「'+def.name+'」'); enterChat();
 }
 function configRoom(id){
   const def=roomDefs[id]||{};
@@ -4196,7 +4204,7 @@ async function recordAndSend(kind, refText, opts){
   if(opts.onCaptured) opts.onCaptured();
   if(famConfigured()){
     toast('上传中…');
-    try{ const url = await famUpload(blob, ext); await famSend(kind, url); toast('✅ 已发送给家长！'); renderMailbox(); }
+    try{ const url = await famUpload(blob, ext); await famSend(kind, url); toast('✅ 已发送！'); renderChat(); }
     catch(e){ toast('录好啦！发送失败：'+((e&&e.message)||e)); }
   } else {
     toast('✅ 录好啦！（连接家庭消息后可发给家长）');
@@ -4218,29 +4226,41 @@ document.getElementById('videoClose').onclick=()=>{ const v=document.getElementB
 async function sendTextReply(){
   if(!famConfigured()){ toast('还没连接家庭消息'); return; }
   const t = prompt('打一句话发过去：'); if(!t || !t.trim()) return;
-  try{ await famSend('text', t.trim()); toast('✅ 已发送'); renderMailbox(); }catch(e){ toast('发送失败'); }
+  try{ await famSend('text', t.trim()); toast('✅ 已发送'); renderChat(); }catch(e){ toast('发送失败'); }
 }
 
-/* ---------- Mailbox (home) ---------- */
+/* ---------- Room chat ---------- */
 function kindIcon(k){ return k==='voice'?'🎧' : k==='video'?'📹' : '💬'; }
-async function renderMailbox(){
-  const card=document.getElementById('mailboxCard');
-  if(!famConfigured()){ card.style.display='none'; return; }
-  card.style.display='block';
-  const titleEl=document.getElementById('mailboxTitle');
-  if(titleEl){ const rid=fam&&fam.room; const nm = rid===PUBLIC_ROOM ? '🌍 公共大厅' : (roomDefs[rid]&&roomDefs[rid].name ? ('🔒 '+roomDefs[rid].name) : '📬 消息'); titleEl.textContent=nm; }
-  const list=document.getElementById('mailboxList');
-  const badge=document.getElementById('mailboxBadge');
+// Soft-delete a message (UPDATE is allowed by RLS; no DELETE policy needed). Hidden everywhere.
+async function famDelete(m){
+  await famApi('/rest/v1/messages?id=eq.'+encodeURIComponent(m.id), { method:'PATCH',
+    headers: famHeaders({'Content-Type':'application/json','Prefer':'return=minimal'}),
+    body: JSON.stringify({ kind:'deleted', content:'' }) });
+}
+function canDelete(m){ return adminUnlocked || m.sender===myName(); }   // own, or teacher deletes any
+function roomTitle(){ const rid=fam&&fam.room; return rid===PUBLIC_ROOM ? '🌍 公共大厅' : (roomDefs[rid]&&roomDefs[rid].name ? ('🔒 '+roomDefs[rid].name) : '💬 聊天'); }
+function enterChat(){ if(!famConfigured()){ toast('先进一个房间吧～'); return; } go('chatScreen'); renderChat(); }
+function updateHomeRoomsUI(msgs){
+  const btn=document.getElementById('homeChatBtn'); if(!btn) return;
+  if(!famConfigured()){ btn.style.display='none'; return; }
+  const rid=fam&&fam.room; const nm = rid===PUBLIC_ROOM ? '公共大厅' : (roomDefs[rid]&&roomDefs[rid].name ? roomDefs[rid].name : '房间');
+  const unseen = msgs ? msgs.filter(m=> m.kind!=='deleted' && m.sender!==myName() && !m.seen).length : 0;
+  btn.style.display='block';
+  btn.textContent='💬 回到「'+nm+'」'+(unseen>0?('（📬 '+unseen+' 条新）'):'');
+}
+async function renderChat(){
+  if(!famConfigured()){ go('home'); return; }
+  const title=document.getElementById('chatTitle'); if(title) title.textContent=roomTitle();
+  const list=document.getElementById('chatList');
   if(!list.innerHTML) list.innerHTML='<div class="subtle">加载中…</div>';
   let msgs;
   try{ msgs = await famFetch(); }
-  catch(e){ badge.textContent=''; list.innerHTML='<div class="subtle">暂时连不上，检查网络或重新连接～</div>'; return; }
-  const others = msgs.filter(m=> m.sender!==myName());
-  const unseen = others.filter(m=> !m.seen).length;
-  badge.textContent = unseen>0 ? ('📬 '+unseen+' 条新消息') : '💬 家庭聊天';
-  if(msgs.length===0){ list.innerHTML='<div class="subtle">还没有消息，发一条打个招呼吧～</div>'; return; }
+  catch(e){ list.innerHTML='<div class="subtle">暂时连不上，检查网络～</div>'; return; }
+  updateHomeRoomsUI(msgs);
+  const visible = msgs.filter(m=> m.kind!=='deleted');
+  if(visible.length===0){ list.innerHTML='<div class="subtle">还没有消息，发一条打个招呼吧～</div>'; return; }
   list.innerHTML='';
-  msgs.slice(-30).forEach(m=>{
+  visible.slice(-50).forEach(m=>{
     const mine = m.sender===myName();
     const row=document.createElement('div'); row.className='msgrow'+(mine?' mine':'')+((!mine && !m.seen)?' unseen':'');
     const d=new Date(m.created_at); const hm=d.getHours()+':'+('0'+d.getMinutes()).slice(-2);
@@ -4252,6 +4272,11 @@ async function renderMailbox(){
       row.innerHTML='<div class="mt"><b>'+who+'</b> '+(m.kind==='video'?'📹 视频':'🎧 语音')+'</div><button class="btn btn-blue msplay">▶️ 播放</button><span class="mtime">'+hm+'</span>';
       row.querySelector('.msplay').onclick=()=> playMedia(m);
     }
+    if(canDelete(m)){
+      const del=document.createElement('button'); del.className='btn btn-ghost'; del.style.cssText='padding:2px 8px;font-size:13px;margin-left:6px'; del.textContent='🗑️';
+      del.onclick=()=>{ if(confirm('删除这条消息？'+(adminUnlocked&&!mine?'（老师删除别人的消息）':''))){ famDelete(m).then(()=>{ toast('已删除'); renderChat(); }).catch(e=> toast('删除失败：'+((e&&e.message)||e))); } };
+      row.appendChild(del);
+    }
     list.appendChild(row);
   });
   list.scrollTop = list.scrollHeight;
@@ -4260,7 +4285,7 @@ function playMedia(m){
   famMarkSeen(m.id);
   if(m.kind==='voice'){ new Audio(m.content).play().catch(()=>toast('播放失败')); }
   else if(m.kind==='video'){ const v=document.getElementById('videoPlay'); v.src=m.content; openMask('videoMask'); v.play().catch(()=>{}); }
-  setTimeout(renderMailbox, 400);
+  setTimeout(renderChat, 400);
 }
 
 /* ---------- Parent backend: connection setup ---------- */
@@ -4320,16 +4345,18 @@ async function initFamily(){
   if(!famConfigured()) return;
   try{ await famFetch(); }catch(e){}
   famSeenIds = new Set(famMsgs.map(m=>m.id));
-  renderMailbox();
+  updateHomeRoomsUI(famMsgs);
   // Poll every 5s for new messages (simple & reliable, no websockets needed).
   famPollTimer = setInterval(async ()=>{
     if(!famConfigured()) return;
     try{
       const msgs = await famFetch();
       let gotNew=false;
-      msgs.forEach(m=>{ if(!famSeenIds.has(m.id)){ famSeenIds.add(m.id); if(m.sender!==myName()) gotNew=true; } });
-      if(gotNew){ toast('📬 收到一条新消息！'); if(document.querySelector('.screen.active').id==='home') renderMailbox(); }
-      else if(document.querySelector('.screen.active').id==='home'){ renderMailbox(); }
+      msgs.forEach(m=>{ if(!famSeenIds.has(m.id)){ famSeenIds.add(m.id); if(m.sender!==myName() && m.kind!=='deleted') gotNew=true; } });
+      updateHomeRoomsUI(msgs);
+      const active=document.querySelector('.screen.active').id;
+      if(gotNew && active!=='chatScreen') toast('📬 收到一条新消息！');
+      if(active==='chatScreen') renderChat();
     }catch(e){}
   }, 5000);
 }
