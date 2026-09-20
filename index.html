@@ -701,6 +701,18 @@
       <input class="in" id="roleName" placeholder="例如 老师 / 姐姐 / 外甥" style="text-align:center;font-size:18px;font-weight:800">
       <label class="fld" style="font-size:14px;margin-top:8px">🎨 我的头像</label>
       <div id="roleAvatarPick" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center"></div>
+      <label class="fld" style="font-size:14px;margin-top:10px">🔊 我喜欢的朗读声音（可试听）</label>
+      <div style="display:flex;gap:6px">
+        <select class="in" id="roleVoice" style="flex:1">
+          <option value="en-US-AriaNeural">自然姐姐 Aria</option>
+          <option value="en-US-JennyNeural">温柔姐姐 Jenny</option>
+          <option value="en-US-MichelleNeural">亲切姐姐 Michelle</option>
+          <option value="en-US-GuyNeural">大哥哥 Guy</option>
+          <option value="en-US-AnaNeural">小女孩 Ana（童声）</option>
+          <option value="en-GB-MaisieNeural">英式小女孩 Maisie（童声）</option>
+        </select>
+        <button class="btn btn-blue" id="roleVoiceTry" type="button" style="padding:8px 12px;white-space:nowrap">🔊 试听</button>
+      </div>
     </div>
     <p class="subtle" style="margin:14px 0 6px;font-weight:800;color:var(--ink)">谁在用这台设备？👇</p>
     <div style="display:flex;flex-direction:column;gap:12px">
@@ -777,7 +789,7 @@
     <label class="fld">🎯 发音评测（Azure · 让"我来读"给真分数，选填）</label>
     <input class="in" id="pAzureKey" placeholder="Azure 语音 KEY（一长串）" style="margin-bottom:6px">
     <input class="in" id="pAzureRegion" placeholder="区域，如 germanywestcentral">
-    <div class="subtle" id="azureHint" style="margin-top:6px">填了之后，跟读会用微软发音评测给真实分数；不填就用普通鼓励模式。</div>
+    <div class="subtle" id="azureHint" style="margin-top:6px">已内置默认密钥，所有设备自动就能发音打分。这里可单独换成你自己的密钥（留空=用内置默认）。</div>
     <label class="fld">🔈 朗读声音</label>
     <select class="in" id="pAzureVoice">
       <option value="en-US-AriaNeural">自然姐姐 Aria（推荐 · 最像真人）</option>
@@ -843,7 +855,7 @@
 <div class="mask" id="recMask">
   <div class="modal" style="text-align:center">
     <h3 id="recTitle">🎤 录音</h3>
-    <div id="recRef" style="display:none;background:#f4f8ff;border-radius:14px;padding:10px;margin-bottom:8px;font-size:17px;font-weight:800"></div>
+    <div id="recRef" style="display:none;background:#f4f8ff;border-radius:14px;padding:10px;margin-bottom:8px;font-size:17px;font-weight:800;white-space:pre-line;text-align:left;max-height:38vh;overflow-y:auto"></div>
     <video id="recPreview" playsinline muted style="display:none;width:100%;border-radius:16px;background:#000;max-height:45vh"></video>
     <div id="recTimer" style="font-size:40px;font-weight:900;margin:10px 0;color:var(--pink-d)">0s</div>
     <div class="subtle">照着上面的句子读，读完点「停止」（最长 15 秒）</div>
@@ -2072,7 +2084,23 @@ function stopSpeaking(){
   try{ if(curAudio){ curAudio.pause(); curAudio.currentTime=0; } }catch(e){}
   curAudio=null;
 }
-function azureVoiceName(){ return (S.azure && S.azure.voice) || 'en-US-AriaNeural'; }
+// Built-in default Azure config so ALL devices get pronunciation-scoring + the nice voice
+// out of the box. A device can still override it in ⚙️ (per-device). To change it for
+// everyone: replace `key` below (one line) and re-upload — or set it in ⚙️ on a device.
+const AZURE_DEFAULT = { key:'', region:'germanywestcentral', voice:'en-US-AriaNeural' };
+// Secure proxy (Supabase Edge Function) that holds the Azure key server-side, so it's never
+// exposed in this public code. When set, TTS + pronunciation-assessment go through it and
+// every device works automatically. Filled in after the function is deployed.
+const AZURE_PROXY = 'https://khlosikjgpuvogpuypiw.supabase.co/functions/v1/azure-proxy';
+function azureCfg(){
+  const s=S.azure||{};
+  return {
+    key:    (s.key    && s.key.trim())    ? s.key.trim()               : AZURE_DEFAULT.key,
+    region: (s.region && s.region.trim()) ? s.region.trim().toLowerCase() : AZURE_DEFAULT.region,
+    voice:  S.voicePref || s.voice || AZURE_DEFAULT.voice   // personal per-device pick wins
+  };
+}
+function azureVoiceName(){ return azureCfg().voice; }
 function playAudioUrl(url, gen){
   if(gen!==undefined && gen!==speakGen) return; // superseded by a newer tap → don't play
   try{ if(curAudio) curAudio.pause(); curAudio=new Audio(url); curAudio.play().catch(()=>{}); }catch(e){}
@@ -2084,8 +2112,15 @@ async function azureTTS(innerSSML, voice){
   const ck=voice+'|'+innerSSML;
   if(ttsCache[ck]){ playAudioUrl(ttsCache[ck], gen); return; }
   const ssml="<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='en-US'><voice name='"+voice+"'>"+innerSSML+"</voice></speak>";
-  const r=await fetch('https://'+S.azure.region+'.tts.speech.microsoft.com/cognitiveservices/v1',{ method:'POST',
-    headers:{ 'Ocp-Apim-Subscription-Key':S.azure.key, 'Content-Type':'application/ssml+xml', 'X-Microsoft-OutputFormat':'audio-24khz-48kbitrate-mono-mp3' }, body:ssml });
+  let r;
+  if(AZURE_PROXY){
+    r=await fetch(AZURE_PROXY+'?mode=tts',{ method:'POST',
+      headers:{ 'Content-Type':'application/ssml+xml', 'apikey':FAMILY_DEFAULT.key, 'Authorization':'Bearer '+FAMILY_DEFAULT.key }, body:ssml });
+  } else {
+    const az=azureCfg();
+    r=await fetch('https://'+az.region+'.tts.speech.microsoft.com/cognitiveservices/v1',{ method:'POST',
+      headers:{ 'Ocp-Apim-Subscription-Key':az.key, 'Content-Type':'application/ssml+xml', 'X-Microsoft-OutputFormat':'audio-24khz-48kbitrate-mono-mp3' }, body:ssml });
+  }
   if(!r.ok) throw new Error('tts '+r.status);
   const url=URL.createObjectURL(await r.blob()); ttsCache[ck]=url; playAudioUrl(url, gen);
 }
@@ -2132,7 +2167,7 @@ function speakAs(text, vcfg){ vcfg=vcfg||{}; speak(text, {voice:vcfg.az, pitch:v
 /* ---------------- Speech: recognition (我来读) ---------------- */
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 /* ---------- Azure pronunciation assessment (real scoring) ---------- */
-function azureOn(){ return !!(S.azure && S.azure.key && S.azure.region); }
+function azureOn(){ if(AZURE_PROXY) return true; const c=azureCfg(); return !!(c.key && c.region); }
 let azureRecStop=false;
 function stopAzureRec(){ azureRecStop=true; }
 let lastRecBlob=null;   // the child's own last recording, for playback
@@ -2177,10 +2212,17 @@ async function assessPronunciation(refText, secs){
   const wav = await recordWav(secs);
   const cfg = { ReferenceText:refText, GradingSystem:'HundredMark', Granularity:'Word', Dimension:'Comprehensive', EnableMiscue:false };
   const pa = btoa(unescape(encodeURIComponent(JSON.stringify(cfg))));
-  const url = 'https://'+S.azure.region+'.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1?language=en-US';
-  const r = await fetch(url, { method:'POST',
-    headers:{ 'Ocp-Apim-Subscription-Key':S.azure.key, 'Content-Type':'audio/wav; codecs=audio/pcm; samplerate=16000', 'Pronunciation-Assessment':pa, 'Accept':'application/json' },
-    body: wav });
+  let r;
+  if(AZURE_PROXY){
+    r = await fetch(AZURE_PROXY+'?mode=assess', { method:'POST',
+      headers:{ 'Content-Type':'audio/wav; codecs=audio/pcm; samplerate=16000', 'x-pa':pa, 'apikey':FAMILY_DEFAULT.key, 'Authorization':'Bearer '+FAMILY_DEFAULT.key }, body: wav });
+  } else {
+    const az = azureCfg();
+    const url = 'https://'+az.region+'.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1?language=en-US';
+    r = await fetch(url, { method:'POST',
+      headers:{ 'Ocp-Apim-Subscription-Key':az.key, 'Content-Type':'audio/wav; codecs=audio/pcm; samplerate=16000', 'Pronunciation-Assessment':pa, 'Accept':'application/json' },
+      body: wav });
+  }
   const j = await r.json();
   if(j.RecognitionStatus!=='Success' || !j.NBest || !j.NBest[0]) return null;
   const nb=j.NBest[0];
@@ -2224,54 +2266,34 @@ async function azureAssess(target, feedbackEl, tipEl, onStars){
 
 function listenAndCheck(target, feedbackEl, tipEl, onStars){
   if(azureOn()){ azureAssess(target, feedbackEl, tipEl, onStars); return; }
-  // Encouraging feedback. Real scoring needs https/localhost; on file:// or when
-  // recognition can't start, degrade to a TIMED read-along (give the child time to
-  // actually read, THEN praise) — never fake-praise before they've spoken.
+  // No Azure scoring → still show a recording-style countdown + a ⏹️ stop button so the
+  // child sees it's their turn and can stop when done. Uses browser recognition if available.
   const cheer = ['太棒啦！','说得真好！','你真厉害！','完美！','好听极了！','再来一次也没问题！'];
   const encourage = ['很勇敢，声音真好听！','开口就是英雄！','越来越像啦！','真棒，再读一遍试试！'];
   const rand = a => a[Math.floor(Math.random()*a.length)];
+  let finished=false, secs=8, iv=null, rec=null; const t0=Date.now();
 
-  // Timed read-along: waits ~3s so praise is earned, not instant.
-  function readAlong(){
-    tipEl.textContent = '🎤 该你读啦，看着单词，大声读出来！';
-    let dots = 0;
-    const iv = setInterval(()=>{ dots=(dots+1)%4; feedbackEl.textContent = '🎧 认真听你读' + '.'.repeat(dots); }, 380);
-    setTimeout(()=>{ clearInterval(iv); tipEl.textContent=''; feedbackEl.textContent = '⭐ ' + rand(cheer); onStars(1, null); }, 3000);
-  }
+  feedbackEl.innerHTML='<button type="button" class="btn btn-orange" id="laStop" style="padding:10px 16px;font-size:16px;width:100%">⏹️ 我读好了</button>';
+  const stopBtn=feedbackEl.querySelector('#laStop');
+  const upd=()=>{ tipEl.textContent='🎤 看着句子大声读，读完点上面（还有 '+Math.max(0,secs)+' 秒）'; };
+  const timedPraise=()=>{ if(finished) return; finished=true; if(iv)clearInterval(iv); tipEl.textContent=''; feedbackEl.textContent='⭐ '+rand(cheer); onStars(1,null); };
+  const finishSR=(txt,stars)=>{ if(finished) return; finished=true; if(iv)clearInterval(iv); tipEl.textContent=''; feedbackEl.textContent=txt; onStars(stars,null); };
+  const doStop=(e)=>{ if(e&&e.cancelable) e.preventDefault(); if(stopBtn){ stopBtn.textContent='🎧 评分中…'; stopBtn.disabled=true; } if(rec){ try{ rec.stop(); }catch(err){ timedPraise(); } } else timedPraise(); };
+  if(stopBtn){ stopBtn.onclick=doStop; stopBtn.addEventListener('touchend', doStop, {passive:false}); }
+  upd();
+  iv=setInterval(()=>{ secs--; upd(); if(secs<=0){ if(rec){ try{ rec.stop(); }catch(e){} } else timedPraise(); } }, 1000);
 
-  // Real recognition only works in a served secure context (http/https), NOT file://
   const canRecognize = !!SR && location.protocol !== 'file:';
-  if(!canRecognize){ readAlong(); return; }
-
-  const rec = new SR();
-  rec.lang = 'en-US';
-  rec.interimResults = false;
-  rec.maxAlternatives = 5;
-  tipEl.textContent = '🎤 在听你说……大声读出来！';
-  feedbackEl.textContent = '👂';
-  let handled = false;
-  const t0 = Date.now();
-  const finish = (txt, stars)=>{ if(handled) return; handled=true; tipEl.textContent=''; feedbackEl.textContent=txt; onStars(stars, null); };
-
-  rec.onresult = (e)=>{
-    let heard = '';
-    for(let i=0;i<e.results[0].length;i++){ heard += ' ' + e.results[0][i].transcript; }
-    heard = heard.toLowerCase();
-    const t = target.toLowerCase().replace(/[^a-z' ]/g,'');
-    const words = t.split(/\s+/).filter(Boolean);
-    const hit = words.some(w=> heard.includes(w)) || heard.includes(t);
-    finish(hit ? ('⭐ ' + rand(cheer)) : ('💛 ' + rand(encourage)), hit ? 2 : 1);
-  };
-  const failSoft = ()=>{
-    if(handled) return;
-    // Failed almost instantly => recognition not really usable here => timed read-along,
-    // not an instant praise. A later failure means "didn't catch it" => gentle encourage.
-    if(Date.now() - t0 < 1200){ handled = true; readAlong(); }
-    else finish('💛 ' + rand(encourage), 1);
-  };
-  rec.onerror = failSoft;
-  rec.onend = ()=>{ if(!handled) failSoft(); };
-  try{ rec.start(); }catch(e){ handled = true; readAlong(); }
+  if(!canRecognize) return;   // countdown + stop → timedPraise
+  try{
+    rec = new SR(); rec.lang='en-US'; rec.interimResults=false; rec.maxAlternatives=5;
+    rec.onresult=(e)=>{ let heard=''; for(let i=0;i<e.results[0].length;i++){ heard+=' '+e.results[0][i].transcript; }
+      heard=heard.toLowerCase(); const t=target.toLowerCase().replace(/[^a-z' ]/g,''); const words=t.split(/\s+/).filter(Boolean);
+      const hit=words.some(w=>heard.includes(w))||heard.includes(t); finishSR(hit?('⭐ '+rand(cheer)):('💛 '+rand(encourage)), hit?2:1); };
+    const failSoft=()=>{ if(finished) return; if(Date.now()-t0<1200){ rec=null; } else finishSR('💛 '+rand(encourage),1); };
+    rec.onerror=failSoft; rec.onend=()=>{ if(!finished) failSoft(); };
+    rec.start();
+  }catch(e){ rec=null; }
 }
 
 /* ---------------- Stars / badges ---------------- */
@@ -2730,8 +2752,9 @@ function renderRoleAvatars(){
   });
   const big=document.getElementById('roleBigAva'); if(big) big.textContent=S.famAvatar;
 }
-function readEntry(){ const n=document.getElementById('roleName'); if(n) S.famName=(n.value||'').trim(); }
-function openRoleMask(){ const n=document.getElementById('roleName'); if(n) n.value=S.famName||S.name||''; renderRoleAvatars(); openMask('roleMask'); }
+function readEntry(){ const n=document.getElementById('roleName'); if(n) S.famName=(n.value||'').trim(); const v=document.getElementById('roleVoice'); if(v) S.voicePref=v.value; }
+function openRoleMask(){ const n=document.getElementById('roleName'); if(n) n.value=S.famName||S.name||''; const v=document.getElementById('roleVoice'); if(v) v.value=S.voicePref||azureVoiceName(); renderRoleAvatars(); openMask('roleMask'); }
+document.getElementById('roleVoiceTry').onclick=()=>{ const v=document.getElementById('roleVoice').value; speak('Hello! Nice to meet you!', {voice:v}); };
 function maybePickRoom(){ if(FAMILY_DEFAULT.key && !famConfigured() && !S.soloMode){ setTimeout(openRooms, 300); } }
 document.getElementById('roleKid').onclick=()=>{ readEntry(); S.role='kid'; save(); closeMask('roleMask'); applyRole(); renderHome(); maybePickRoom(); };
 document.getElementById('roleParent').onclick=()=>{ readEntry(); S.role='parent'; save(); closeMask('roleMask'); applyRole(); renderHome(); toast('点右上角 ⚙️ 进入后台，密码 1234'); maybePickRoom(); };
@@ -3113,8 +3136,9 @@ document.getElementById('convPlayAll').onclick=function(){
   const step=()=>{ if(!convCtx || k>=lines.length) return; speak(lines[k].en); const d=1200+lines[k].en.split(/\s+/).length*450; k++; setTimeout(step,d); };
   step();
 };
-document.getElementById('convSendVoice').onclick=()=> recordAndSend('voice');
-document.getElementById('convSendVideo').onclick=()=> recordAndSend('video');
+function convRefText(){ return convCtx && convCtx.c ? convCtx.c.lines.map(l=>l.en).join('\n') : ''; }
+document.getElementById('convSendVoice').onclick=()=> recordAndSend('voice', convRefText());
+document.getElementById('convSendVideo').onclick=()=> recordAndSend('video', convRefText());
 
 /* ---------------- Course (unit-based, board unlock + certificate) ---------------- */
 let courseCtx=null;
@@ -4284,8 +4308,11 @@ function makeMsgRow(m){
   if(m.kind==='text'){
     row.innerHTML='<div class="mt"><b>'+who+'：</b>'+escapeHtml(m.content)+'</div><span class="mtime">'+hm+'</span>';
     if(!mine && !m.seen) famMarkSeen(m.id);
+  }else if(m.kind==='voice'){
+    row.innerHTML='<div class="mt"><b>'+who+'</b> 🎧 语音</div><button class="btn btn-blue msplay">▶️ 播放</button><span class="mtime">'+hm+'</span>';
+    makeVoicePlayer(row.querySelector('.msplay'), row.querySelector('.mtime'), m, hm);
   }else{
-    row.innerHTML='<div class="mt"><b>'+who+'</b> '+(m.kind==='video'?'📹 视频':'🎧 语音')+'</div><button class="btn btn-blue msplay">▶️ 播放</button><span class="mtime">'+hm+'</span>';
+    row.innerHTML='<div class="mt"><b>'+who+'</b> 📹 视频</div><button class="btn btn-blue msplay">▶️ 播放</button><span class="mtime">'+hm+'</span>';
     row.querySelector('.msplay').onclick=()=> playMedia(m);
   }
   if(canDelete(m)){
@@ -4294,6 +4321,28 @@ function makeMsgRow(m){
     row.appendChild(del);
   }
   return row;
+}
+// Voice message player: ▶️播放 ⇄ ⏸️暂停 toggle, shows remaining seconds while playing,
+// only one voice plays at a time, resets to the send-time when finished.
+let voicePlaying=null, voiceReset=null;
+function makeVoicePlayer(btn, timeEl, m, hm){
+  let audio=null, timer=null;
+  function stopTimer(){ if(timer){ clearInterval(timer); timer=null; } }
+  function toIdle(){ stopTimer(); btn.textContent='▶️ 播放'; timeEl.textContent=hm; }
+  function tick(){ if(audio && isFinite(audio.duration)){ timeEl.textContent = Math.max(0, Math.ceil(audio.duration-audio.currentTime))+'s'; } }
+  btn.onclick=()=>{
+    if(audio && !audio.paused){ audio.pause(); return; }   // toggle → pause
+    if(!audio){
+      audio=new Audio(m.content); famMarkSeen(m.id);
+      audio.onplay=()=>{ btn.textContent='⏸️ 暂停'; stopTimer(); timer=setInterval(tick,250); tick(); };
+      audio.onpause=()=>{ stopTimer(); btn.textContent='▶️ 播放'; };
+      audio.onended=()=>{ toIdle(); if(voicePlaying===audio){ voicePlaying=null; voiceReset=null; } };
+      audio.onerror=()=>{ toIdle(); toast('播放失败'); };
+    }
+    if(voicePlaying && voicePlaying!==audio){ voicePlaying.pause(); if(voiceReset) voiceReset(); }   // stop other voice
+    voicePlaying=audio; voiceReset=toIdle;
+    audio.play().catch(()=>{ toIdle(); toast('播放失败'); });
+  };
 }
 function appendWithDayHeaders(list, msgs){
   let lastDay='';
