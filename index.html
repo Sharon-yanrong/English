@@ -2101,16 +2101,34 @@ function azureCfg(){
   };
 }
 function azureVoiceName(){ return azureCfg().voice; }
-function playAudioUrl(url, gen){
+// Mobile browsers block audio that starts AFTER a network fetch (the tap "expired"). Fix: reuse
+// ONE <audio> element and unlock it on the first user gesture, so later async plays are allowed.
+let _ttsEl=null, _ttsUnlocked=false;
+function _ttsAudio(){ if(!_ttsEl){ _ttsEl=new Audio(); try{ _ttsEl.setAttribute('playsinline',''); }catch(e){} } return _ttsEl; }
+function unlockAudio(){
+  if(_ttsUnlocked) return;
+  const a=_ttsAudio();
+  try{ a.src='data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
+    const p=a.play(); if(p&&p.then){ p.then(()=>{_ttsUnlocked=true;}).catch(()=>{}); } else { _ttsUnlocked=true; }
+  }catch(e){}
+}
+document.addEventListener('pointerdown', unlockAudio, {passive:true});
+document.addEventListener('touchend', unlockAudio, {passive:true});
+document.addEventListener('click', unlockAudio, true);
+function playAudioUrl(url, gen, onFail){
   if(gen!==undefined && gen!==speakGen) return; // superseded by a newer tap → don't play
-  try{ if(curAudio) curAudio.pause(); curAudio=new Audio(url); curAudio.play().catch(()=>{}); }catch(e){}
+  try{
+    const a=_ttsAudio(); a.pause(); curAudio=a; a.src=url;
+    const p=a.play();
+    if(p && p.catch) p.catch(()=>{ if(onFail && (gen===undefined||gen===speakGen)) onFail(); });
+  }catch(e){ if(onFail) onFail(); }
 }
 // Send arbitrary inner-SSML to Azure with a chosen voice; cache by voice+ssml.
-async function azureTTS(innerSSML, voice){
+async function azureTTS(innerSSML, voice, fallback){
   const gen=speakGen;
   voice = voice || azureVoiceName();
   const ck=voice+'|'+innerSSML;
-  if(ttsCache[ck]){ playAudioUrl(ttsCache[ck], gen); return; }
+  if(ttsCache[ck]){ playAudioUrl(ttsCache[ck], gen, fallback); return; }
   const ssml="<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='en-US'><voice name='"+voice+"'>"+innerSSML+"</voice></speak>";
   let r;
   if(AZURE_PROXY){
@@ -2122,7 +2140,7 @@ async function azureTTS(innerSSML, voice){
       headers:{ 'Ocp-Apim-Subscription-Key':az.key, 'Content-Type':'application/ssml+xml', 'X-Microsoft-OutputFormat':'audio-24khz-48kbitrate-mono-mp3' }, body:ssml });
   }
   if(!r.ok) throw new Error('tts '+r.status);
-  const url=URL.createObjectURL(await r.blob()); ttsCache[ck]=url; playAudioUrl(url, gen);
+  const url=URL.createObjectURL(await r.blob()); ttsCache[ck]=url; playAudioUrl(url, gen, fallback);
 }
 // Azure Neural sometimes mispronounces a few isolated words (e.g. says "Kate" for "cat").
 // Pin those with an IPA override. Add more here if the child spots another wrong one.
@@ -2133,7 +2151,8 @@ async function azureSpeak(text, opts){
   const key = text.trim().toLowerCase();
   const body = PRON_IPA[key] ? "<phoneme alphabet='ipa' ph='"+PRON_IPA[key]+"'>"+escapeHtml(text)+"</phoneme>" : escapeHtml(text);
   const inner="<prosody rate='"+rate+"'>"+body+"</prosody>";
-  return azureTTS(inner, opts.voice);
+  const single = !/\s/.test(text.trim());
+  return azureTTS(inner, opts.voice, ()=> browserSpeak(text, {pitch:opts.pitch, rate: single?0.95:0.8}));
 }
 function speak(text, opts){
   opts=opts||{};
@@ -2156,7 +2175,7 @@ function speakPhoneme(ipa, times, fallbackText){
   stopSpeaking(); const gen=speakGen;
   if(typeof azureOn==='function' && azureOn() && azureVoiceName()!=='browser' && ph){
     let inner=''; for(let i=0;i<times;i++){ inner+="<phoneme alphabet='ipa' ph='"+ph+"'>uh</phoneme>"; if(i<times-1) inner+="<break time='400ms'/>"; }
-    azureTTS(inner).catch(()=>{ if(fallbackText && gen===speakGen) browserSpeak(fallbackText); });
+    azureTTS(inner, undefined, ()=>{ if(fallbackText && gen===speakGen) browserSpeak(fallbackText); }).catch(()=>{ if(fallbackText && gen===speakGen) browserSpeak(fallbackText); });
   } else if(fallbackText){
     let k=0; const step=()=>{ if(gen!==speakGen || k>=times) return; browserSpeak(fallbackText,{rate:0.7}); k++; setTimeout(step,900); }; step();
   }
