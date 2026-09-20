@@ -2160,12 +2160,18 @@ function speak(text, opts){
   stopSpeaking(); // tapping a new word/sentence stops whatever was playing
   // A single short word reads clearer at normal speed; slow only for longer phrases.
   const single = !/\s/.test(text.trim());
+  const brate = single?0.95:0.8;
   if(typeof azureOn==='function' && azureOn() && azureVoiceName()!=='browser'){
     const az = Object.assign({}, opts); if(az.rate==null) az.rate = single ? '0%' : '-6%';
-    azureSpeak(text, az).catch(()=> browserSpeak(text, {pitch:opts.pitch, rate: single?0.95:0.8}));
+    const myGen = speakGen;
+    let settled=false;
+    const bfall = ()=>{ if(settled) return; settled=true; browserSpeak(text, {pitch:opts.pitch, rate:brate}); };
+    azureSpeak(text, az).then(()=>{ settled=true; }).catch(bfall);
+    // If Azure is slow / blocked / unreachable, don't leave the child waiting — use the local voice.
+    setTimeout(()=>{ if(!settled && myGen===speakGen){ stopSpeaking(); bfall(); } }, 2000);
     return;
   }
-  browserSpeak(text, {pitch:opts.pitch, rate: (typeof opts.rate==='number'?opts.rate : (single?0.95:0.8))});
+  browserSpeak(text, {pitch:opts.pitch, rate: (typeof opts.rate==='number'?opts.rate : brate)});
 }
 // Play ONE isolated phoneme (a vowel/consonant sound), N times, using Azure IPA — the reliable
 // way to get a correct short sound. Browser TTS can't do phonemes, so it falls back to a hint word.
@@ -4490,4 +4496,8 @@ initFamily();
 if(!S.role){ openRoleMask(); } else { applyRole(); }
 // warm up voices
 if('speechSynthesis' in window){ speechSynthesis.getVoices(); }
+// Pre-warm the Azure proxy (Edge Functions cold-start ~1-2s when idle) so the first read is snappier.
+if(AZURE_PROXY){ setTimeout(()=>{ try{ fetch(AZURE_PROXY+'?mode=tts',{ method:'POST',
+  headers:{ 'Content-Type':'application/ssml+xml', 'apikey':FAMILY_DEFAULT.key, 'Authorization':'Bearer '+FAMILY_DEFAULT.key },
+  body:"<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='en-US'><voice name='en-US-AriaNeural'>hi</voice></speak>" }).catch(()=>{}); }catch(e){} }, 800); }
 </script>
