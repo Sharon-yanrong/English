@@ -2142,6 +2142,45 @@ async function azureTTS(innerSSML, voice, fallback){
   if(!r.ok) throw new Error('tts '+r.status);
   const url=URL.createObjectURL(await r.blob()); ttsCache[ck]=url; playAudioUrl(url, gen, fallback);
 }
+// Build the exact cache key azureSpeak would use for a plain phrase (so prefetch matches playback).
+function ttsCacheKey(text, voice){
+  const single=!/\s/.test(text.trim());
+  const rate= single?'0%':'-6%';
+  const key=text.trim().toLowerCase();
+  const body = PRON_IPA[key] ? "<phoneme alphabet='ipa' ph='"+PRON_IPA[key]+"'>"+escapeHtml(text)+"</phoneme>" : escapeHtml(text);
+  const inner="<prosody rate='"+rate+"'>"+body+"</prosody>";
+  return { ck: voice+'|'+inner, inner };
+}
+// Pre-cache the audio for a screen's phrases in the background, so the first tap is INSTANT
+// (and on phones, cached playback starts inside the tap → no autoplay block).
+let _pfQueue=[], _pfRunning=false;
+function prefetchTTS(texts){
+  if(!(typeof azureOn==='function' && azureOn() && azureVoiceName()!=='browser')) return;
+  const voice=azureVoiceName();
+  texts.forEach(t=>{ if(t && t.trim()){ const {ck}=ttsCacheKey(t.trim(), voice); if(!ttsCache[ck]) _pfQueue.push(t.trim()); } });
+  if(!_pfRunning) _runPrefetch();
+}
+async function _runPrefetch(){
+  _pfRunning=true;
+  while(_pfQueue.length){
+    const batch=_pfQueue.splice(0,3);            // 3 at a time — fill fast without hammering
+    const voice=azureVoiceName();
+    await Promise.all(batch.map(async text=>{
+      const {ck, inner}=ttsCacheKey(text, voice);
+      if(ttsCache[ck]) return;
+      try{
+        const ssml="<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='en-US'><voice name='"+voice+"'>"+inner+"</voice></speak>";
+        const r=await fetch(AZURE_PROXY?AZURE_PROXY+'?mode=tts':'https://'+azureCfg().region+'.tts.speech.microsoft.com/cognitiveservices/v1',{
+          method:'POST',
+          headers: AZURE_PROXY ? {'Content-Type':'application/ssml+xml','apikey':FAMILY_DEFAULT.key,'Authorization':'Bearer '+FAMILY_DEFAULT.key}
+                               : {'Ocp-Apim-Subscription-Key':azureCfg().key,'Content-Type':'application/ssml+xml','X-Microsoft-OutputFormat':'audio-24khz-48kbitrate-mono-mp3'},
+          body:ssml });
+        if(r.ok) ttsCache[ck]=URL.createObjectURL(await r.blob());
+      }catch(e){}
+    }));
+  }
+  _pfRunning=false;
+}
 // Azure Neural sometimes mispronounces a few isolated words (e.g. says "Kate" for "cat").
 // Pin those with an IPA override. Add more here if the child spots another wrong one.
 const PRON_IPA = { cat:'kæt', hat:'hæt', bat:'bæt', mat:'mæt', map:'mæp', cap:'kæp', bag:'bæɡ' };
@@ -2662,6 +2701,7 @@ function phPrac(refText, onResult){
 }
 function openPhonicsLesson(idx){
   const L=PHONICS[idx];
+  prefetchTTS(L.items.reduce((a,it)=>{ (it.words||[]).forEach(w=>a.push(w.w)); if(it.say) a.push(it.say); return a; }, []));
   document.getElementById('phLessonTitle').textContent=L.title;
   document.getElementById('phFeedback').textContent=''; document.getElementById('phTip').textContent='';
   const body=document.getElementById('phLessonBody'); body.innerHTML='';
@@ -2916,6 +2956,7 @@ function renderStoryList(){
 let storyCtx=null;
 function startStory(i){
   storyCtx={ i, k:0, auto:false, st:STORIES[i], _t:null, qi:0 };
+  prefetchTTS(STORIES[i].lines.map(l=>l.en));   // pre-cache all lines
   document.getElementById('storyPlayTitle').textContent=STORIES[i].char+' '+STORIES[i].title;
   go('storyPlay'); renderStoryLine(); markToday();
 }
@@ -3154,6 +3195,7 @@ function openConv(i){
     bub.appendChild(en); bub.appendChild(cn); bub.appendChild(sp); bub.appendChild(prac); bub.appendChild(fb); bub.appendChild(tp);
     row.appendChild(who); row.appendChild(bub); body.appendChild(row);
   });
+  prefetchTTS(CONV[i].lines.map(l=>l.en));   // pre-cache so taps are instant
   go('convPlay'); markToday();
 }
 document.getElementById('convPlayAll').onclick=function(){
@@ -3293,6 +3335,7 @@ function stepView(body, steps){
 // 学单词 — one flashcard at a time; after the last card, jump straight into the challenge.
 function renderWordFlashcards(host, u, onDone){
   const words=u.words; let k=0;
+  prefetchTTS(words.reduce((a,w)=>{ a.push(w.en); if(w.s) a.push(w.s.en); return a; }, []));   // pre-cache all
   const card=document.createElement('div'); host.appendChild(card);
   function show(){
     const w=words[k];
@@ -3321,6 +3364,7 @@ function renderWordFlashcards(host, u, onDone){
 // 学语法 — one grammar point at a time; after the last, jump straight into the challenge.
 function renderGrammarSteps(host, u, onDone){
   const pts=u.grammar; let k=0;
+  prefetchTTS(pts.reduce((a,pt)=>{ pt.examples.forEach(ex=>a.push(ex.en)); return a; }, []));
   const card=document.createElement('div'); host.appendChild(card);
   function show(){
     const pt=pts[k];
@@ -3423,6 +3467,14 @@ function openBoard(idx){
   const u=courseCtx.u, b=BOARDS[idx]; courseCtx.board=b;
   document.getElementById('unitBoardTitle').textContent=b.em+' '+b.name;
   const body=document.getElementById('unitBoardBody'); body.innerHTML='';
+  // Pre-cache this board's phrases so taps are instant.
+  const pf=[];
+  if(b.key==='words') u.words.forEach(w=>{ pf.push(w.en); if(w.s) pf.push(w.s.en); });
+  else if(b.key==='dialogue') (u.dialogues||[]).forEach(d=> d.lines.forEach(l=>pf.push(l.en)));
+  else if(b.key==='situ') (u.situ||[]).forEach(s=>{ pf.push(s.prompt); s.options.forEach(o=>pf.push(o.en)); });
+  else if(b.key==='dub' && u.dub) u.dub.lines.forEach(l=>pf.push(l.en));
+  else if(b.key==='task' && u.story) u.story.quiz.forEach(q=> q.options.forEach(o=>pf.push(o.en)));
+  prefetchTTS(pf);
   renderBoard(b.key, body, u);
   go('unitBoard');
 }
