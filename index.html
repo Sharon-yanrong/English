@@ -789,7 +789,7 @@
     <label class="fld">🎯 发音评测（Azure · 让"我来读"给真分数，选填）</label>
     <input class="in" id="pAzureKey" placeholder="Azure 语音 KEY（一长串）" style="margin-bottom:6px">
     <input class="in" id="pAzureRegion" placeholder="区域，如 germanywestcentral">
-    <div class="subtle" id="azureHint" style="margin-top:6px">已内置默认密钥，所有设备自动就能发音打分。这里可单独换成你自己的密钥（留空=用内置默认）。</div>
+    <div class="subtle" id="azureHint" style="margin-top:6px">把老师给的 Azure 语音密钥粘到上面「密钥」框里（区域已自动填好），保存后这台就有发音打分 + 好听声音了。每台设备填一次即可。</div>
     <label class="fld">🔈 朗读声音</label>
     <select class="in" id="pAzureVoice">
       <option value="en-US-AriaNeural">自然姐姐 Aria（推荐 · 最像真人）</option>
@@ -2091,7 +2091,7 @@ const AZURE_DEFAULT = { key:'', region:'germanywestcentral', voice:'en-US-AriaNe
 // Secure proxy (Supabase Edge Function) that holds the Azure key server-side, so it's never
 // exposed in this public code. When set, TTS + pronunciation-assessment go through it and
 // every device works automatically. Filled in after the function is deployed.
-const AZURE_PROXY = 'https://khlosikjgpuvogpuypiw.supabase.co/functions/v1/azure-proxy';
+const AZURE_PROXY = '';   // '' = 直连 Azure（每台设备在 ⚙️ 填自己的密钥，最快）。填回代理地址即恢复"密钥藏服务器"模式。
 function azureCfg(){
   const s=S.azure||{};
   return {
@@ -2855,7 +2855,7 @@ function openParent(){
   document.getElementById('pRewardTarget').value = (S.reward&&S.reward.target)||'';
   document.getElementById('rewardHint').textContent = (S.reward&&S.reward.target>0) ? ('孩子现在有 '+S.stars+' 颗星，目标 '+S.reward.target+' 颗') : '';
   document.getElementById('pAzureKey').value = (S.azure&&S.azure.key)||'';
-  document.getElementById('pAzureRegion').value = (S.azure&&S.azure.region)||'';
+  document.getElementById('pAzureRegion').value = (S.azure&&S.azure.region)||'germanywestcentral';
   document.getElementById('pAzureVoice').value = (S.azure&&S.azure.voice)||'en-US-AriaNeural';
   document.getElementById('recStatus').textContent = S.voice ? '✅ 已有一段录音' : '还没有录音';
   const pick=document.getElementById('avatarPick'); pick.innerHTML='';
